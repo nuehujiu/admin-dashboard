@@ -92,7 +92,8 @@ else {
 if ($DryRun) {
     $stArgs = @('status', '--porcelain')
     if ($Scope -eq 'frontend') { $stArgs += @('--', 'frontend') }
-    $raw = GRead $stArgs
+    # 不用 GRead：它对整体做了 Trim，会吃掉行首的状态位，Substring(3) 就会切错
+    $raw = (& $Git -C $Repo @stArgs 2>&1 | Out-String)
     $changed = ((($raw -split '\r?\n') | Where-Object { $_.Length -gt 3 } |
         ForEach-Object { $_.Substring(3).Trim() }) -join "`n").Trim()
     $scopeText = if ($Scope -eq 'frontend') { 'frontend/' } else { '整个仓库' }
