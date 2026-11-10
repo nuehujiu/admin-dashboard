@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>houtai 商城后台 · UI 设计预览</title>
+<style>
+:root{
+  --primary:#F5611D;
+  --primary-hover:#DC4F12;
+  --primary-ink:#B9400A;
+  --primary-soft:#FFF2EA;
+  --primary-line:#FFD8C4;
+
+  --text:#1C1917;
+  --text-2:#5D5751;
+  --muted:#A8A29C;
+  --line:#EDE8E2;
+  --line-soft:#F4F1ED;
+  --bg:#F7F5F2;
+  --card:#FFFFFF;
+  --hover:#FFFBF8;
+
+  --success:#1F9D55;
+  --success-soft:#E9F7EF;
+  --warn:#C77A28;
+  --warn-soft:#FDF3E7;
+  --danger:#D33A32;
+  --danger-soft:#FCECEB;
+  --teal:#2F8F86;
+  --teal-soft:#E7F4F2;
+
+  --r-sm:8px; --r-md:12px; --r-lg:14px;
+  --sh-1:0 1px 2px rgba(28,25,23,.04);
+  --sh-2:0 2px 4px rgba(28,25,23,.04), 0 12px 28px rgba(28,25,23,.05);
+  --font:-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font);
+  color:var(--text);
+  background:#EDEAE5;
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+}
+svg.ic{width:18px;height:18px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+svg.ic.sm{width:16px;height:16px}
+svg.ic.xs{width:14px;height:14px}
+
+/* ============ 预览外壳 ============ */
+.toolbar{
+  position:fixed;z-index:99;left:50%;bottom:22px;transform:translateX(-50%);
+  display:flex;align-items:center;gap:6px;padding:8px 10px;
+  background:rgba(28,25,23,.92);border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.28);
+  backdrop-filter:blur(10px);
+}
+.toolbar .seg{display:flex;gap:4px}
+.toolbar button{
+  font-family:var(--font);font-size:12.5px;color:rgba(255,255,255,.72);
+  background:transparent;border:0;border-radius:9px;padding:8px 12px;cursor:pointer;
+  transition:.15s;
+}
+.toolbar button:hover{color:#fff;background:rgba(255,255,255,.08)}
+.toolbar button.on{color:#fff;background:var(--primary);font-weight:600}
+.toolbar .div{width:1px;height:20px;background:rgba(255,255,255,.14);margin:0 4px}
+.toolbar select{
+  font-family:var(--font);font-size:12.5px;color:#fff;background:rgba(255,255,255,.1);
+  border:0;border-radius:9px;padding:8px 8px;outline:none;cursor:pointer;
+}
+.toolbar .tip{font-size:12px;color:rgba(255,255,255,.5);padding-right:6px}
+
+.stage{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px 24px 90px}
+.frame{
+  width:1440px;height:900px;position:relative;overflow:hidden;flex:none;
+  background:var(--bg);transform-origin:center center;
+  box-shadow:0 30px 80px rgba(28,25,23,.18);
+  border-radius:4px;
+}
+.page{position:absolute;inset:0;display:none}
+.page.on{display:block}
+
+/* ============ 通用组件 ============ */
+.btn{
+  height:34px;padding:0 13px;display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font);font-size:13px;font-weight:500;color:var(--text);
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);
+  cursor:pointer;transition:.15s;white-space:nowrap;
+}
+.btn:hover{border-color:#DCD5CD;background:#FBFAF8}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 1px 2px rgba(244,97,29,.25)}
+.btn.primary:hover{background:var(--primary-hover);border-color:var(--primary-hover)}
+.btn.text{border-color:transparent;background:transparent;padding:0 8px;color:var(--text-2)}
+.btn.text:hover{color:var(--primary);background:var(--primary-soft)}
+.btn.sm{height:28px;padding:0 10px;font-size:12.5px}
+
+.input{
+  height:34px;display:flex;align-items:center;gap:8px;padding:0 11px;
+  border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;
+  font-size:13px;color:var(--text);transition:.15s;
+}
+.input:focus-within{border-color:#F9A87E;box-shadow:0 0 0 3px rgba(245,97,29,.10)}
+.input .ph{color:var(--muted)}
+.input .pre{color:var(--text-2);display:flex}
+.field-label{font-size:12.5px;color:var(--text-2);margin-bottom:7px;font-weight:500}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1)}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0}
+.card-title{font-size:15px;font-weight:600;letter-spacing:.01em}
+.card-sub{font-size:12px;color:var(--muted);margin-top:4px}
+
+.tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:6px;font-size:12px;font-weight:500}
+.tag .dot{width:5px;height:5px;border-radius:50%}
+.tag.orange{color:var(--primary-ink);background:var(--primary-soft)}
+.tag.teal{color:#1F6B63;background:var(--teal-soft)}
+.tag.gray{color:var(--text-2);background:#F2EFEA}
+.tag.on{color:#12683F;background:var(--success-soft)}
+.tag.off{color:#6B6560;background:#F2EFEA}
+.tag.warn{color:var(--warn);background:var(--warn-soft)}
+
+.switch{width:36px;height:20px;border-radius:99px;background:#DCD5CD;position:relative;display:inline-block}
+.switch:after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:2px;left:2px;box-shadow:0 1px 2px rgba(0,0,0,.18)}
+.switch.on{background:var(--success)}
+.switch.on:after{left:18px}
+.switch.off{background:#DDD7CF}
+
+.avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex:none}
+.a1{background:linear-gradient(135deg,#F58B4E,#E4551B)}
+.a2{background:linear-gradient(135deg,#5AB0A5,#2F8F86)}
+.a3{background:linear-gradient(135deg,#B49A7C,#8A6E52)}
+.a4{background:linear-gradient(135deg,#9A9C9E,#74787C)}
+.a5{background:linear-gradient(135deg,#E2A24C,#C77A28)}
+.a6{background:linear-gradient(135deg,#C98D8A,#A96A66)}
+
+/* ============ 布局 ============ */
+.app{display:flex;height:100%}
+.sider{
+  width:216px;flex:none;background:#fff;border-right:1px solid var(--line);
+  display:flex;flex-direction:column;padding:0 12px 16px;
+}
+.brand{height:64px;display:flex;align-items:center;gap:10px;padding:0 6px}
+.logo{
+  width:32px;height:32px;border-radius:9px;flex:none;
+  background:linear-gradient(135deg,#FF8442,#EE4E14);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 6px rgba(238,78,20,.28);
+}
+.logo svg{width:17px;height:17px;stroke:#fff;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.brand-name{font-size:15px;font-weight:700;letter-spacing:.06em}
+.brand-sub{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:.06em}
+
+.nav-group{margin-top:14px}
+.nav-label{font-size:11px;color:#BDB6AE;letter-spacing:.12em;padding:0 10px 8px}
+.nav-item{
+  height:40px;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:9px;
+  font-size:13.5px;color:var(--text-2);cursor:pointer;transition:.15s;position:relative;
+}
+.nav-item:hover{background:#FAF7F4;color:var(--text)}
+.nav-item.on{background:var(--primary-soft);color:var(--primary-ink);font-weight:600}
+.nav-item .badge{margin-left:auto;font-size:11px;font-weight:600;color:var(--primary-ink);background:#FFE3D3;border-radius:99px;padding:1px 6px}
+.sider-foot{margin-top:auto;padding:12px 10px 0;border-top:1px solid var(--line-soft)}
+.sider-foot .k{font-size:11px;color:var(--muted)}
+.sider-foot .v{font-size:12.5px;color:var(--text-2);margin-top:3px}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--bg)}
+.header{
+  height:64px;flex:none;background:#fff;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 24px;gap:14px;
+}
+.crumb{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.crumb b{color:var(--text);font-weight:500}
+.crumb svg{width:12px;height:12px;stroke:#C9C2BA;fill:none;stroke-width:1.8}
+.header .grow{flex:1}
+.icon-btn{
+  width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  color:var(--text-2);cursor:pointer;position:relative;
+}
+.icon-btn:hover{background:#FAF7F4;color:var(--text)}
+.icon-btn .bell-dot{position:absolute;top:7px;right:7px;width:6px;height:6px;border-radius:50%;background:var(--primary)}
+.user-chip{display:flex;align-items:center;gap:9px;padding-left:14px;border-left:1px solid var(--line);cursor:pointer}
+.user-chip .n{font-size:13px;font-weight:550}
+.user-chip .r{font-size:11px;color:var(--muted);margin-top:1px}
+.user-chip svg{width:14px;height:14px;stroke:#B5AEA7;fill:none;stroke-width:1.8}
+
+.content{padding:20px 28px 22px;flex:1;display:flex;flex-direction:column;min-height:0}
+.pagehead{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:14px}
+.pagehead h1{font-size:21px;font-weight:650;letter-spacing:-.01em}
+.pagehead .sub{font-size:12.5px;color:var(--muted);margin-top:6px}
+.pagehead .actions{display:flex;align-items:center;gap:8px;padding-top:2px}
+
+.segbar{display:inline-flex;padding:3px;background:#F2EFEA;border-radius:9px}
+.segbar span{
+  font-size:12.5px;color:var(--text-2);padding:0 12px;height:28px;line-height:28px;
+  border-radius:7px;cursor:pointer;transition:.15s;
+}
+.segbar span.on{background:#fff;color:var(--text);font-weight:600;box-shadow:0 1px 2px rgba(28,25,23,.06)}
+
+/* ============ 数据看板 ============ */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:14px;flex:none}
+.kpi{padding:13px 18px 0;position:relative;overflow:hidden;height:112px}
+.kpi .top{display:flex;align-items:center;justify-content:space-between}
+.kpi .k{font-size:12.5px;color:var(--text-2)}
+.kpi .badge-ic{
+  width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  background:var(--primary-soft);color:var(--primary)
+}
+.kpi .badge-ic.teal{background:var(--teal-soft);color:var(--teal)}
+.kpi .badge-ic.warn{background:var(--warn-soft);color:var(--warn)}
+.kpi .badge-ic.gray{background:#F2EFEA;color:#8A827A}
+.kpi .val{font-size:26px;font-weight:650;letter-spacing:-.02em;margin-top:8px;display:flex;align-items:baseline;gap:4px}
+.kpi .val .unit{font-size:13px;font-weight:500;color:var(--text-2)}
+.kpi .foot{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:11.5px;color:var(--muted)}
+.chg{display:inline-flex;align-items:center;gap:2px;font-weight:600;font-size:11.5px}
+.chg.up{color:var(--success)}
+.chg.down{color:var(--danger)}
+.kpi svg.spark{position:absolute;right:14px;bottom:14px;width:78px;height:34px}
+
+.chart-row{display:grid;grid-template-columns:1.62fr 1fr;gap:16px;height:312px;margin-bottom:14px;flex:none}
+.bottom-row{display:grid;grid-template-columns:1.62fr 1fr;gap:16px;flex:1;min-height:0;overflow:hidden}
+
+.chart-card{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.chart-card .hd{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 20px 0}
+.legend{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--text-2)}
+.legend i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:1px}
+#trend-wrap{flex:1;position:relative;margin:2px 8px 6px}
+#donut-wrap{display:flex;align-items:center;gap:6px;padding:4px 18px 12px;flex:1}
+
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:9px;padding-right:4px}
+.dl-row{display:flex;align-items:center;font-size:12.5px;gap:7px}
+.dl-row i{width:7px;height:7px;border-radius:2px;flex:none}
+.dl-row .nm{color:var(--text-2);width:74px}
+.dl-row .pct{color:var(--muted);font-size:11.5px;width:38px;text-align:right}
+.dl-row .amt{margin-left:auto;font-weight:600;font-size:12.5px}
+
+.rank-card{display:flex;flex-direction:column;min-height:0;padding-bottom:6px}
+.rank-list{padding:8px 20px 10px;display:flex;flex-direction:column;gap:0;flex:1;min-height:0}
+.rank-line{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-soft)}
+.rank-line:last-child{border-bottom:0}
+.rank-no{width:20px;height:20px;border-radius:6px;background:#F2EFEA;color:#8A827A;font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none}
+.rank-no.top{background:var(--primary);color:#fff}
+.rank-nm{font-size:13px;width:82px;flex:none}
+.rank-bar{flex:1;height:6px;border-radius:99px;background:#F4F1ED;overflow:hidden}
+.rank-bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#FFA46E,#F5611D)}
+.rank-amt{width:92px;text-align:right;font-size:12.5px;font-weight:600}
+
+.quick-card{display:flex;flex-direction:column;min-height:0}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 18px 18px;flex:1}
+.quick{
+  border:1px solid var(--line);border-radius:11px;padding:12px 13px;
+  display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:.15s;background:#FFFDFC
+}
+.quick:hover{border-color:var(--primary-line);background:var(--primary-soft)}
+.quick .qi{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#F7F3EE;color:#8A6E52}
+.quick .qn{font-size:13px;font-weight:550}
+.quick .qd{font-size:11.5px;color:var(--muted)}
+
+/* ============ 表格页 ============ */
+.table-card{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.filter-row{display:flex;align-items:center;gap:12px;padding:14px 18px;flex:none;border-bottom:1px solid var(--line-soft)}
+.filter-row .grow{flex:1}
+.filter-row .input{width:260px}
+.select{height:34px;display:flex;align-items:center;gap:8px;padding:0 10px 0 12px;border:1px solid var(--line);border-radius:var(--r-sm);font-size:13px;color:var(--text-2);background:#fff;cursor:pointer;min-width:116px}
+.select span.grow{flex:1}
+.select svg{width:14px;height:14px;stroke:#B5AEA7;fill:none;stroke-width:1.8}
+
+.tbl-scroll{flex:1;min-height:0;overflow:hidden}
+table{width:100%;height:100%;border-collapse:collapse;table-layout:fixed}
+thead th{
+  height:44px;text-align:left;font-size:12px;font-weight:500;color:#8E8881;
+  letter-spacing:.04em;background:#FBFAF8;border-bottom:1px solid var(--line);padding:0 14px;
+}
+thead th:first-child{padding-left:20px}
+tbody td{height:54px;font-size:13.5px;border-bottom:1px solid var(--line-soft);padding:0 14px;vertical-align:middle}
+tbody td:first-child{padding-left:20px}
+tbody tr:hover td{background:var(--hover)}
+.cell-prod{display:flex;align-items:center;gap:11px}
+.thumb{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none;border:1px solid rgba(28,25,23,.04)}
+.thumb svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.t-elec{background:linear-gradient(140deg,#FFF3EA,#FFE0CC);color:#B9400A}
+.t-apparel{background:linear-gradient(140deg,#F9F3EC,#EFE3D3);color:#8A6E52}
+.t-home{background:linear-gradient(140deg,#EFF4F1,#E1EBE6);color:#2F8F86}
+.t-beauty{background:linear-gradient(140deg,#FDF1ED,#F6E0D8);color:#B06552}
+.pname{font-size:13.5px;font-weight:500;line-height:1.35}
+.psku{font-size:11px;color:var(--muted);margin-top:3px}
+.num{font-size:13.5px}
+.stock{display:flex;align-items:center;gap:8px}
+.stock .bar{width:44px;height:4px;border-radius:99px;background:#F4F1ED;overflow:hidden}
+.stock .bar span{display:block;height:100%;background:#DCD5CD}
+.stock .bar.low span{background:#E9A23B}
+.stock .bar.ok span{background:#9FC9B4}
+.ops{display:flex;align-items:center;gap:2px}
+.ops a{font-size:12.5px;color:var(--primary-ink);text-decoration:none;padding:4px 6px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.ops a:hover{background:var(--primary-soft)}
+.ops a.danger{color:var(--danger)}
+.ops a.danger:hover{background:var(--danger-soft)}
+.ops .sep{color:#E4DED7;font-size:11px}
+
+.tbl-foot{height:60px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-top:1px solid var(--line-soft);background:#fff}
+.tbl-foot .info{font-size:12.5px;color:var(--muted)}
+.tbl-foot .info b{color:var(--text-2);font-weight:600}
+.pager{display:flex;align-items:center;gap:6px}
+.pg{min-width:30px;height:30px;padding:0 8px;display:flex;align-items:center;justify-content:center;font-size:12.5px;color:var(--text-2);border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+.pg:hover{border-color:#DCD5CD;background:#FBFAF8}
+.pg.on{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600}
+.pg.ell{border:0;color:#BDB6AE;cursor:default;background:transparent}
+.pager .size{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);margin-left:10px}
+.pager .size .select{height:30px;min-width:86px;font-size:12.5px}
+
+/* 用户页 */
+thead th.uth{height:44px}
+.ucell{display:flex;align-items:center;gap:10px}
+.ucell .nm{font-size:13.5px;font-weight:500;line-height:1.3}
+.ucell .un{font-size:11px;color:var(--muted);margin-top:2px}
+.tbl-toolbar{height:50px;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid var(--line-soft);flex:none}
+.tbl-toolbar .cnt{font-size:12.5px;color:var(--muted)}
+.tbl-toolbar .cnt b{color:var(--text)}
+.tbl-toolbar .grow{flex:1}
+
+/* ============ 个人中心 ============ */
+.profile-grid{display:grid;grid-template-columns:1.42fr 1fr;gap:16px;flex:1;min-height:0}
+.pcard{display:flex;flex-direction:column;overflow:hidden}
+.pcard .hd{padding:18px 22px 14px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between}
+.pcard .hd h3{font-size:14.5px;font-weight:600}
+.pcard .hd .hint{font-size:11.5px;color:var(--muted)}
+.pbody{padding:20px 22px;flex:1;min-height:0}
+
+.avatar-block{display:flex;align-items:center;gap:18px;padding-bottom:18px;border-bottom:1px dashed var(--line)}
+.big-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#F58B4E,#E4551B);display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;font-weight:600;position:relative;box-shadow:0 6px 16px rgba(228,85,27,.22)}
+.big-avatar .cam{position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--text-2)}
+.big-avatar .cam svg{width:12px;height:12px}
+.ab-name{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.ab-meta{font-size:12px;color:var(--muted);margin-top:5px}
+.ab-acts{display:flex;gap:8px;margin-top:12px}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;margin-top:18px}
+.form-item.full{grid-column:1/-1}
+.form-item .input{height:36px}
+.input-val{font-size:13px;color:var(--text)}
+.form-foot{display:flex;align-items:center;gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line-soft)}
+.form-foot .note{font-size:11.5px;color:var(--muted);margin-left:auto}
+
+.side-stack{display:flex;flex-direction:column;gap:16px;min-height:0}
+.sec-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line-soft);font-size:13px}
+.sec-row:last-child{border-bottom:0}
+.sec-row .k{color:var(--text-2);font-size:12.5px}
+.sec-row .v{color:var(--text);font-size:13px}
+.pass-form .form-item{margin-bottom:13px}
+.pass-form .input{height:36px}
+.strength{display:flex;align-items:center;gap:4px;margin-top:8px}
+.strength i{height:3px;flex:1;border-radius:2px;background:#F0ECE7}
+.strength i.on{background:var(--primary)}
+.strength span{font-size:11px;color:var(--muted);margin-left:6px;flex:none}
+.device{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.device:last-child{border-bottom:0}
+.device .di{width:30px;height:30px;border-radius:8px;background:#F7F3EE;display:flex;align-items:center;justify-content:center;color:#8A6E52;flex:none}
+.device .dn{font-size:12.5px;font-weight:500}
+.device .dd{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ============ 登录页 ============ */
+.login-page{display:flex;height:100%}
+.lg-left{
+  width:600px;flex:none;position:relative;overflow:hidden;padding:34px 44px;
+  background:
+    radial-gradient(1000px 760px at 96% 6%, #FFD9C0 0%, rgba(255,217,192,0) 58%),
+    radial-gradient(760px 600px at 6% 92%, #FFE6D6 0%, rgba(255,230,214,0) 62%),
+    linear-gradient(158deg,#FFFCF9 0%, #FFF3EA 48%, #FBE6D7 100%);
+  display:flex;flex-direction:column;justify-content:space-between;
+}
+.lg-left .ring{position:absolute;border-radius:50%;border:1px solid rgba(238,78,20,.14);pointer-events:none}
+.ring.r1{width:420px;height:420px;right:-140px;top:150px}
+.ring.r2{width:260px;height:260px;right:-60px;top:240px;border-color:rgba(238,78,20,.2)}
+.blob{position:absolute;width:200px;height:200px;border-radius:50%;right:44px;bottom:84px;
+  background:radial-gradient(circle at 34% 30%, #FFC6A4, #EE4E14);
+  opacity:.14;filter:blur(16px)}
+.lg-brand{display:flex;align-items:center;gap:10px;position:relative;z-index:2}
+.lg-brand .logo{width:34px;height:34px;border-radius:10px}
+.lg-brand .bn{font-size:15.5px;font-weight:700;letter-spacing:.08em}
+.lg-brand .bs{font-size:11px;color:#A08A7C;letter-spacing:.1em;margin-top:1px}
+.lg-mid{position:relative;z-index:2;max-width:470px}
+.lg-mid .eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;letter-spacing:.14em;color:#B9400A;text-transform:uppercase;margin-bottom:18px}
+.lg-mid .eyebrow:before{content:"";width:22px;height:1px;background:#E4693A}
+.lg-mid h1{font-size:38px;line-height:1.34;font-weight:680;letter-spacing:-.02em;color:#2A211B}
+.lg-mid h1 em{font-style:normal;color:#DC4F12;position:relative}
+.lg-mid h1 em:after{content:"";position:absolute;left:0;right:0;bottom:2px;height:8px;background:rgba(245,97,29,.16);border-radius:3px;z-index:-1}
+.lg-mid p{font-size:13.5px;line-height:1.85;color:#7A6C61;margin-top:16px;max-width:400px}
+.lg-stats{display:flex;align-items:center;gap:0;margin-top:34px}
+.stat{padding-right:22px;margin-right:22px;border-right:1px solid rgba(160,138,124,.28)}
+.stat:last-child{border-right:0;padding-right:0;margin-right:0}
+.stat .v{font-size:19px;font-weight:650;color:#2A211B;letter-spacing:-.01em}
+.stat .k{font-size:11.5px;color:#A08A7C;margin-top:4px;letter-spacing:.03em}
+.lg-foot{position:relative;z-index:2;font-size:11.5px;color:#A08A7C;display:flex;align-items:center;gap:14px}
+.lg-foot .sep{width:1px;height:10px;background:rgba(160,138,124,.35)}
+
+.lg-right{flex:1;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.lg-right .top-links{position:absolute;top:30px;right:38px;display:flex;align-items:center;gap:16px;font-size:12px;color:var(--muted)}
+.lg-right .top-links a{color:var(--text-2);text-decoration:none}
+.lg-form{width:352px}
+.lg-form .h{font-size:22px;font-weight:650;letter-spacing:-.01em}
+.lg-form .sh{font-size:12.5px;color:var(--muted);margin-top:7px}
+.lg-form .fields{margin-top:28px}
+.lg-form .form-item{margin-bottom:16px}
+.lg-form .field-label{display:flex;justify-content:space-between;align-items:center}
+.lg-form .field-label a{font-size:11.5px;color:var(--primary-ink);text-decoration:none;font-weight:400}
+.lg-form .input{height:42px;padding:0 12px;border-radius:9px;font-size:13.5px}
+.lg-form .input:focus-within{border-color:#F9A87E;box-shadow:0 0 0 3px rgba(245,97,29,.10)}
+.lg-form .row-between{display:flex;align-items:center;justify-content:space-between;margin:4px 0 22px}
+.checkbox{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-2)}
+.checkbox .box{width:16px;height:16px;border-radius:4px;border:1px solid #DED7D0;background:#fff;display:flex;align-items:center;justify-content:center}
+.checkbox .box.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.checkbox .box svg{width:10px;height:10px;stroke:#fff;stroke-width:2;fill:none}
+.btn-login{width:100%;height:44px;justify-content:center;font-size:14px;font-weight:600;border-radius:9px;letter-spacing:.04em}
+.lg-form .or{display:flex;align-items:center;gap:12px;margin:20px 0;font-size:11.5px;color:#C2BBB3}
+.lg-form .or i{flex:1;height:1px;background:var(--line)}
+.lg-form .demo{
+  display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-2);
+  background:#FBFAF8;border:1px dashed #E7DFD6;border-radius:9px;padding:10px 12px;
+}
+.lg-form .demo b{color:var(--text);font-weight:600}
+.lg-form .demo .k{color:var(--muted);margin-left:auto}
+.lg-copy{margin-top:26px;font-size:11px;color:#C2BBB3;text-align:center}
+
+/* 截图模式 */
+body.shot .toolbar{display:none}
+body.shot .stage{padding:0;background:#fff}
+body.shot .frame{box-shadow:none;border-radius:0;transform:none!important}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M3.2 7.2 12 3l8.8 4.2v9.6L12 21 3.2 16.8V7.2z"/><path d="M3.6 7.4 12 11.4l8.4-4"/><path d="M12 11.4V21"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><rect x="3.5" y="12" width="4" height="8.5" rx="1"/><rect x="10" y="6" width="4" height="14.5" rx="1"/><rect x="16.5" y="9.5" width="4" height="11" rx="1"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.2" r="3.3"/><path d="M3.4 19.4c0-3.1 2.5-4.9 5.6-4.9s5.6 1.8 5.6 4.9"/><circle cx="17.4" cy="9.4" r="2.4"/><path d="M15.7 15.2c2.5-.4 4.9 1.3 4.9 4.2"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.2 19 6v6c0 4.2-3 7.3-7 8.8-4-1.5-7-4.6-7-8.8V6l7-2.8z"/><path d="m9.2 12.1 2 2 3.6-3.8"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.2M12 19v2.2M2.8 12H5M19 12h2.2M5.5 5.5l1.6 1.6M16.9 16.9l1.6 1.6M18.5 5.5 16.9 7.1M7.1 16.9 5.5 18.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.2" r="3.6"/><path d="M4.6 20c0-3.7 3.3-5.7 7.4-5.7s7.4 2 7.4 5.7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.4"/><path d="m15.7 15.7 5 5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 16V11c0-3.3-2.7-6-6-6s-6 2.7-6 6v5l-1.8 2.4h15.6L18 16z"/><path d="M9.7 20.4a2.5 2.5 0 0 0 4.6 0"/></symbol>
+  <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"/></symbol>
+  <symbol id="i-chev-right" viewBox="0 0 24 24"><path d="M9 5.5 15.5 12 9 18.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3.5v10.5M8.2 10.6l3.8 3.8 3.8-3.8"/><path d="M4.6 18v2.2h14.8V18"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4.2 19.8h3.9L19 8.9l-3.9-3.9L4.2 15.9v3.9z"/><path d="m14 6.2 3.9 3.9"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.2 7h15.6"/><path d="M9.5 7V4.6h5V7"/><path d="M6.2 7l.9 12.9h9.8L17.8 7"/><path d="M10 10.8v5.8M14 10.8v5.8"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.6 12s3.6-6.4 9.4-6.4S21.4 12 21.4 12 17.8 18.4 12 18.4 2.6 12 2.6 12z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5.5M6.4 11.1 12 5.5l5.6 5.6"/></symbol>
+  <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v13.5M6.4 12.9 12 18.5l5.6-5.6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.6 4.5 4.4L19 7"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.8" y="10.4" width="14.4" height="9.6" rx="2.2"/><path d="M8.4 10.4V8a3.6 3.6 0 0 1 7.2 0v2.4"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5.2" width="18" height="13.6" rx="2.2"/><path d="M3.6 6.6 12 12.4 20.4 6.6"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.6" y="2.6" width="10.8" height="18.8" rx="2.8"/><path d="M10.8 18.4h2.4"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8.2h3.2L8.8 5.8h6.4l1.6 2.4H20v10.6H4V8.2z"/><circle cx="12" cy="13.4" r="3"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.4" y="5.4" width="17.2" height="15.2" rx="2.2"/><path d="M3.4 10h17.2M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3.2" y="4.4" width="17.6" height="11.4" rx="2"/><path d="M8 20h8M12 15.8V20"/></symbol>
+  <symbol id="i-headphone" viewBox="0 0 24 24"><path d="M4.4 14v-2a7.6 7.6 0 0 1 15.2 0v2"/><rect x="2.8" y="13.4" width="4.4" height="6.4" rx="2"/><rect x="16.8" y="13.4" width="4.4" height="6.4" rx="2"/></symbol>
+  <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="4.6" width="16" height="10.8" rx="1.8"/><path d="M2 19h20"/></symbol>
+  <symbol id="i-watch" viewBox="0 0 24 24"><rect x="6.6" y="6.2" width="10.8" height="11.6" rx="3"/><path d="M9.4 6.2V3.6h5.2v2.6M9.4 17.8v2.6h5.2v-2.6"/></symbol>
+  <symbol id="i-scarf" viewBox="0 0 24 24"><path d="M5 5h14l-1.6 14h-10.8L5 5z"/><path d="M6.6 9.4h10.8"/></symbol>
+  <symbol id="i-cup" viewBox="0 0 24 24"><path d="M4.6 5.6h11.6v8a4.2 4.2 0 0 1-4.2 4.2H8.8a4.2 4.2 0 0 1-4.2-4.2v-8z"/><path d="M16.2 8.4h2.2a2.4 2.4 0 0 1 0 4.8h-2.2"/><path d="M3.4 20.8h15.2"/></symbol>
+  <symbol id="i-candle" viewBox="0 0 24 24"><rect x="7.4" y="9.6" width="9.2" height="10.4" rx="1.8"/><path d="M12 3.4c1.9 2.1 1.9 3.9 0 5.6-1.9-1.7-1.9-3.5 0-5.6z"/></symbol>
+  <symbol id="i-bottle" viewBox="0 0 24 24"><path d="M10 3.4h4v3.2l1.6 2.6v11.4H8.4V9.2L10 6.6V3.4z"/><path d="M8.6 12.4h6.8"/></symbol>
+  <symbol id="i-pillow" viewBox="0 0 24 24"><path d="M4.4 7.4c3 1.2 12 1.2 15.2 0 1.4 3.2 1.4 7.4 0 9.2-3 1.2-12 1.2-15.2 0-1.4-1.8-1.4-6 0-9.2z"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><rect x="2.6" y="6.6" width="11" height="9.8" rx="1.6"/><path d="M13.6 10h4l3 3.2v3.2h-7V10z"/><circle cx="7" cy="18.4" r="1.8"/><circle cx="17.6" cy="18.4" r="1.8"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M4.8 7.6h14.4l-1.2 13h-12L4.8 7.6z"/><path d="M8.6 7.6V6a3.4 3.4 0 0 1 6.8 0v1.6"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3.4h8l4 4v13.2H6V3.4z"/><path d="M14 3.4v4.2h4"/><path d="M9 13h6M9 16.2h6"/></symbol>
+</defs>
+</svg>
+
+<div class="toolbar" id="toolbar">
+  <div class="seg">
+    <button data-go="login">登录页</button>
+    <button data-go="home" class="on">数据看板</button>
+    <button data-go="goods">商品管理</button>
+    <button data-go="users">用户管理</button>
+    <button data-go="profile">个人中心</button>
+  </div>
+  <span class="div"></span>
+  <select id="zoom">
+    <option value="0.72">72%</option>
+    <option value="0.85">85%</option>
+    <option value="1" selected>100%</option>
+  </select>
+  <span class="tip">1440 × 900 · 悬停查看图表 / 表格交互</span>
+</div>
+
+<div class="stage">
+<div class="frame" id="frame">
+
+<!-- ================= 数据看板 ================= -->
+<section class="page on" id="p-home">
+  <div class="app">
+    <aside class="sider">
+      <div class="brand">
+        <div class="logo"><svg viewBox="0 0 24 24"><path d="M3.2 7.2 12 3l8.8 4.2v9.6L12 21 3.2 16.8V7.2z"/><path d="M3.6 7.4 12 11.4l8.4-4"/><path d="M12 11.4V21"/></svg></div>
+        <div><div class="brand-name">houtai</div><div class="brand-sub">商城后台</div></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">概览</div>
+        <div class="nav-item on"><svg class="ic"><use href="#i-grid"/></svg>数据看板</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-chart"/></svg>销售统计</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">运营</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-box"/></svg>商品管理<span class="badge">32</span></div>
+        <div class="nav-item"><svg class="ic"><use href="#i-users"/></svg>用户管理</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">系统</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色权限</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-gear"/></svg>系统设置</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-item"><svg class="ic"><use href="#i-user"/></svg>个人中心</div>
+      </div>
+      <div class="sider-foot">
+        <div class="k">当前角色</div>
+        <div class="v">超级管理员 · 全部权限</div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div class="crumb">工作台 <svg viewBox="0 0 24 24"><path d="M9 6l7 6-7 6"/></svg> <b>数据看板</b></div>
+        <div class="grow"></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-search"/></svg></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-bell"/></svg><span class="bell-dot"></span></div>
+        <div class="user-chip">
+          <div class="avatar a1">陈</div>
+          <div><div class="n">陈嘉禾</div><div class="r">超级管理员</div></div>
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="pagehead">
+          <div>
+            <h1>下午好，陈嘉禾</h1>
+            <div class="sub">2026 年 11 月 9 日 周一 · 数据更新于 14:26</div>
+          </div>
+          <div class="actions">
+            <div class="segbar"><span>近 7 天</span><span class="on">近 30 天</span><span>本季</span></div>
+            <button class="btn"><svg class="ic sm"><use href="#i-download"/></svg>导出报表</button>
+          </div>
+        </div>
+
+        <div class="kpi-row">
+          <div class="card kpi">
+            <div class="top"><span class="k">今日销售额</span><span class="badge-ic"><svg class="ic sm"><use href="#i-bag"/></svg></span></div>
+            <div class="val">¥86,420<span class="unit">.50</span></div>
+            <div class="foot"><span class="chg up"><svg class="ic xs"><use href="#i-arrow-up"/></svg>12.5%</span> 较昨日</div>
+            <svg class="spark" data-spark="a"></svg>
+          </div>
+          <div class="card kpi">
+            <div class="top"><span class="k">今日订单</span><span class="badge-ic teal"><svg class="ic sm"><use href="#i-file"/></svg></span></div>
+            <div class="val">1,284<span class="unit">单</span></div>
+            <div class="foot"><span class="chg up"><svg class="ic xs"><use href="#i-arrow-up"/></svg>8.2%</span> 较昨日</div>
+            <svg class="spark" data-spark="b"></svg>
+          </div>
+          <div class="card kpi">
+            <div class="top"><span class="k">累计销售额</span><span class="badge-ic warn"><svg class="ic sm"><use href="#i-chart"/></svg></span></div>
+            <div class="val">¥3,286,940</div>
+            <div class="foot">近 30 天累计 · 客单价 ¥252</div>
+            <svg class="spark" data-spark="c"></svg>
+          </div>
+          <div class="card kpi">
+            <div class="top"><span class="k">活跃用户</span><span class="badge-ic gray"><svg class="ic sm"><use href="#i-users"/></svg></span></div>
+            <div class="val">2,356<span class="unit">人</span></div>
+            <div class="foot"><span class="chg down"><svg class="ic xs"><use href="#i-arrow-down"/></svg>1.4%</span> 较昨日</div>
+            <svg class="spark" data-spark="d"></svg>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="card chart-card">
+            <div class="hd">
+              <div>
+                <div class="card-title">销售趋势</div>
+                <div class="card-sub">近 30 天每日销售额与销量走势</div>
+              </div>
+              <div class="legend">
+                <span><i style="background:#F5611D"></i>销售额</span>
+                <span><i style="background:#2F8F86"></i>销量</span>
+              </div>
+            </div>
+            <div id="trend-wrap"></div>
+          </div>
+
+          <div class="card chart-card">
+            <div class="hd">
+              <div>
+                <div class="card-title">品类销售占比</div>
+                <div class="card-sub">按销售金额统计</div>
+              </div>
+            </div>
+            <div id="donut-wrap">
+              <div id="donut" style="width:168px;height:168px;position:relative;flex:none"></div>
+              <div class="donut-legend" id="donut-legend"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-row">
+          <div class="card rank-card">
+            <div class="hd" style="display:flex;align-items:center;justify-content:space-between;padding:15px 20px 0">
+              <div>
+                <div class="card-title" style="font-size:14.5px">品类销售排行</div>
+                <div class="card-sub">TOP 5 · 近 30 天</div>
+              </div>
+              <button class="btn text sm">查看全部<svg class="ic xs"><use href="#i-chev-right"/></svg></button>
+            </div>
+            <div class="rank-list" id="rank-list"></div>
+          </div>
+
+          <div class="card quick-card">
+            <div class="hd" style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px 0">
+              <div class="card-title" style="font-size:14.5px">快捷入口</div>
+              <span style="font-size:11.5px;color:var(--muted)">常用操作</span>
+            </div>
+            <div class="quick-grid">
+              <div class="quick"><div class="qi"><svg class="ic sm"><use href="#i-box"/></svg></div><div class="qn">新增商品</div><div class="qd">发布并上架</div></div>
+              <div class="quick"><div class="qi"><svg class="ic sm"><use href="#i-users"/></svg></div><div class="qn">新增用户</div><div class="qd">分配角色权限</div></div>
+              <div class="quick"><div class="qi"><svg class="ic sm"><use href="#i-truck"/></svg></div><div class="qn">待发货</div><div class="qd">18 笔待处理</div></div>
+              <div class="quick"><div class="qi"><svg class="ic sm"><use href="#i-file"/></svg></div><div class="qn">导出数据</div><div class="qd">CSV / Excel</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 商品管理 ================= -->
+<section class="page" id="p-goods">
+  <div class="app">
+    <aside class="sider">
+      <div class="brand">
+        <div class="logo"><svg viewBox="0 0 24 24"><path d="M3.2 7.2 12 3l8.8 4.2v9.6L12 21 3.2 16.8V7.2z"/><path d="M3.6 7.4 12 11.4l8.4-4"/><path d="M12 11.4V21"/></svg></div>
+        <div><div class="brand-name">houtai</div><div class="brand-sub">商城后台</div></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">概览</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-grid"/></svg>数据看板</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-chart"/></svg>销售统计</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">运营</div>
+        <div class="nav-item on"><svg class="ic"><use href="#i-box"/></svg>商品管理<span class="badge">32</span></div>
+        <div class="nav-item"><svg class="ic"><use href="#i-users"/></svg>用户管理</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">系统</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色权限</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-gear"/></svg>系统设置</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-item"><svg class="ic"><use href="#i-user"/></svg>个人中心</div>
+      </div>
+      <div class="sider-foot">
+        <div class="k">当前角色</div>
+        <div class="v">超级管理员 · 全部权限</div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div class="crumb">运营 <svg viewBox="0 0 24 24"><path d="M9 6l7 6-7 6"/></svg> <b>商品管理</b></div>
+        <div class="grow"></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-search"/></svg></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-bell"/></svg><span class="bell-dot"></span></div>
+        <div class="user-chip">
+          <div class="avatar a1">陈</div>
+          <div><div class="n">陈嘉禾</div><div class="r">超级管理员</div></div>
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="pagehead">
+          <div>
+            <h1>商品管理</h1>
+            <div class="sub">共 128 件商品 · 其中 12 件库存低于预警值</div>
+          </div>
+          <div class="actions">
+            <button class="btn"><svg class="ic sm"><use href="#i-download"/></svg>导入</button>
+            <button class="btn primary"><svg class="ic sm"><use href="#i-plus"/></svg>新增商品</button>
+          </div>
+        </div>
+
+        <div class="card table-card">
+          <div class="filter-row">
+            <div class="input"><svg class="ic sm" style="color:#B5AEA7"><use href="#i-search"/></svg><span class="ph">搜索商品名称 / SKU</span></div>
+            <div class="select"><span>全部分类</span><span class="grow"></span><svg><use href="#i-chev-down"/></svg></div>
+            <div class="select"><span>全部状态</span><span class="grow"></span><svg><use href="#i-chev-down"/></svg></div>
+            <button class="btn primary">查询</button>
+            <button class="btn text">重置</button>
+            <div class="grow"></div>
+            <span style="font-size:12px;color:var(--muted)">已筛选 10 条</span>
+          </div>
+
+          <div class="tbl-scroll">
+            <table>
+              <colgroup>
+                <col style="width:44px"><col style="width:auto"><col style="width:120px"><col style="width:110px">
+                <col style="width:140px"><col style="width:90px"><col style="width:104px"><col style="width:176px">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></th>
+                  <th>商品信息</th><th>分类</th><th>价格</th><th>库存</th><th>销量</th><th>状态</th><th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="cell-prod"><div class="thumb t-elec"><svg><use href="#i-headphone"/></svg></div><div><div class="pname">无线蓝牙耳机 Pro</div><div class="psku">SKU-20841 · 白色</div></div></div></td>
+                  <td>电子产品</td><td class="num">¥299.00</td>
+                  <td><div class="stock"><span class="num">120</span><span class="bar ok"><span style="width:74%"></span></span></div></td>
+                  <td class="num">86</td><td><span class="tag on"><span class="dot" style="background:#1F9D55"></span>已上架</span></td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>下架</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="cell-prod"><div class="thumb t-elec"><svg><use href="#i-laptop"/></svg></div><div><div class="pname">轻薄笔记本 14 英寸</div><div class="psku">SKU-20842 · 深空灰</div></div></div></td>
+                  <td>电子产品</td><td class="num">¥4,899.00</td>
+                  <td><div class="stock"><span class="num">42</span><span class="bar ok"><span style="width:38%"></span></span></div></td>
+                  <td class="num">213</td><td><span class="tag on"><span class="dot" style="background:#1F9D55"></span>已上架</span></td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>下架</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="cell-prod"><div class="thumb t-elec"><svg><use href="#i-watch"/></svg></div><div><div class="pname">智能手表 S2</div><div class="psku">SKU-20843 · 曜石黑</div></div></div></td>
+                  <td>电子产品</td><td class="num">¥1,099.00</td>
+                  <td><div class="stock"><span class="num">18</span><span class="bar low"><span style="width:16%"></span></span></div></td>
+                  <td class="num">154</td><td><span class="tag on"><span class="dot" style="background:#1F9D55"></span>已上架</span></td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>下架</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box on" style="display:inline-flex"><svg style="width:10px;height:10px;stroke:#fff;stroke-width:2;fill:none"><use href="#i-check"/></svg></span></span></td>
+                  <td><div class="cell-prod"><div class="thumb t-apparel"><svg><use href="#i-scarf"/></svg></div><div><div class="pname">真丝方巾 · 星野</div><div class="psku">SKU-20844 · 雾霾蓝</div></div></div></td>
+                  <td>服饰鞋包</td><td class="num">¥168.00</td>
+                  <td><div class="stock"><span class="num">260</span><span class="bar ok"><span style="width:88%"></span></span></div></td>
+                  <td class="num">402</td><td><span class="tag on"><span class="dot" style="background:#1F9D55"></span>已上架</span></td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>下架</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="cell-prod"><div class="thumb t-home"><svg><use href="#i-cup"/></svg></div><div><div class="pname">陶瓷马克杯套装</div><div class="psku">SKU-20845 · 四只装</div></div></div></td>
+                  <td>家居生活</td><td class="num">¥129.00</td>
+                  <td><div class="stock"><span class="num">6</span><span class="bar low"><span style="width:9%"></span></span></div></td>
+                  <td class="num">88</td><td><span class="tag off"><span class="dot" style="background:#A8A29C"></span>已下架</span></td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>上架</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="cell-prod"><div class="thumb t-home"><svg><use href="#i-candle"/></svg></div><div><div class="pname">香薰蜡烛礼盒</div><div class="psku">SKU-20846 · 雪松与橙花</div></div></div></td>
+                  <td>家居生活</td><td class="num">¥88.00</td>
+                  <td><div class="stock"><span class="num">340</span><span class="bar ok"><span style="width:92%"></span></span></div></td>
+                  <td class="num">512</td><td><span class="tag on"><span class="dot" style="background:#1F9D55"></span>已上架</span></td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>下架</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="cell-prod"><div class="thumb t-beauty"><svg><use href="#i-bottle"/></svg></div><div><div class="pname">氨基酸洁面乳</div><div class="psku">SKU-20847 · 120ml</div></div></div></td>
+                  <td>美妆个护</td><td class="num">¥69.00</td>
+                  <td><div class="stock"><span class="num">95</span><span class="bar ok"><span style="width:48%"></span></span></div></td>
+                  <td class="num">1,204</td><td><span class="tag on"><span class="dot" style="background:#1F9D55"></span>已上架</span></td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>下架</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="cell-prod"><div class="thumb t-home"><svg><use href="#i-pillow"/></svg></div><div><div class="pname">云朵抱枕 · 暖灰</div><div class="psku">SKU-20848 · 45 × 45cm</div></div></div></td>
+                  <td>家居生活</td><td class="num">¥59.00</td>
+                  <td><div class="stock"><span class="num">12</span><span class="bar low"><span style="width:11%"></span></span></div></td>
+                  <td class="num">76</td><td><span class="tag off"><span class="dot" style="background:#A8A29C"></span>已下架</span></td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>上架</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="cell-prod"><div class="thumb t-home"><svg><use href="#i-bottle"/></svg></div><div><div class="pname">智能保温杯 480ml</div><div class="psku">SKU-20849 · 雾白</div></div></div></td>
+                  <td>家居生活</td><td class="num">¥139.00</td>
+                  <td><div class="stock"><span class="num">78</span><span class="bar ok"><span style="width:62%"></span></span></div></td>
+                  <td class="num">143</td><td><span class="tag on"><span class="dot" style="background:#1F9D55"></span>已上架</span></td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>下架</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="cell-prod"><div class="thumb t-apparel"><svg><use href="#i-scarf"/></svg></div><div><div class="pname">亚麻衬衫 · 米白</div><div class="psku">SKU-20850 · M / L / XL</div></div></div></td>
+                  <td>服饰鞋包</td><td class="num">¥239.00</td>
+                  <td><div class="stock"><span class="num">56</span><span class="bar ok"><span style="width:46%"></span></span></div></td>
+                  <td class="num">268</td><td><span class="tag on"><span class="dot" style="background:#1F9D55"></span>已上架</span></td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>下架</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tbl-foot">
+            <div class="info">已选 <b>1</b> 项 · 共 <b>128</b> 条 · 第 <b>1</b> / 13 页</div>
+            <div class="pager">
+              <div class="pg" style="color:#C9C2BA">上一页</div>
+              <div class="pg on">1</div><div class="pg">2</div><div class="pg">3</div>
+              <div class="pg ell">…</div><div class="pg">13</div>
+              <div class="pg">下一页</div>
+              <div class="size"><span class="select"><span>10 条 / 页</span><span class="grow"></span><svg><use href="#i-chev-down"/></svg></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 用户管理 ================= -->
+<section class="page" id="p-users">
+  <div class="app">
+    <aside class="sider">
+      <div class="brand">
+        <div class="logo"><svg viewBox="0 0 24 24"><path d="M3.2 7.2 12 3l8.8 4.2v9.6L12 21 3.2 16.8V7.2z"/><path d="M3.6 7.4 12 11.4l8.4-4"/><path d="M12 11.4V21"/></svg></div>
+        <div><div class="brand-name">houtai</div><div class="brand-sub">商城后台</div></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">概览</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-grid"/></svg>数据看板</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-chart"/></svg>销售统计</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">运营</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-box"/></svg>商品管理<span class="badge">32</span></div>
+        <div class="nav-item on"><svg class="ic"><use href="#i-users"/></svg>用户管理</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">系统</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色权限</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-gear"/></svg>系统设置</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-item"><svg class="ic"><use href="#i-user"/></svg>个人中心</div>
+      </div>
+      <div class="sider-foot">
+        <div class="k">当前角色</div>
+        <div class="v">超级管理员 · 全部权限</div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div class="crumb">系统 <svg viewBox="0 0 24 24"><path d="M9 6l7 6-7 6"/></svg> <b>用户管理</b></div>
+        <div class="grow"></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-search"/></svg></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-bell"/></svg><span class="bell-dot"></span></div>
+        <div class="user-chip">
+          <div class="avatar a1">陈</div>
+          <div><div class="n">陈嘉禾</div><div class="r">超级管理员</div></div>
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="pagehead">
+          <div>
+            <h1>用户管理</h1>
+            <div class="sub">共 356 位成员 · 本周新增 12 位</div>
+          </div>
+          <div class="actions">
+            <button class="btn"><svg class="ic sm"><use href="#i-shield"/></svg>角色配置</button>
+            <button class="btn primary"><svg class="ic sm"><use href="#i-plus"/></svg>新增用户</button>
+          </div>
+        </div>
+
+        <div class="card table-card">
+          <div class="filter-row">
+            <div class="input" style="width:250px"><svg class="ic sm" style="color:#B5AEA7"><use href="#i-search"/></svg><span class="ph">姓名 / 邮箱 / 登录名</span></div>
+            <div class="select"><span>全部角色</span><span class="grow"></span><svg><use href="#i-chev-down"/></svg></div>
+            <div class="select"><span>全部状态</span><span class="grow"></span><svg><use href="#i-chev-down"/></svg></div>
+            <button class="btn primary">查询</button>
+            <button class="btn text">重置</button>
+            <div class="grow"></div>
+            <div class="select" style="min-width:104px"><span>最近登录</span><span class="grow"></span><svg><use href="#i-chev-down"/></svg></div>
+          </div>
+
+          <div class="tbl-toolbar">
+            <span class="cnt">已选 <b>0</b> 项</span>
+            <button class="btn sm" style="opacity:.5">批量启用</button>
+            <button class="btn sm" style="opacity:.5">批量禁用</button>
+            <div class="grow"></div>
+            <span class="cnt">列表按最近登录时间排序</span>
+          </div>
+
+          <div class="tbl-scroll">
+            <table>
+              <colgroup>
+                <col style="width:44px"><col style="width:auto"><col style="width:210px"><col style="width:130px">
+                <col style="width:120px"><col style="width:160px"><col style="width:170px">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></th>
+                  <th>用户</th><th>邮箱</th><th>角色</th><th>状态</th><th>最近登录</th><th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="ucell"><div class="avatar a1">陈</div><div><div class="nm">陈嘉禾</div><div class="un">admin · ID 1001</div></div></div></td>
+                  <td style="color:var(--text-2)">chen.jh@houtai.cn</td>
+                  <td><span class="tag orange">超级管理员</span></td>
+                  <td><span class="switch on"></span></td>
+                  <td style="color:var(--text-2)">今天 08:42</td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a style="color:#C2BBB3">禁用</a><span class="sep">·</span><a style="color:#C2BBB3">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="ucell"><div class="avatar a2">林</div><div><div class="nm">林清越</div><div class="un">linqingyue · ID 1002</div></div></div></td>
+                  <td style="color:var(--text-2)">lin.qy@houtai.cn</td>
+                  <td><span class="tag teal">运营</span></td>
+                  <td><span class="switch on"></span></td>
+                  <td style="color:var(--text-2)">今天 09:15</td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>禁用</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="ucell"><div class="avatar a3">周</div><div><div class="nm">周牧之</div><div class="un">zhoumuzhi · ID 1003</div></div></div></td>
+                  <td style="color:var(--text-2)">zhou.mz@houtai.cn</td>
+                  <td><span class="tag teal">运营</span></td>
+                  <td><span class="switch on"></span></td>
+                  <td style="color:var(--text-2)">昨天 21:03</td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>禁用</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="ucell"><div class="avatar a4">苏</div><div><div class="nm">苏念</div><div class="un">suniàn · ID 1004</div></div></div></td>
+                  <td style="color:var(--text-2)">su.nian@houtai.cn</td>
+                  <td><span class="tag gray">成员</span></td>
+                  <td><span class="switch off"></span></td>
+                  <td style="color:var(--text-2)">2026-10-22 14:20</td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a style="color:var(--success)">启用</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="ucell"><div class="avatar a5">何</div><div><div class="nm">何知远</div><div class="un">hezhiyuan · ID 1005</div></div></div></td>
+                  <td style="color:var(--text-2)">he.zy@houtai.cn</td>
+                  <td><span class="tag gray">成员</span></td>
+                  <td><span class="switch on"></span></td>
+                  <td style="color:var(--text-2)">2026-11-07 10:11</td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>禁用</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="ucell"><div class="avatar a6">沈</div><div><div class="nm">沈安然</div><div class="un">shenanran · ID 1006</div></div></div></td>
+                  <td style="color:var(--text-2)">shen.ar@houtai.cn</td>
+                  <td><span class="tag teal">运营</span></td>
+                  <td><span class="switch on"></span></td>
+                  <td style="color:var(--text-2)">2026-11-06 16:35</td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>禁用</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="ucell"><div class="avatar a2">顾</div><div><div class="nm">顾言</div><div class="un">guyan · ID 1007</div></div></div></td>
+                  <td style="color:var(--text-2)">gu.yan@houtai.cn</td>
+                  <td><span class="tag teal">运营</span></td>
+                  <td><span class="switch on"></span></td>
+                  <td style="color:var(--text-2)">2026-11-05 09:40</td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a>禁用</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+                <tr>
+                  <td><span class="checkbox"><span class="box" style="display:inline-flex"></span></span></td>
+                  <td><div class="ucell"><div class="avatar a4">白</div><div><div class="nm">白露</div><div class="un">bailu · ID 1008</div></div></div></td>
+                  <td style="color:var(--text-2)">bai.lu@houtai.cn</td>
+                  <td><span class="tag gray">成员</span></td>
+                  <td><span class="switch off"></span></td>
+                  <td style="color:var(--text-2)">2026-10-30 11:12</td>
+                  <td><div class="ops"><a>编辑</a><span class="sep">·</span><a style="color:var(--success)">启用</a><span class="sep">·</span><a class="danger">删除</a></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tbl-foot">
+            <div class="info">共 <b>356</b> 条 · 第 <b>1</b> / 45 页</div>
+            <div class="pager">
+              <div class="pg" style="color:#C9C2BA">上一页</div>
+              <div class="pg on">1</div><div class="pg">2</div><div class="pg">3</div>
+              <div class="pg ell">…</div><div class="pg">45</div>
+              <div class="pg">下一页</div>
+              <div class="size"><span class="select"><span>8 条 / 页</span><span class="grow"></span><svg><use href="#i-chev-down"/></svg></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 个人中心 ================= -->
+<section class="page" id="p-profile">
+  <div class="app">
+    <aside class="sider">
+      <div class="brand">
+        <div class="logo"><svg viewBox="0 0 24 24"><path d="M3.2 7.2 12 3l8.8 4.2v9.6L12 21 3.2 16.8V7.2z"/><path d="M3.6 7.4 12 11.4l8.4-4"/><path d="M12 11.4V21"/></svg></div>
+        <div><div class="brand-name">houtai</div><div class="brand-sub">商城后台</div></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">概览</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-grid"/></svg>数据看板</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-chart"/></svg>销售统计</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">运营</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-box"/></svg>商品管理<span class="badge">32</span></div>
+        <div class="nav-item"><svg class="ic"><use href="#i-users"/></svg>用户管理</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">系统</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色权限</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-gear"/></svg>系统设置</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-item on"><svg class="ic"><use href="#i-user"/></svg>个人中心</div>
+      </div>
+      <div class="sider-foot">
+        <div class="k">当前角色</div>
+        <div class="v">超级管理员 · 全部权限</div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div class="crumb">账户 <svg viewBox="0 0 24 24"><path d="M9 6l7 6-7 6"/></svg> <b>个人中心</b></div>
+        <div class="grow"></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-bell"/></svg><span class="bell-dot"></span></div>
+        <div class="user-chip">
+          <div class="avatar a1">陈</div>
+          <div><div class="n">陈嘉禾</div><div class="r">超级管理员</div></div>
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="pagehead">
+          <div>
+            <h1>个人中心</h1>
+            <div class="sub">维护个人资料与账号安全设置</div>
+          </div>
+          <div class="actions">
+            <span class="tag orange" style="height:26px"><span class="dot" style="background:#F5611D"></span>账号状态正常</span>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <div class="card pcard">
+            <div class="hd"><h3>基本资料</h3><span class="hint">修改后需保存生效</span></div>
+            <div class="pbody">
+              <div class="avatar-block">
+                <div class="big-avatar">陈<span class="cam"><svg><use href="#i-camera"/></svg></span></div>
+                <div>
+                  <div class="ab-name">陈嘉禾 <span class="tag orange">超级管理员</span></div>
+                  <div class="ab-meta">登录名 admin · 用户 ID 1001</div>
+                  <div class="ab-acts">
+                    <button class="btn sm">更换头像</button>
+                    <button class="btn text sm">移除</button>
+                    <span style="font-size:11.5px;color:var(--muted);align-self:center">支持 JPG / PNG，≤ 2MB</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-item">
+                  <div class="field-label">昵称 <span style="color:var(--primary)">*</span></div>
+                  <div class="input"><span class="input-val">陈嘉禾</span></div>
+                </div>
+                <div class="form-item">
+                  <div class="field-label">手机号</div>
+                  <div class="input"><span class="input-val">138 0013 8000</span></div>
+                </div>
+                <div class="form-item">
+                  <div class="field-label">邮箱</div>
+                  <div class="input"><span class="input-val">chen.jh@houtai.cn</span></div>
+                </div>
+                <div class="form-item">
+                  <div class="field-label">所属角色</div>
+                  <div class="input" style="background:#FBFAF8"><span class="input-val" style="color:var(--text-2)">超级管理员（不可修改）</span></div>
+                </div>
+                <div class="form-item full">
+                  <div class="field-label">个人简介</div>
+                  <div class="input" style="height:60px;align-items:flex-start;padding-top:10px;background:#FBFAF8">
+                    <span style="font-size:13px;color:var(--muted);line-height:1.7">负责商城整体运营与后台权限管理，如需调整请联系系统管理员。</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-foot" style="margin-top:18px;padding-top:16px">
+                <button class="btn primary">保存修改</button>
+                <button class="btn">取消</button>
+                <span class="note">上一次保存：2026-11-08 17:22</span>
+              </div>
+
+              <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                  <span style="font-size:13px;font-weight:600">账号信息</span>
+                  <span style="font-size:11.5px;color:var(--muted)">由系统统一管理，如需变更请联系管理员</span>
+                </div>
+                <div class="form-grid" style="margin-top:0;gap:10px 18px">
+                  <div class="form-item">
+                    <div class="field-label">登录名</div>
+                    <div class="input" style="background:#FBFAF8;border-color:var(--line-soft)"><span class="input-val" style="color:var(--text-2)">admin</span></div>
+                  </div>
+                  <div class="form-item">
+                    <div class="field-label">用户 ID</div>
+                    <div class="input" style="background:#FBFAF8;border-color:var(--line-soft)"><span class="input-val" style="color:var(--text-2)">1001</span></div>
+                  </div>
+                  <div class="form-item">
+                    <div class="field-label">创建时间</div>
+                    <div class="input" style="background:#FBFAF8;border-color:var(--line-soft)"><span class="input-val" style="color:var(--text-2)">2024-03-18 10:24</span></div>
+                  </div>
+                  <div class="form-item">
+                    <div class="field-label">最近登录</div>
+                    <div class="input" style="background:#FBFAF8;border-color:var(--line-soft)"><span class="input-val" style="color:var(--text-2)">2026-11-09 08:42 · 合肥</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="side-stack">
+            <div class="card pcard">
+              <div class="hd"><h3>修改密码</h3><span class="hint">建议 90 天更换一次</span></div>
+              <div class="pbody">
+                <div class="pass-form">
+                  <div class="form-item">
+                    <div class="field-label">当前密码</div>
+                    <div class="input"><span class="pre"><svg class="ic sm" style="color:#B5AEA7"><use href="#i-lock"/></svg></span><span class="ph">请输入当前密码</span></div>
+                  </div>
+                  <div class="form-item">
+                    <div class="field-label">新密码</div>
+                    <div class="input"><span class="pre"><svg class="ic sm" style="color:#B5AEA7"><use href="#i-lock"/></svg></span><span class="input-val" style="letter-spacing:2px">••••••••••</span></div>
+                    <div class="strength">
+                      <i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+                      <span>强度：较强</span>
+                    </div>
+                  </div>
+                  <div class="form-item">
+                    <div class="field-label">确认新密码</div>
+                    <div class="input"><span class="pre"><svg class="ic sm" style="color:#B5AEA7"><use href="#i-check"/></svg></span><span class="input-val" style="letter-spacing:2px">••••••••••</span></div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:18px">
+                  <button class="btn primary">确认修改</button>
+                  <button class="btn">重置</button>
+                </div>
+                <div style="font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:14px;background:#FBFAF8;border:1px solid var(--line-soft);border-radius:9px;padding:10px 12px">
+                  密码规则：至少 6 位，建议包含大小写字母、数字与符号；修改成功后需重新登录。
+                </div>
+              </div>
+            </div>
+
+            <div class="card pcard" style="flex:1">
+              <div class="hd"><h3>登录设备</h3><button class="btn text sm">全部下线</button></div>
+              <div class="pbody" style="padding-top:6px;padding-bottom:10px">
+                <div class="device">
+                  <div class="di"><svg class="ic sm"><use href="#i-monitor"/></svg></div>
+                  <div style="flex:1"><div class="dn">Windows · Chrome <span class="tag on" style="height:20px;margin-left:6px;font-size:11px">当前</span></div><div class="dd">合肥 · 2026-11-09 08:42 · 192.168.1.24</div></div>
+                </div>
+                <div class="device">
+                  <div class="di"><svg class="ic sm"><use href="#i-phone"/></svg></div>
+                  <div style="flex:1"><div class="dn">iPhone 15 · Safari</div><div class="dd">合肥 · 2026-11-08 20:15 · 10.24.8.61</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-soft)">
+                  <span class="tag warn">双因素认证未开启</span>
+                  <span style="font-size:11.5px;color:var(--muted)">开启后异地登录需二次验证</span>
+                  <button class="btn sm" style="margin-left:auto">去开启</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 登录页 ================= -->
+<section class="page" id="p-login">
+  <div class="login-page">
+    <div class="lg-left">
+      <div class="ring r1"></div><div class="ring r2"></div>
+      <div class="lg-brand">
+        <div class="logo"><svg viewBox="0 0 24 24"><path d="M3.2 7.2 12 3l8.8 4.2v9.6L12 21 3.2 16.8V7.2z"/><path d="M3.6 7.4 12 11.4l8.4-4"/><path d="M12 11.4V21"/></svg></div>
+        <div><div class="bn">houtai</div><div class="bs">商城后台管理系统</div></div>
+      </div>
+
+      <div class="lg-mid">
+        <div class="eyebrow">Merchant Operations Center</div>
+        <h1>把商城的每一笔生意，<br><em>都看得清清楚楚</em>。</h1>
+        <p>商品、用户、订单与经营数据集中在同一个工作台，权限分级清晰，日常运营只需三步：查看、处理、复盘。</p>
+        <div class="lg-stats">
+          <div class="stat"><div class="v">128</div><div class="k">在售商品</div></div>
+          <div class="stat"><div class="v">2,356</div><div class="k">活跃用户</div></div>
+          <div class="stat"><div class="v">¥3.28M</div><div class="k">近 30 天 GMV</div></div>
+        </div>
+      </div>
+
+      <div class="lg-foot">
+        <span>© 2026 houtai</span><span class="sep"></span><span>内部系统 · 仅限授权账号访问</span>
+      </div>
+    </div>
+
+    <div class="lg-right">
+      <div class="top-links"><a>帮助中心</a><a>联系管理员</a></div>
+
+      <div class="lg-form">
+        <div class="h">欢迎回来</div>
+        <div class="sh">使用后台账号登录，继续今天的运营工作</div>
+
+        <div class="fields">
+          <div class="form-item">
+            <div class="field-label"><span>账号</span></div>
+            <div class="input"><span class="pre"><svg class="ic sm" style="color:#B5AEA7"><use href="#i-user"/></svg></span><span class="input-val">admin</span></div>
+          </div>
+          <div class="form-item">
+            <div class="field-label"><span>密码</span><a>忘记密码？</a></div>
+            <div class="input"><span class="pre"><svg class="ic sm" style="color:#B5AEA7"><use href="#i-lock"/></svg></span><span class="input-val" style="letter-spacing:2px">••••••••</span><span class="grow"></span><svg class="ic sm" style="color:#C2BBB3"><use href="#i-eye"/></svg></div>
+          </div>
+
+          <div class="row-between">
+            <label class="checkbox"><span class="box on"><svg><use href="#i-check"/></svg></span>7 天内自动登录</label>
+            <span style="font-size:11.5px;color:var(--muted)">当前环境：内网</span>
+          </div>
+
+          <button class="btn primary btn-login">登录</button>
+
+          <div class="or"><i></i>演示环境<i></i></div>
+          <div class="demo">
+            <svg class="ic sm" style="color:#B9400A"><use href="#i-shield"/></svg>
+            <span>账号 <b>admin</b> · 密码 <b>123456</b></span>
+            <span class="k">运营账号 operator</span>
+          </div>
+        </div>
+
+        <div class="lg-copy">登录即表示同意《内部系统使用规范》与《数据安全承诺》</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script>
+/* ---------- 页面切换 ---------- */
+const pages = ['login','home','goods','users','profile'];
+const frame = document.getElementById('frame');
+
+function go(name){
+  pages.forEach(p=>{
+    document.getElementById('p-'+p).classList.toggle('on', p===name);
+  });
+  document.querySelectorAll('#toolbar button[data-go]').forEach(b=>{
+    b.classList.toggle('on', b.dataset.go===name);
+  });
+}
+
+/* ---------- 工具 ---------- */
+const money = n => '¥' + n.toLocaleString('zh-CN');
+const fmt = n => n.toLocaleString('zh-CN');
+
+/* ---------- 迷你折线 ---------- */
+function sparkle(el, data, color, fill){
+  const w=78,h=34,pad=2;
+  const min=Math.min(...data), max=Math.max(...data), span=(max-min)||1;
+  const pts=data.map((v,i)=>{
+    const x=pad + i*(w-pad*2)/(data.length-1);
+    const y=h-pad - (v-min)/span*(h-pad*2);
+    return [x,y];
+  });
+  let d='M'+pts[0][0]+' '+pts[0][1];
+  for(let i=1;i<pts.length;i++) d+=' L'+pts[i][0].toFixed(1)+' '+pts[i][1].toFixed(1);
+  el.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  el.innerHTML=`<path d="${d}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="${d} L${w-pad} ${h} L${pad} ${h}" fill="${fill}" stroke="none"/>`;
+}
+
+/* ---------- 主趋势图 ---------- */
+function trendChart(){
+  const wrap=document.getElementById('trend-wrap');
+  if(!wrap) return;
+  const W=745,H=252, PL=44, PR=16, PT=18, PB=26;
+  const n=30;
+  const sales=Array.from({length:n},(_,i)=> 52000 + i*1150 + Math.sin(i*0.82)*5200 + Math.sin(i*2.3)*2300 + (i>24?(i-24)*900:0));
+  const qty=Array.from({length:n},(_,i)=> 780 + i*6 + Math.sin(i*0.9+1)*120 + Math.sin(i*2.1)*60);
+  const minV=0;
+  const rawMax=Math.max(...sales);
+  const maxV=Math.ceil(rawMax*1.12/40000)*40000;
+  const innerW=W-PL-PR, innerH=H-PT-PB;
+  const X=i=> PL + i*innerW/(n-1);
+  const Y=v=> PT + innerH - (v-minV)/(maxV-minV)*innerH;
+
+  // 平滑曲线
+  function path(data,mapY){
+    let d='M'+X(0)+' '+mapY(data[0]).toFixed(1);
+    for(let i=0;i<data.length-1;i++){
+      const x0=X(i), y0=mapY(data[i]), x1=X(i+1), y1=mapY(data[i+1]);
+      const cx=(x0+x1)/2;
+      d+=` C${cx.toFixed(1)} ${y0.toFixed(1)} ${cx.toFixed(1)} ${y1.toFixed(1)} ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+    }
+    return d;
+  }
+  const qtyMax=Math.max(...qty)*1.25;
+  const Y2=v=> PT + innerH - (v/qtyMax)*innerH;
+
+  const dSales=path(sales,Y), dQty=path(qty,Y2);
+
+  // 网格与 y 轴
+  let grid='';
+  for(let i=0;i<=4;i++){
+    const y=PT+innerH*i/4;
+    const val=maxV*(1-i/4);
+    const lab = val>=10000 ? Math.round(val/10000)+'万' : Math.round(val);
+    grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${W-PR}" y2="${y.toFixed(1)}" stroke="#F2EFEA" stroke-width="1"/>
+    <text x="${PL-10}" y="${(y+4).toFixed(1)}" text-anchor="end" font-size="10.5" fill="#B5AEA7" font-family="inherit">${i===4?'0':lab}</text>`;
+  }
+  // x 轴标签
+  const dates=['10-11','10-16','10-21','10-26','10-31','11-05','11-09'];
+  let xlab='';
+  dates.forEach((d,i)=>{
+    const idx=Math.round(i*(n-1)/(dates.length-1));
+    xlab+=`<text x="${X(idx).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="10.5" fill="#B5AEA7" font-family="inherit">${d}</text>`;
+  });
+
+  wrap.innerHTML=`
+  <svg id="trend-svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" style="display:block">
+    <defs>
+      <linearGradient id="gSales" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#F5611D" stop-opacity=".18"/>
+        <stop offset="100%" stop-color="#F5611D" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    ${grid}
+    <path d="${dQty}" fill="none" stroke="#2F8F86" stroke-width="1.4" stroke-dasharray="4 4" opacity=".75"/>
+    <path d="${dSales} L${X(n-1)} ${PT+innerH} L${PL} ${PT+innerH}" fill="url(#gSales)" stroke="none"/>
+    <path d="${dSales}" fill="none" stroke="#F5611D" stroke-width="2.2" stroke-linecap="round"/>
+    <g id="focus" style="opacity:0">
+      <line id="focus-line" x1="0" y1="${PT}" x2="0" y2="${PT+innerH}" stroke="#E0D8CF" stroke-width="1" stroke-dasharray="3 3"/>
+      <circle id="focus-dot" r="4" fill="#fff" stroke="#F5611D" stroke-width="2"/>
+    </g>
+    <circle cx="${X(n-1).toFixed(1)}" cy="${Y(sales[n-1]).toFixed(1)}" r="4.5" fill="#fff" stroke="#F5611D" stroke-width="2"/>
+    ${xlab}
+  </svg>
+  <div id="trend-tip" style="position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;
+    background:#fff;border:1px solid #EDE8E2;border-radius:10px;padding:9px 11px;
+    box-shadow:0 8px 20px rgba(28,25,23,.1);font-size:11.5px;white-space:nowrap;z-index:3;
+    transform:translate(-50%,-100%)">
+    <div id="tip-date" style="color:#8E8881;margin-bottom:4px"></div>
+    <div style="display:flex;align-items:center;gap:6px"><i style="width:6px;height:6px;border-radius:2px;background:#F5611D"></i><span style="color:#5D5751">销售额</span><b id="tip-amt" style="margin-left:auto;padding-left:12px"></b></div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:2px"><i style="width:6px;height:6px;border-radius:2px;background:#2F8F86"></i><span style="color:#5D5751">销量</span><b id="tip-qty" style="margin-left:auto;padding-left:12px"></b></div>
+  </div>`;
+
+  const svg=document.getElementById('trend-svg');
+  const focus=document.getElementById('focus');
+  const fl=document.getElementById('focus-line');
+  const fd=document.getElementById('focus-dot');
+  const tip=document.getElementById('trend-tip');
+  const dateLabels=Array.from({length:n},(_,i)=>{
+    const d=new Date(2026,9,11); d.setDate(d.getDate()+i);
+    return `${d.getMonth()+1}月${d.getDate()}日`;
+  });
+
+  svg.addEventListener('mousemove',e=>{
+    const rect=svg.getBoundingClientRect();
+    const px=(e.clientX-rect.left)/rect.width*W;
+    let i=Math.round((px-PL)/innerW*(n-1));
+    i=Math.max(0,Math.min(n-1,i));
+    focus.style.opacity=1;
+    fl.setAttribute('x1',X(i)); fl.setAttribute('x2',X(i));
+    fd.setAttribute('cx',X(i)); fd.setAttribute('cy',Y(sales[i]));
+    tip.style.opacity=1;
+    const left=(X(i)/W)*rect.width;
+    const top=(Y(sales[i])/H)*rect.height;
+    tip.style.left=left+'px';
+    tip.style.top=(top-10)+'px';
+    document.getElementById('tip-date').textContent=dateLabels[i];
+    document.getElementById('tip-amt').textContent=money(Math.round(sales[i]));
+    document.getElementById('tip-qty').textContent=fmt(Math.round(qty[i]))+' 件';
+  });
+  svg.addEventListener('mouseleave',()=>{
+    focus.style.opacity=0; tip.style.opacity=0;
+  });
+}
+
+/* ---------- 环形图 ---------- */
+function donut(){
+  const el=document.getElementById('donut');
+  if(!el) return;
+  const data=[
+    {name:'电子产品', value:42, color:'#F5611D'},
+    {name:'服饰鞋包', value:26, color:'#F0A33C'},
+    {name:'家居生活', value:16, color:'#2F8F86'},
+    {name:'美妆个护', value:11, color:'#C08867'},
+    {name:'食品生鲜', value:5,  color:'#C7BFB6'},
+  ];
+  const size=168, cx=size/2, cy=size/2, r=62, thick=18;
+  const C=2*Math.PI*r;
+  let offset=0, arcs='';
+  data.forEach(d=>{
+    const len=C*d.value/100;
+    arcs+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="${thick}"
+      stroke-dasharray="${(len-2).toFixed(2)} ${(C-len+2).toFixed(2)}"
+      stroke-dashoffset="${(-offset).toFixed(2)}" stroke-linecap="butt"
+      transform="rotate(-90 ${cx} ${cy})"/>`;
+    offset+=len;
+  });
+  el.innerHTML=`<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#F7F4F0" stroke-width="${thick}"/>
+    ${arcs}
+    <text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="10.5" fill="#A8A29C" font-family="inherit">近 30 天合计</text>
+    <text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="16" font-weight="650" fill="#1C1917" font-family="inherit">¥3.28M</text>
+  </svg>`;
+
+  const legend=document.getElementById('donut-legend');
+  const rs=[{amt:'¥1.38M',p:'42%'},{amt:'¥854K',p:'26%'},{amt:'¥525K',p:'16%'},{amt:'¥361K',p:'11%'},{amt:'¥164K',p:'5%'}];
+  legend.innerHTML=data.map((d,i)=>`
+    <div class="dl-row">
+      <i style="background:${d.color}"></i>
+      <span class="nm">${d.name}</span>
+      <span class="pct">${rs[i].p}</span>
+      <span class="amt">${rs[i].amt}</span>
+    </div>`).join('');
+}
+
+/* ---------- 排行 ---------- */
+function rank(){
+  const el=document.getElementById('rank-list');
+  if(!el) return;
+  const data=[
+    {name:'电子产品', amt:1386200, pct:100},
+    {name:'服饰鞋包', amt:854300, pct:62},
+    {name:'家居生活', amt:525900, pct:38},
+    {name:'美妆个护', amt:361400, pct:26},
+    {name:'食品生鲜', amt:164100, pct:12},
+  ];
+  el.innerHTML=data.map((d,i)=>`
+    <div class="rank-line">
+      <div class="rank-no ${i===0?'top':''}">${i+1}</div>
+      <div class="rank-nm">${d.name}</div>
+      <div class="rank-bar"><span style="width:${d.pct}%"></span></div>
+      <div class="rank-amt">${money(d.amt)}</div>
+    </div>`).join('');
+}
+
+/* ---------- 初始化 ---------- */
+function init(){
+  sparkle(document.querySelector('[data-spark="a"]'),[42,48,45,52,49,58,55,63,61,70],'#F5611D','rgba(245,97,29,.10)');
+  sparkle(document.querySelector('[data-spark="b"]'),[30,34,31,38,36,41,39,46,44,50],'#2F8F86','rgba(47,143,134,.10)');
+  sparkle(document.querySelector('[data-spark="c"]'),[40,44,42,49,47,53,58,56,64,68],'#E2A24C','rgba(226,162,76,.10)');
+  sparkle(document.querySelector('[data-spark="d"]'),[50,47,52,48,45,49,44,41,43,38],'#9A9C9E','rgba(154,156,158,.10)');
+  trendChart(); donut(); rank();
+}
+
+/* ---------- 截图模式 / 缩放 ---------- */
+const qs=new URLSearchParams(location.search);
+if(qs.get('shot')){
+  document.body.classList.add('shot');
+  go(qs.get('page')||'home');
+  document.getElementById('frame').style.transform='none';
+}else{
+  go('home');
+  const zoom=document.getElementById('zoom');
+  function applyZoom(){
+    const s=Number(zoom.value);
+    const frameEl=document.getElementById('frame');
+    frameEl.style.transform=`scale(${s})`;
+    frameEl.style.margin=`${(s-1)*450}px ${(s-1)*720}px`;
+  }
+  zoom.addEventListener('change',applyZoom);
+  document.querySelectorAll('#toolbar button[data-go]').forEach(b=>{
+    b.addEventListener('click',()=>go(b.dataset.go));
+  });
+}
+
+init();
+</script>
+</body>
+</html>

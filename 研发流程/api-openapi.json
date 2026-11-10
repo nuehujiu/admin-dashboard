@@ -1,0 +1,932 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Admin Dashboard API",
+    "description": "后台管理 + 数据看板。统一响应 {code,message,data}，code=0 为成功；业务错误返回 HTTP 200 + code=1。除 health/register/login 外均需 Authorization: Bearer <token>。",
+    "version": "2.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "本地开发" }
+  ],
+  "tags": [
+    { "name": "Health", "description": "健康检查" },
+    { "name": "Auth", "description": "认证与当前用户" },
+    { "name": "Users", "description": "用户管理" },
+    { "name": "Roles", "description": "角色与权限" },
+    { "name": "Dashboard", "description": "数据看板" },
+    { "name": "Goods", "description": "商品管理" },
+    { "name": "Settings", "description": "系统设置" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    },
+    "schemas": {
+      "RespBase": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "description": "0 成功；1 业务错误；401 未登录；404 不存在" },
+          "message": { "type": "string" }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "username": { "type": "string" },
+          "nickname": { "type": "string", "nullable": true },
+          "email": { "type": "string", "nullable": true },
+          "avatar": { "type": "string", "nullable": true },
+          "role_id": { "type": "integer" },
+          "role_name": { "type": "string" },
+          "status": { "type": "integer", "description": "1 启用 / 0 禁用" },
+          "created_at": { "type": "string" }
+        }
+      },
+      "UserDetail": {
+        "allOf": [
+          { "$ref": "#/components/schemas/User" },
+          { "type": "object", "properties": { "updated_at": { "type": "string" } } }
+        ]
+      },
+      "PagedUsers": {
+        "type": "object",
+        "properties": {
+          "list": { "type": "array", "items": { "$ref": "#/components/schemas/User" } },
+          "total": { "type": "integer" },
+          "page": { "type": "integer" },
+          "pageSize": { "type": "integer" }
+        }
+      },
+      "Role": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "code": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "user_count": { "type": "integer" },
+          "created_at": { "type": "string" },
+          "updated_at": { "type": "string" }
+        }
+      },
+      "Menu": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "parent_id": { "type": "integer" },
+          "name": { "type": "string" },
+          "path": { "type": "string", "nullable": true },
+          "icon": { "type": "string", "nullable": true },
+          "type": { "type": "integer", "description": "1 菜单 / 2 按钮" },
+          "permission": { "type": "string", "nullable": true },
+          "sort": { "type": "integer" }
+        }
+      },
+      "Overview": {
+        "type": "object",
+        "properties": {
+          "today_amount": { "type": "number" },
+          "today_amount_change": { "type": "number", "description": "环比百分比；昨日为 0 时返回 0" },
+          "today_qty": { "type": "integer" },
+          "total_amount": { "type": "number" },
+          "total_qty": { "type": "integer" },
+          "user_count": { "type": "integer" },
+          "record_count": { "type": "integer" }
+        }
+      },
+      "TrendPoint": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "example": "2026-11-09" },
+          "amount": { "type": "number" },
+          "qty": { "type": "integer" }
+        }
+      },
+      "CategoryRatioItem": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "number" }
+        }
+      },
+      "RankItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "amount": { "type": "number" },
+          "qty": { "type": "integer" }
+        }
+      },
+      "Goods": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "sku": { "type": "string" },
+          "category": { "type": "string" },
+          "price": { "type": "string", "description": "DECIMAL(10,2)，mysql2 返回字符串，如 \"899.00\"；前端 Number() 后展示" },
+          "stock": { "type": "integer" },
+          "sales": { "type": "integer" },
+          "status": { "type": "integer", "description": "1 上架 / 0 下架" },
+          "image": { "type": "string", "nullable": true, "description": "缩略图地址，null 时前端用占位图" },
+          "description": { "type": "string", "nullable": true },
+          "created_at": { "type": "string" },
+          "updated_at": { "type": "string" }
+        }
+      },
+      "PagedGoods": {
+        "type": "object",
+        "properties": {
+          "list": { "type": "array", "items": { "$ref": "#/components/schemas/Goods" } },
+          "total": { "type": "integer" },
+          "page": { "type": "integer" },
+          "pageSize": { "type": "integer" }
+        }
+      },
+      "Settings": {
+        "type": "object",
+        "description": "系统设置对象，未设置过的字段返回默认值",
+        "properties": {
+          "systemName": { "type": "string", "example": "电商后台管理系统" },
+          "slogan": { "type": "string", "example": "用数据驱动每一次增长" },
+          "notice": { "type": "string", "example": "" },
+          "themeColor": { "type": "string", "example": "#F5611D" },
+          "siderCollapsed": { "type": "integer", "description": "0 展开 / 1 折叠" }
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "未登录或 token 无效/过期",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                { "$ref": "#/components/schemas/RespBase" },
+                { "type": "object", "properties": { "code": { "example": 401 }, "message": { "example": "token 无效或已过期" } } }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "健康检查",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "服务正常",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "type": "object", "properties": { "time": { "type": "string" } } } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "注册（默认运营角色）",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "password"],
+                "properties": {
+                  "username": { "type": "string", "minLength": 3 },
+                  "password": { "type": "string", "minLength": 6 },
+                  "nickname": { "type": "string" },
+                  "email": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "code=0 成功；用户名占用/位数不足返回 code=1",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "type": "object", "properties": { "id": { "type": "integer" } } } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "登录",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "password"],
+                "properties": {
+                  "username": { "type": "string", "example": "admin" },
+                  "password": { "type": "string", "example": "123456" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 token 与用户信息；密码错/账号禁用返回 code=1",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "token": { "type": "string", "description": "JWT，有效期 2h" },
+                            "user": {
+                              "type": "object",
+                              "properties": {
+                                "id": { "type": "integer" },
+                                "username": { "type": "string" },
+                                "nickname": { "type": "string" },
+                                "email": { "type": "string" },
+                                "avatar": { "type": "string", "nullable": true },
+                                "role_id": { "type": "integer" },
+                                "role_name": { "type": "string" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "当前用户 + 菜单 + 权限",
+        "responses": {
+          "200": {
+            "description": "menus 为扁平数组（type=1），permissions 为权限码数组（已过滤 null）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "allOf": [
+                            { "$ref": "#/components/schemas/User" },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "menus": { "type": "array", "items": { "$ref": "#/components/schemas/Menu" } },
+                                "permissions": { "type": "array", "items": { "type": "string" } }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "用户分页列表",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1, "minimum": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "default": 10, "minimum": 1, "maximum": 100 } },
+          { "name": "keyword", "in": "query", "description": "模糊匹配 username 或 nickname", "schema": { "type": "string" } },
+          { "name": "role_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "status", "in": "query", "description": "1 启用 / 0 禁用", "schema": { "type": "integer", "enum": [0, 1] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "按 id 倒序",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PagedUsers" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "新增用户",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "password", "role_id"],
+                "properties": {
+                  "username": { "type": "string", "minLength": 3 },
+                  "password": { "type": "string", "minLength": 6 },
+                  "nickname": { "type": "string" },
+                  "email": { "type": "string" },
+                  "role_id": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 {id}；用户名重复/缺参返回 code=1",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "type": "object", "properties": { "id": { "type": "integer" } } } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "用户详情",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "用户详情（含 updated_at）" },
+          "404": { "description": "用户不存在，code=404" }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "编辑用户",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nickname": { "type": "string" },
+                  "email": { "type": "string" },
+                  "role_id": { "type": "integer" },
+                  "password": { "type": "string", "description": "可选；传了才重置密码", "minLength": 6 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "只更新传入字段" },
+          "404": { "description": "用户不存在" }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "删除用户",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "成功 code=0；删除自己返回 code=1「不能删除当前登录账号」（仍是 HTTP 200）" },
+          "404": { "description": "用户不存在，code=404" }
+        }
+      }
+    },
+    "/api/users/{id}/status": {
+      "put": {
+        "tags": ["Users"],
+        "summary": "启用/禁用用户",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": { "status": { "type": "integer", "enum": [0, 1] } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "成功；不能禁用自己" }
+        }
+      }
+    },
+    "/api/roles": {
+      "get": {
+        "tags": ["Roles"],
+        "summary": "角色列表（含 user_count）",
+        "responses": {
+          "200": {
+            "description": "data 直接是数组，不是 paged 结构",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Role" } } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Roles"],
+        "summary": "新增角色",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "code"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "code": { "type": "string", "description": "唯一" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "code 重复返回 code=1" } }
+      }
+    },
+    "/api/roles/{id}": {
+      "put": {
+        "tags": ["Roles"],
+        "summary": "编辑角色",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "description": "务必同时传 name 与 description：后端未校验 name，只传 description 会写坏数据",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "成功" } }
+      },
+      "delete": {
+        "tags": ["Roles"],
+        "summary": "删除角色",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "角色下仍有用户时返回 code=1" } }
+      }
+    },
+    "/api/roles/{id}/menus": {
+      "get": {
+        "tags": ["Roles"],
+        "summary": "角色已分配的菜单 id",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": {
+            "description": "data 为 menu_id 数字数组",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "type": "array", "items": { "type": "integer" } } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Roles"],
+        "summary": "全量覆盖角色菜单权限",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["menu_ids"],
+                "properties": {
+                  "menu_ids": { "type": "array", "items": { "type": "integer" }, "description": "先删后插；传空数组会清空该角色全部权限" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "成功" } }
+      }
+    },
+    "/api/dashboard/overview": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "看板概览指标",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Overview" } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/trend": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "销售趋势（自动补齐缺失日期）",
+        "parameters": [
+          { "name": "days", "in": "query", "schema": { "type": "integer", "default": 30, "minimum": 1, "maximum": 90 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "按日期升序，无销售日期补 0",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/TrendPoint" } } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/category-ratio": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "分类销售占比",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/CategoryRatioItem" } } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/rank": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "分类销售排行",
+        "parameters": [
+          { "name": "top", "in": "query", "schema": { "type": "integer", "default": 5, "minimum": 1, "maximum": 20 } }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/RankItem" } } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/goods": {
+      "get": {
+        "tags": ["Goods"],
+        "summary": "商品分页列表",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1, "minimum": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "default": 10, "minimum": 1, "maximum": 100 } },
+          { "name": "keyword", "in": "query", "schema": { "type": "string" }, "description": "模糊匹配 name 或 sku" },
+          { "name": "category", "in": "query", "schema": { "type": "string" }, "description": "精确匹配分类名" },
+          { "name": "status", "in": "query", "schema": { "type": "integer", "enum": [0, 1] } }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PagedGoods" } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Goods"],
+        "summary": "新增商品（name/sku/price 必填，SKU 唯一）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "sku", "price"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "sku": { "type": "string" },
+                  "category": { "type": "string" },
+                  "price": { "type": "number", "minimum": 0 },
+                  "stock": { "type": "integer", "minimum": 0, "default": 0 },
+                  "sales": { "type": "integer", "minimum": 0, "default": 0 },
+                  "status": { "type": "integer", "enum": [0, 1], "default": 1 },
+                  "image": { "type": "string", "nullable": true },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "type": "object", "properties": { "id": { "type": "integer" } } } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/goods/categories": {
+      "get": {
+        "tags": ["Goods"],
+        "summary": "分类下拉选项（去重字符串数组；注意路径必须排在 /api/goods/{id} 之前）",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "type": "array", "items": { "type": "string" } } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/goods/{id}": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+      ],
+      "get": {
+        "tags": ["Goods"],
+        "summary": "商品详情",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Goods" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "description": "商品不存在，code=404" }
+        }
+      },
+      "put": {
+        "tags": ["Goods"],
+        "summary": "编辑商品（只更新传入字段；SKU 变更需不与他人冲突）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "sku": { "type": "string" },
+                  "category": { "type": "string" },
+                  "price": { "type": "number", "minimum": 0 },
+                  "stock": { "type": "integer", "minimum": 0 },
+                  "sales": { "type": "integer", "minimum": 0 },
+                  "status": { "type": "integer", "enum": [0, 1] },
+                  "image": { "type": "string", "nullable": true },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功 code=0；空 body 返回 code=1「没有可更新的字段」；price/stock/sales 非法 code=1",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RespBase" }
+              }
+            }
+          },
+          "404": { "description": "商品不存在，code=404" }
+        }
+      },
+      "delete": {
+        "tags": ["Goods"],
+        "summary": "删除商品",
+        "responses": {
+          "200": {
+            "description": "成功 code=0（HTTP 200）；404 表示商品不存在",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RespBase" }
+              }
+            }
+          },
+          "404": { "description": "商品不存在，code=404" }
+        }
+      }
+    },
+    "/api/goods/{id}/status": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+      ],
+      "put": {
+        "tags": ["Goods"],
+        "summary": "上下架（1 上架 / 0 下架）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": { "status": { "type": "integer", "enum": [0, 1] } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功 code=0，message 为「已上架 / 已下架」；status 非 0/1 返回 code=1",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RespBase" }
+              }
+            }
+          },
+          "404": { "description": "商品不存在，code=404" }
+        }
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "tags": ["Settings"],
+        "summary": "读取全部设置（未设置字段返回默认值）",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Settings" } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Settings"],
+        "summary": "保存设置（部分字段即可，返回保存后的完整对象）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Settings" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功 code=0 + data 为完整设置对象；空对象 code=1「没有可保存的设置项」；themeColor 非 #RRGGBB code=1",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Settings" } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/reset": {
+      "post": {
+        "tags": ["Settings"],
+        "summary": "恢复默认设置",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Settings" } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

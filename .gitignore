@@ -1,0 +1,22 @@
+# 依赖与构建产物
+node_modules/
+dist/
+build/
+*.local
+
+# 密钥与环境变量（.env.example 除外）
+.env
+.env.*
+!.env.example
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 日志与临时
+*.log
+npm-debug.log*
+*.tmp
+*.ps1~

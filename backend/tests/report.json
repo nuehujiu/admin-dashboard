@@ -1,0 +1,342 @@
+{
+  "base": "http://localhost:3000",
+  "time": "2026-11-09T10:41:30.681Z",
+  "summary": {
+    "total": 66,
+    "passed": 66,
+    "failed": 0,
+    "passRate": "100.0%"
+  },
+  "results": [
+    {
+      "name": "GET /api/health 返回 200 且 code=0",
+      "ok": true,
+      "ms": 49
+    },
+    {
+      "name": "注册成功返回用户 id",
+      "ok": true,
+      "ms": 87
+    },
+    {
+      "name": "重复注册被拒绝(用户名已被占用)",
+      "ok": true,
+      "ms": 4
+    },
+    {
+      "name": "用户名少于 3 位被拒绝",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "密码少于 6 位被拒绝",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "缺少用户名/密码被拒绝",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "admin 登录成功返回 token 与角色",
+      "ok": true,
+      "ms": 67
+    },
+    {
+      "name": "operator 登录成功",
+      "ok": true,
+      "ms": 65
+    },
+    {
+      "name": "注册用户可登录且默认分配「运营」角色",
+      "ok": true,
+      "ms": 65
+    },
+    {
+      "name": "密码错误登录失败",
+      "ok": true,
+      "ms": 65
+    },
+    {
+      "name": "不存在的用户登录失败",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "缺少参数登录失败",
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "name": "未携带 token 访问 /me 返回 401",
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "name": "无效 token 访问 /me 返回 401",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "携带有效 token 访问 /me 返回用户+菜单+权限",
+      "ok": true,
+      "ms": 4
+    },
+    {
+      "name": "未登录访问用户列表返回 401",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "用户列表默认分页结构正确",
+      "ok": true,
+      "ms": 5
+    },
+    {
+      "name": "pageSize=2 分页生效",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "keyword 筛选生效",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "新增用户成功",
+      "ok": true,
+      "ms": 65
+    },
+    {
+      "name": "新增重复用户名被拒绝",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "新增缺少必填项被拒绝",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "用户详情返回完整字段",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "查询不存在用户返回 404",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "编辑用户昵称与邮箱成功并生效",
+      "ok": true,
+      "ms": 6
+    },
+    {
+      "name": "编辑用户密码后可用新密码登录",
+      "ok": true,
+      "ms": 128
+    },
+    {
+      "name": "编辑时指定不存在的角色被拒绝",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "编辑不存在用户返回 404",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "不能禁用当前登录账号",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "status 传非法值被拒绝",
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "name": "禁用用户成功，被禁用账号无法登录",
+      "ok": true,
+      "ms": 5
+    },
+    {
+      "name": "status=0 筛选能查出被禁用用户",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "恢复启用后可重新登录",
+      "ok": true,
+      "ms": 67
+    },
+    {
+      "name": "启停不存在用户返回 404",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "不能删除当前登录账号",
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "name": "删除不存在用户返回 404",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "删除临时用户成功，详情变为 404",
+      "ok": true,
+      "ms": 6
+    },
+    {
+      "name": "已删除用户登录失败",
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "name": "角色列表包含内置 admin/operator 角色",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "新增角色成功",
+      "ok": true,
+      "ms": 4
+    },
+    {
+      "name": "重复角色编码被拒绝",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "新增缺少必填项被拒绝",
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "name": "编辑角色成功并生效",
+      "ok": true,
+      "ms": 7
+    },
+    {
+      "name": "编辑不存在角色返回 404",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "获取 admin 角色菜单权限列表",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "分配菜单权限后可读回一致",
+      "ok": true,
+      "ms": 7
+    },
+    {
+      "name": "传空数组清空菜单权限",
+      "ok": true,
+      "ms": 6
+    },
+    {
+      "name": "向不存在角色分配菜单返回 404",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "删除仍有用户的角色被拒绝",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "删除不存在角色返回 404",
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "name": "删除空角色成功",
+      "ok": true,
+      "ms": 4
+    },
+    {
+      "name": "已删除角色的菜单接口返回空数组",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "未登录访问看板返回 401",
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "name": "overview 概览字段完整且为数值",
+      "ok": true,
+      "ms": 7
+    },
+    {
+      "name": "trend 默认返回 30 天且日期连续升序",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "trend days=7 返回 7 天",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "trend days=0 回退默认 30 天(0 被视为未传)",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "trend days=-5 被钳制为 1 天",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "trend days=500 被钳制为 90 天",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "category-ratio 返回 {name,value} 数组",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "rank 默认 TOP5",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "rank top=3 生效",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "rank top=999 被钳制为 20",
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "name": "rank top=非法值回退默认 5",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "访问不存在的接口返回 404",
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "name": "非法 JSON 请求体返回 400",
+      "ok": true,
+      "ms": 3
+    }
+  ]
+}

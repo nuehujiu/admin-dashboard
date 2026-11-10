@@ -1,0 +1,978 @@
+{
+  "info": {
+    "name": "admin-dashboard API 自动化测试",
+    "description": "后台管理+数据看板接口自动化测试集合，可导入 Apifox 使用。\n\n使用顺序：\n1. 集合内请求按文件夹顺序执行（认证 → 用户 → 角色 → 看板）\n2. 登录请求会自动提取 token 存入集合变量，后续请求自动携带\n3. 每个请求带 pm.test 断言，Apifox 的「自动化测试」中新建测试场景按顺序拖入即可运行\n\n内置账号：admin / 123456",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" },
+    { "key": "adminId", "value": "" },
+    { "key": "adminRoleId", "value": "" },
+    { "key": "newUserId", "value": "" },
+    { "key": "newRoleId", "value": "" },
+    { "key": "regUsername", "value": "" },
+    { "key": "tmpUsername", "value": "" },
+    { "key": "tmpRoleCode", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "0-健康检查",
+      "item": [
+        {
+          "name": "健康检查",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('业务码 code=0', () => pm.expect(json.code).to.eql(0));",
+                  "pm.test('返回时间字段', () => pm.expect(json.data.time).to.be.a('string'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1-认证",
+      "item": [
+        {
+          "name": "注册（动态用户名）",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{regUsername}}\",\n  \"password\": \"Ap123456\",\n  \"nickname\": \"Apifox注册用户\",\n  \"email\": \"apifox@test.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('regUsername', 'apifox_' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('注册成功 code=0', () => pm.expect(json.code).to.eql(0));",
+                  "pm.test('返回用户 id', () => pm.expect(json.data.id).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "重复注册（应失败）",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{regUsername}}\",\n  \"password\": \"Ap123456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('业务码 code=1', () => pm.expect(json.code).to.eql(1));",
+                  "pm.test('提示用户名已被占用', () => pm.expect(json.message).to.include('占用'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "登录 admin（自动提取 token）",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"123456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('登录成功 code=0', () => pm.expect(json.code).to.eql(0));",
+                  "pm.test('角色为超级管理员', () => pm.expect(json.data.user.role_name).to.eql('超级管理员'));",
+                  "pm.collectionVariables.set('token', json.data.token);",
+                  "pm.collectionVariables.set('adminId', String(json.data.user.id));",
+                  "pm.collectionVariables.set('adminRoleId', String(json.data.user.role_id));",
+                  "pm.test('token 已存入集合变量', () => pm.expect(pm.collectionVariables.get('token').length).to.be.above(20));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "登录失败-错误密码（应失败）",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"wrong_password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('业务码 code=1', () => pm.expect(json.code).to.eql(1));",
+                  "pm.test('提示用户名或密码错误', () => pm.expect(json.message).to.include('用户名或密码错误'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "获取当前用户 /me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('当前用户为 admin', () => pm.expect(json.data.username).to.eql('admin'));",
+                  "pm.test('menus 为非空数组', () => pm.expect(json.data.menus).to.be.an('array').that.is.not.empty);",
+                  "pm.test('permissions 包含 user:create', () => pm.expect(json.data.permissions).to.include('user:create'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录访问 /me（应 401）",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
+                  "pm.test('业务码 code=401', () => pm.expect(pm.response.json().code).to.eql(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2-用户管理",
+      "item": [
+        {
+          "name": "用户列表-默认分页",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=1&pageSize=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('code=0', () => pm.expect(json.code).to.eql(0));",
+                  "pm.test('list 为数组', () => pm.expect(json.data.list).to.be.an('array'));",
+                  "pm.test('分页字段正确', () => {",
+                  "  pm.expect(json.data.page).to.eql(1);",
+                  "  pm.expect(json.data.pageSize).to.eql(10);",
+                  "  pm.expect(json.data.total).to.be.at.least(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "keyword 筛选",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?keyword=admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [{ "key": "keyword", "value": "admin" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('至少命中 admin', () => pm.expect(json.data.list.length).to.be.at.least(1));",
+                  "pm.test('结果均包含关键词', () => {",
+                  "  json.data.list.forEach(u => {",
+                  "    pm.expect(u.username + (u.nickname || '')).to.include('admin');",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "新增用户（自动提取 id）",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{tmpUsername}}\",\n  \"password\": \"Tmp123456\",\n  \"nickname\": \"临时用户\",\n  \"role_id\": {{adminRoleId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/users"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('tmpUsername', 'apifox_user_' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('新增成功 code=0', () => pm.expect(json.code).to.eql(0));",
+                  "pm.collectionVariables.set('newUserId', String(json.data.id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "新增重复用户名（应失败）",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{tmpUsername}}\",\n  \"password\": \"Tmp123456\",\n  \"role_id\": {{adminRoleId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/users"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('业务码 code=1', () => pm.expect(json.code).to.eql(1));",
+                  "pm.test('提示用户名已被占用', () => pm.expect(json.message).to.include('占用'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "用户详情",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/users/{{newUserId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('code=0', () => pm.expect(json.code).to.eql(0));",
+                  "pm.test('用户名匹配', () => pm.expect(json.data.username).to.eql(pm.collectionVariables.get('tmpUsername')));",
+                  "pm.test('包含 role_name/status 字段', () => {",
+                  "  pm.expect(json.data).to.have.property('role_name');",
+                  "  pm.expect(json.data).to.have.property('status');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "编辑用户",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickname\": \"改名了\",\n  \"email\": \"changed@test.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/users/{{newUserId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('更新成功 code=0', () => pm.expect(json.code).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "禁用用户",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": 0\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/users/{{newUserId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('禁用成功 code=0', () => pm.expect(json.code).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "被禁用账号登录（应失败）",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{tmpUsername}}\",\n  \"password\": \"Tmp123456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('禁用账号登录 code=1', () => pm.expect(json.code).to.eql(1));",
+                  "pm.test('提示账号已被禁用', () => pm.expect(json.message).to.include('禁用'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "恢复启用用户",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/users/{{newUserId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('启用成功 code=0', () => pm.expect(json.code).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "不能禁用自己（应失败）",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": 0\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/users/{{adminId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('业务码 code=1', () => pm.expect(json.code).to.eql(1));",
+                  "pm.test('提示不能禁用当前账号', () => pm.expect(json.message).to.include('不能禁用'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "status 非法值（应失败）",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": 2\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/users/{{newUserId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('业务码 code=1', () => pm.expect(json.code).to.eql(1));",
+                  "pm.test('提示只能为 0 或 1', () => pm.expect(json.message).to.include('0 或 1'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "不能删除自己（应失败）",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/users/{{adminId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('业务码 code=1', () => pm.expect(json.code).to.eql(1));",
+                  "pm.test('提示不能删除当前账号', () => pm.expect(json.message).to.include('不能删除'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "删除临时用户",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/users/{{newUserId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('删除成功 code=0', () => pm.expect(json.code).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3-角色管理",
+      "item": [
+        {
+          "name": "角色列表",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/roles"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('code=0', () => pm.expect(json.code).to.eql(0));",
+                  "pm.test('包含 admin/operator 内置角色', () => {",
+                  "  const codes = json.data.map(r => r.code);",
+                  "  pm.expect(codes).to.include('admin');",
+                  "  pm.expect(codes).to.include('operator');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "新增角色（自动提取 id）",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"临时角色\",\n  \"code\": \"{{tmpRoleCode}}\",\n  \"description\": \"Apifox 自动化测试\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/roles"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('tmpRoleCode', 'apifox_role_' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('新增成功 code=0', () => pm.expect(json.code).to.eql(0));",
+                  "pm.collectionVariables.set('newRoleId', String(json.data.id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "编辑角色",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"临时角色改名\",\n  \"description\": \"改名了\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/roles/{{newRoleId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('更新成功 code=0', () => pm.expect(json.code).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "分配菜单权限",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"menu_ids\": [1, 2, 3]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/roles/{{newRoleId}}/menus"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('分配成功 code=0', () => pm.expect(json.code).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "读回菜单权限",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/roles/{{newRoleId}}/menus"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('读回 3 个菜单 id', () => {",
+                  "  pm.expect(json.data.length).to.eql(3);",
+                  "  pm.expect(json.data.sort().join(',')).to.eql('1,2,3');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "清空菜单权限",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"menu_ids\": []\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/roles/{{newRoleId}}/menus"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('清空成功 code=0', () => pm.expect(json.code).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "删除仍有用户的角色（应失败）",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/roles/{{adminRoleId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('业务码 code=1', () => pm.expect(json.code).to.eql(1));",
+                  "pm.test('提示角色下仍有用户', () => pm.expect(json.message).to.include('仍有用户'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "删除临时角色",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/roles/{{newRoleId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('删除成功 code=0', () => pm.expect(json.code).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4-数据看板",
+      "item": [
+        {
+          "name": "概览 overview",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/dashboard/overview"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('code=0', () => pm.expect(json.code).to.eql(0));",
+                  "pm.test('字段均为非负数值', () => {",
+                  "  ['today_amount','today_amount_change','today_qty','total_amount','total_qty','user_count','record_count'].forEach(k => {",
+                  "    pm.expect(json.data[k], k).to.be.a('number');",
+                  "    pm.expect(json.data[k], k).to.be.at.least(0);",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "趋势 trend 默认 30 天",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/dashboard/trend"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('返回 30 天', () => pm.expect(json.data.length).to.eql(30));",
+                  "pm.test('日期升序连续', () => {",
+                  "  for (let i = 1; i < json.data.length; i++) {",
+                  "    pm.expect(json.data[i].date > json.data[i-1].date, '第' + i + '天').to.be.true;",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "趋势 trend days=0 回退默认",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/trend?days=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "trend"],
+              "query": [{ "key": "days", "value": "0" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('days=0 视为未传，返回 30 天', () => pm.expect(json.data.length).to.eql(30));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "分类占比 category-ratio",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/dashboard/category-ratio"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('code=0', () => pm.expect(json.code).to.eql(0));",
+                  "pm.test('每项含 name/value 且 value>=0', () => {",
+                  "  json.data.forEach(item => {",
+                  "    pm.expect(item.name).to.be.a('string');",
+                  "    pm.expect(item.value).to.be.a('number').and.at.least(0);",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "排行 rank 默认 TOP5",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/dashboard/rank"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('不超过 5 条', () => pm.expect(json.data.length).to.be.at.most(5));",
+                  "pm.test('按金额降序', () => {",
+                  "  for (let i = 1; i < json.data.length; i++) {",
+                  "    pm.expect(json.data[i].amount, '第' + i + '名').to.be.at.most(json.data[i-1].amount);",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "排行 rank top=999 钳制为 20",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/rank?top=999",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "rank"],
+              "query": [{ "key": "top", "value": "999" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('不超过 20 条', () => pm.expect(json.data.length).to.be.at.most(20));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5-通用错误",
+      "item": [
+        {
+          "name": "访问不存在接口（应 404）",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/not/exist"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+                  "pm.test('提示接口不存在', () => pm.expect(pm.response.json().message).to.include('接口不存在'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
