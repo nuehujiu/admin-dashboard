@@ -419,6 +419,94 @@ thead th.uth{height:44px}
 .lg-form .demo .k{color:var(--muted);margin-left:auto}
 .lg-copy{margin-top:26px;font-size:11px;color:#C2BBB3;text-align:center}
 
+/* ============ 销售统计 ============ */
+.sales-main{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;flex:1;min-height:0}
+.bars-card{display:flex;flex-direction:column;min-height:0;overflow:hidden;padding-bottom:4px}
+.bars-wrap{flex:1;display:flex;align-items:flex-end;gap:10px;padding:14px 22px 6px;min-height:0;overflow:hidden}
+.bar-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;min-width:0}
+.bar-col .v{font-size:10.5px;color:var(--text-2);font-weight:600;white-space:nowrap}
+.bar-col .b{width:100%;max-width:32px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,#FFA46E,#F5611D);box-shadow:0 2px 6px rgba(245,97,29,.16)}
+.bar-col .b.dim{background:linear-gradient(180deg,#F6D3BF,#EBBCA2);box-shadow:none}
+.bar-x{display:flex;gap:10px;padding:0 22px 12px;flex:none}
+.bar-x span{flex:1;text-align:center;font-size:11px;color:var(--muted);min-width:0}
+
+.cat-list{display:flex;flex-direction:column;flex:1;min-height:0;padding:4px 20px 10px}
+.cat-row{flex:1;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line-soft);min-height:0}
+.cat-row:last-child{border-bottom:0}
+.cat-nm{width:66px;flex:none;font-size:12.5px;font-weight:500}
+.cat-bar{flex:1;height:7px;border-radius:99px;background:#F4F1ED;overflow:hidden}
+.cat-bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#FFC09A,#F5611D)}
+.cat-amt{width:74px;text-align:right;font-size:12px;font-weight:600}
+.cat-amt .sub{font-size:10.5px;color:var(--muted);font-weight:400;margin-top:3px}
+.cat-pct{width:36px;text-align:right;font-size:11px;color:var(--muted)}
+
+/* ============ 角色权限 ============ */
+.role-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;flex:none;margin-bottom:14px}
+.role-card{padding:15px 17px;display:flex;flex-direction:column;gap:9px}
+.role-card.on{border-color:var(--primary-line);background:linear-gradient(180deg,#FFFDFB,#FFF7F1)}
+.role-top{display:flex;align-items:center;gap:10px}
+.role-ic{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:var(--primary-soft);color:var(--primary);flex:none}
+.role-ic.teal{background:var(--teal-soft);color:var(--teal)}
+.role-ic.warn{background:var(--warn-soft);color:var(--warn)}
+.role-ic.gray{background:#F2EFEA;color:#8A827A}
+.role-nm{font-size:14px;font-weight:600}
+.role-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.role-meta{display:flex;align-items:center;gap:14px;font-size:11.5px;color:var(--muted)}
+.role-meta b{font-weight:600;color:var(--text-2)}
+.perm-card{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.perm-table{flex:1;min-height:0;overflow:hidden}
+.perm-table table{height:auto}
+.perm-table thead th{height:42px}
+.perm-table tbody td{height:44px;font-size:13px}
+.perm-yes,.perm-no{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px}
+.perm-yes{background:var(--success-soft);color:var(--success)}
+.perm-no{background:#F5F2EE;color:#C4BDB5}
+.perm-yes svg,.perm-no svg{width:11px;height:11px;stroke:currentColor;stroke-width:2.4;fill:none}
+.perm-group td{background:#FBFAF8;font-weight:600;color:var(--text-2);font-size:12px}
+
+/* ============ 系统设置 ============ */
+.set-grid{display:grid;grid-template-columns:196px 1fr;gap:16px;flex:1;min-height:0}
+.set-nav{padding:10px;display:flex;flex-direction:column;gap:4px}
+.set-nav .it{display:flex;align-items:center;gap:9px;height:40px;padding:0 10px;border-radius:9px;font-size:13px;color:var(--text-2);cursor:pointer}
+.set-nav .it:hover{background:#FAF7F4}
+.set-nav .it.on{background:var(--primary-soft);color:var(--primary-ink);font-weight:600}
+.set-card{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.set-sec{padding:10px 22px;border-bottom:1px solid var(--line-soft)}
+.set-sec:last-child{border-bottom:0;flex:1;min-height:0}
+.set-sec h4{font-size:13.5px;font-weight:600;margin-bottom:3px}
+.set-sec p{font-size:11.5px;color:var(--muted);margin-bottom:6px}
+.set-form{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px}
+.set-form .input{height:36px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:8px 0;border-bottom:1px solid var(--line-soft)}
+.set-row:last-child{border-bottom:0}
+.set-row .k{font-size:13px;font-weight:500}
+.set-row .d{font-size:11.5px;color:var(--muted);margin-top:3px}
+.set-row .ctl{flex:none}
+
+/* 系统设置 · 对齐 settings 表 5 个键 */
+.set-cols{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;flex:1;min-height:0;align-content:start}
+.set-textarea{display:block;padding:9px 11px;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;font-size:13px;line-height:1.75;color:var(--text)}
+.swatches{display:flex;align-items:center;gap:9px}
+.sw{width:26px;height:26px;border-radius:8px;box-shadow:inset 0 0 0 1px rgba(28,25,23,.06)}
+.sw.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--primary-line)}
+.sw-val{margin-left:6px;font-size:12px;color:var(--text-2);font-weight:500}
+.set-hint{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.8}
+.preview-card{grid-column:1/-1;display:flex;flex-direction:column;overflow:hidden}
+.pv-row{display:flex;gap:16px;padding:14px 20px 16px}
+.pv-login{flex:1;border:1px solid var(--line);border-radius:12px;padding:15px 16px;background:linear-gradient(158deg,#FFFCF9,#FFF3EA);display:flex;flex-direction:column;gap:9px}
+.pv-logo{display:flex;align-items:center;gap:8px}
+.pv-logo .lg{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#FF8442,#EE4E14);display:flex;align-items:center;justify-content:center}
+.pv-logo .lg svg{width:14px;height:14px;stroke:#fff;stroke-width:1.8;fill:none}
+.pv-name{font-size:14.5px;font-weight:700;letter-spacing:.04em}
+.pv-slogan{font-size:12px;color:#7A6C61}
+.pv-notice{font-size:11.5px;color:var(--primary-ink);background:rgba(245,97,29,.10);border-radius:6px;padding:6px 9px;line-height:1.65}
+.pv-sider{flex:1;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;min-height:120px}
+.pv-sider .s1{width:54px;background:#fff;border-right:1px solid var(--line);padding:10px 7px;display:flex;flex-direction:column;gap:6px}
+.pv-sider .s1 i{display:block;height:13px;border-radius:4px;background:#F2EFEA}
+.pv-sider .s1 i.on{background:var(--primary-soft);border:1px solid var(--primary-line)}
+.pv-sider .s2{flex:1;background:var(--bg);padding:10px 12px;font-size:10.5px;color:var(--muted);line-height:1.8}
+.pv-cap{font-size:11px;color:var(--muted);padding:0 20px 14px;line-height:1.7}
+
 /* 截图模式 */
 body.shot .toolbar{display:none}
 body.shot .stage{padding:0;background:#fff}
@@ -472,8 +560,11 @@ body.shot .frame{box-shadow:none;border-radius:0;transform:none!important}
   <div class="seg">
     <button data-go="login">登录页</button>
     <button data-go="home" class="on">数据看板</button>
+    <button data-go="sales">销售统计</button>
     <button data-go="goods">商品管理</button>
     <button data-go="users">用户管理</button>
+    <button data-go="roles">角色管理</button>
+    <button data-go="settings">系统设置</button>
     <button data-go="profile">个人中心</button>
   </div>
   <span class="div"></span>
@@ -508,7 +599,7 @@ body.shot .frame{box-shadow:none;border-radius:0;transform:none!important}
       </div>
       <div class="nav-group">
         <div class="nav-label">系统</div>
-        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色权限</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色管理</div>
         <div class="nav-item"><svg class="ic"><use href="#i-gear"/></svg>系统设置</div>
       </div>
       <div class="nav-group">
@@ -651,7 +742,7 @@ body.shot .frame{box-shadow:none;border-radius:0;transform:none!important}
       </div>
       <div class="nav-group">
         <div class="nav-label">系统</div>
-        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色权限</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色管理</div>
         <div class="nav-item"><svg class="ic"><use href="#i-gear"/></svg>系统设置</div>
       </div>
       <div class="nav-group">
@@ -832,7 +923,7 @@ body.shot .frame{box-shadow:none;border-radius:0;transform:none!important}
       </div>
       <div class="nav-group">
         <div class="nav-label">系统</div>
-        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色权限</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色管理</div>
         <div class="nav-item"><svg class="ic"><use href="#i-gear"/></svg>系统设置</div>
       </div>
       <div class="nav-group">
@@ -993,6 +1084,462 @@ body.shot .frame{box-shadow:none;border-radius:0;transform:none!important}
   </div>
 </section>
 
+<!-- ================= 销售统计 ================= -->
+<section class="page" id="p-sales">
+  <div class="app">
+    <aside class="sider">
+      <div class="brand">
+        <div class="logo"><svg viewBox="0 0 24 24"><path d="M3.2 7.2 12 3l8.8 4.2v9.6L12 21 3.2 16.8V7.2z"/><path d="M3.6 7.4 12 11.4l8.4-4"/><path d="M12 11.4V21"/></svg></div>
+        <div><div class="brand-name">houtai</div><div class="brand-sub">商城后台</div></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">概览</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-grid"/></svg>数据看板</div>
+        <div class="nav-item on"><svg class="ic"><use href="#i-chart"/></svg>销售统计</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">运营</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-box"/></svg>商品管理<span class="badge">32</span></div>
+        <div class="nav-item"><svg class="ic"><use href="#i-users"/></svg>用户管理</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">系统</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色管理</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-gear"/></svg>系统设置</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-item"><svg class="ic"><use href="#i-user"/></svg>个人中心</div>
+      </div>
+      <div class="sider-foot">
+        <div class="k">当前角色</div>
+        <div class="v">超级管理员 · 全部权限</div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div class="crumb">概览 <svg viewBox="0 0 24 24"><path d="M9 6l7 6-7 6"/></svg> <b>销售统计</b></div>
+        <div class="grow"></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-search"/></svg></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-bell"/></svg><span class="bell-dot"></span></div>
+        <div class="user-chip">
+          <div class="avatar a1">陈</div>
+          <div><div class="n">陈嘉禾</div><div class="r">超级管理员</div></div>
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="pagehead">
+          <div>
+            <h1>销售统计</h1>
+            <div class="sub">近 30 天 · 5 大品类 · 数据更新于 14:26</div>
+          </div>
+          <div class="actions">
+            <div class="segbar"><span>近 7 天</span><span class="on">近 30 天</span><span>本季</span></div>
+            <button class="btn"><svg class="ic sm"><use href="#i-download"/></svg>导出明细</button>
+          </div>
+        </div>
+
+        <div class="kpi-row">
+          <div class="card kpi">
+            <div class="top"><span class="k">近 30 天销售额</span><span class="badge-ic"><svg class="ic sm"><use href="#i-bag"/></svg></span></div>
+            <div class="val">¥3,286,940</div>
+            <div class="foot"><span class="chg up"><svg class="ic xs"><use href="#i-arrow-up"/></svg>12.5%</span> 较上期</div>
+          </div>
+          <div class="card kpi">
+            <div class="top"><span class="k">订单量</span><span class="badge-ic teal"><svg class="ic sm"><use href="#i-file"/></svg></span></div>
+            <div class="val">6,128<span class="unit">单</span></div>
+            <div class="foot"><span class="chg up"><svg class="ic xs"><use href="#i-arrow-up"/></svg>8.2%</span> 较上期</div>
+          </div>
+          <div class="card kpi">
+            <div class="top"><span class="k">客单价</span><span class="badge-ic warn"><svg class="ic sm"><use href="#i-chart"/></svg></span></div>
+            <div class="val">¥252<span class="unit">/ 单</span></div>
+            <div class="foot"><span class="chg up"><svg class="ic xs"><use href="#i-arrow-up"/></svg>3.6%</span> 较上期</div>
+          </div>
+          <div class="card kpi">
+            <div class="top"><span class="k">退款率</span><span class="badge-ic gray"><svg class="ic sm"><use href="#i-arrow-down"/></svg></span></div>
+            <div class="val">1.8<span class="unit">%</span></div>
+            <div class="foot"><span class="chg up"><svg class="ic xs"><use href="#i-arrow-down"/></svg>0.4%</span> 低于上期</div>
+          </div>
+        </div>
+
+        <div class="sales-main">
+          <div class="card bars-card">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:15px 20px 0;flex:none">
+              <div>
+                <div class="card-title">每日销售额</div>
+                <div class="card-sub">近 12 天 · 单位：万元</div>
+              </div>
+              <div class="legend"><span><i style="background:#F5611D"></i>销售额</span></div>
+            </div>
+            <div class="bars-wrap">
+              <div class="bar-col"><div class="v">5.2</div><div class="b" style="height:52%"></div></div>
+              <div class="bar-col"><div class="v">5.8</div><div class="b" style="height:58%"></div></div>
+              <div class="bar-col"><div class="v">4.6</div><div class="b" style="height:46%"></div></div>
+              <div class="bar-col"><div class="v">6.2</div><div class="b" style="height:62%"></div></div>
+              <div class="bar-col"><div class="v">5.5</div><div class="b" style="height:55%"></div></div>
+              <div class="bar-col"><div class="v">6.8</div><div class="b" style="height:68%"></div></div>
+              <div class="bar-col"><div class="v">6.0</div><div class="b" style="height:60%"></div></div>
+              <div class="bar-col"><div class="v">7.2</div><div class="b" style="height:72%"></div></div>
+              <div class="bar-col"><div class="v">6.4</div><div class="b" style="height:64%"></div></div>
+              <div class="bar-col"><div class="v">7.6</div><div class="b" style="height:76%"></div></div>
+              <div class="bar-col"><div class="v">7.0</div><div class="b" style="height:70%"></div></div>
+              <div class="bar-col"><div class="v">8.0</div><div class="b" style="height:80%"></div></div>
+            </div>
+            <div class="bar-x">
+              <span>11.01</span><span>11.02</span><span>11.03</span><span>11.04</span>
+              <span>11.05</span><span>11.06</span><span>11.07</span><span>11.08</span>
+              <span>11.09</span><span>11.10</span><span>11.11</span><span>11.12</span>
+            </div>
+          </div>
+
+          <div class="card cat-list">
+            <div style="padding:15px 0 2px;flex:none">
+              <div class="card-title" style="font-size:14.5px">品类销售明细</div>
+              <div class="card-sub">近 30 天 · 按金额排序</div>
+            </div>
+            <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+              <div class="cat-row"><span class="cat-nm">电子产品</span><span class="cat-bar"><span style="width:100%"></span></span><span class="cat-amt">¥1.38M<div class="sub">2,588 单</div></span><span class="cat-pct">42%</span></div>
+              <div class="cat-row"><span class="cat-nm">服饰鞋包</span><span class="cat-bar"><span style="width:62%"></span></span><span class="cat-amt">¥854K<div class="sub">1,596 单</div></span><span class="cat-pct">26%</span></div>
+              <div class="cat-row"><span class="cat-nm">家居生活</span><span class="cat-bar"><span style="width:38%"></span></span><span class="cat-amt">¥525K<div class="sub">1,064 单</div></span><span class="cat-pct">16%</span></div>
+              <div class="cat-row"><span class="cat-nm">美妆个护</span><span class="cat-bar"><span style="width:26%"></span></span><span class="cat-amt">¥361K<div class="sub">842 单</div></span><span class="cat-pct">11%</span></div>
+              <div class="cat-row"><span class="cat-nm">食品生鲜</span><span class="cat-bar"><span style="width:12%"></span></span><span class="cat-amt">¥164K<div class="sub">438 单</div></span><span class="cat-pct">5%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 角色管理 ================= -->
+<section class="page" id="p-roles">
+  <div class="app">
+    <aside class="sider">
+      <div class="brand">
+        <div class="logo"><svg viewBox="0 0 24 24"><path d="M3.2 7.2 12 3l8.8 4.2v9.6L12 21 3.2 16.8V7.2z"/><path d="M3.6 7.4 12 11.4l8.4-4"/><path d="M12 11.4V21"/></svg></div>
+        <div><div class="brand-name">houtai</div><div class="brand-sub">商城后台</div></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">概览</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-grid"/></svg>数据看板</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-chart"/></svg>销售统计</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">运营</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-box"/></svg>商品管理<span class="badge">32</span></div>
+        <div class="nav-item"><svg class="ic"><use href="#i-users"/></svg>用户管理</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">系统</div>
+        <div class="nav-item on"><svg class="ic"><use href="#i-shield"/></svg>角色管理</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-gear"/></svg>系统设置</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-item"><svg class="ic"><use href="#i-user"/></svg>个人中心</div>
+      </div>
+      <div class="sider-foot">
+        <div class="k">当前角色</div>
+        <div class="v">超级管理员 · 全部权限</div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div class="crumb">系统 <svg viewBox="0 0 24 24"><path d="M9 6l7 6-7 6"/></svg> <b>角色管理</b></div>
+        <div class="grow"></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-search"/></svg></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-bell"/></svg><span class="bell-dot"></span></div>
+        <div class="user-chip">
+          <div class="avatar a1">陈</div>
+          <div><div class="n">陈嘉禾</div><div class="r">超级管理员</div></div>
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="pagehead">
+          <div>
+            <h1>角色管理</h1>
+            <div class="sub">共 4 个角色 · 3 个已启用 · 覆盖 6 位成员</div>
+          </div>
+          <div class="actions">
+            <button class="btn"><svg class="ic sm"><use href="#i-download"/></svg>导出配置</button>
+            <button class="btn primary"><svg class="ic sm"><use href="#i-plus"/></svg>新增角色</button>
+          </div>
+        </div>
+
+        <div class="role-row">
+          <div class="card role-card on">
+            <div class="role-top">
+              <div class="role-ic"><svg class="ic sm"><use href="#i-shield"/></svg></div>
+              <div><div class="role-nm">超级管理员</div><div class="role-desc">全部菜单与按钮权限</div></div>
+            </div>
+            <div class="role-meta"><span><b>1</b> 位成员</span><span><b>13</b> 项权限</span><span class="tag on"><span class="dot" style="background:#1F9D55"></span>启用</span></div>
+          </div>
+          <div class="card role-card">
+            <div class="role-top">
+              <div class="role-ic teal"><svg class="ic sm"><use href="#i-chart"/></svg></div>
+              <div><div class="role-nm">运营</div><div class="role-desc">看板与销售数据</div></div>
+            </div>
+            <div class="role-meta"><span><b>2</b> 位成员</span><span><b>2</b> 项权限</span><span class="tag on"><span class="dot" style="background:#1F9D55"></span>启用</span></div>
+          </div>
+          <div class="card role-card">
+            <div class="role-top">
+              <div class="role-ic warn"><svg class="ic sm"><use href="#i-box"/></svg></div>
+              <div><div class="role-nm">商品编辑</div><div class="role-desc">商品与库存维护</div></div>
+            </div>
+            <div class="role-meta"><span><b>3</b> 位成员</span><span><b>6</b> 项权限</span><span class="tag on"><span class="dot" style="background:#1F9D55"></span>启用</span></div>
+          </div>
+          <div class="card role-card">
+            <div class="role-top">
+              <div class="role-ic gray"><svg class="ic sm"><use href="#i-eye"/></svg></div>
+              <div><div class="role-nm">访客</div><div class="role-desc">只读演示账号</div></div>
+            </div>
+            <div class="role-meta"><span><b>0</b> 位成员</span><span><b>1</b> 项权限</span><span class="tag off"><span class="dot" style="background:#A8A29C"></span>停用</span></div>
+          </div>
+        </div>
+
+        <div class="card perm-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 20px 12px;flex:none">
+            <div>
+              <div class="card-title" style="font-size:14.5px">权限矩阵</div>
+              <div class="card-sub">勾选 = 该角色在 role_menu 中拥有对应菜单 / 按钮权限</div>
+            </div>
+            <button class="btn text sm">全选当前列<svg class="ic xs"><use href="#i-chev-right"/></svg></button>
+          </div>
+          <div class="perm-table">
+            <table>
+              <colgroup>
+                <col style="width:30%"><col style="width:17.5%"><col style="width:17.5%"><col style="width:17.5%"><col style="width:17.5%">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>权限项</th>
+                  <th style="text-align:center">超级管理员</th>
+                  <th style="text-align:center">运营</th>
+                  <th style="text-align:center">商品编辑</th>
+                  <th style="text-align:center">访客</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>数据看板</td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                </tr>
+                <tr>
+                  <td>销售统计</td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                </tr>
+                <tr>
+                  <td>商品管理</td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                </tr>
+                <tr class="perm-group">
+                  <td>系统管理 · 用户 / 角色 / 设置</td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                </tr>
+                <tr>
+                  <td>其中 · 用户管理</td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                </tr>
+                <tr>
+                  <td>其中 · 角色管理</td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                </tr>
+                <tr>
+                  <td>其中 · 系统设置</td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                </tr>
+                <tr>
+                  <td>个人中心</td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                </tr>
+                <tr>
+                  <td>按钮 · 用户新增 / 编辑 / 删除</td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                </tr>
+                <tr>
+                  <td>按钮 · 角色新增 / 编辑 / 删除</td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                </tr>
+                <tr>
+                  <td>按钮 · 商品上下架 / 库存调整</td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                  <td style="text-align:center"><span class="perm-yes"><svg><use href="#i-check"/></svg></span></td>
+                  <td style="text-align:center"><span class="perm-no"></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 系统设置 ================= -->
+<section class="page" id="p-settings">
+  <div class="app">
+    <aside class="sider">
+      <div class="brand">
+        <div class="logo"><svg viewBox="0 0 24 24"><path d="M3.2 7.2 12 3l8.8 4.2v9.6L12 21 3.2 16.8V7.2z"/><path d="M3.6 7.4 12 11.4l8.4-4"/><path d="M12 11.4V21"/></svg></div>
+        <div><div class="brand-name">houtai</div><div class="brand-sub">商城后台</div></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">概览</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-grid"/></svg>数据看板</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-chart"/></svg>销售统计</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">运营</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-box"/></svg>商品管理<span class="badge">32</span></div>
+        <div class="nav-item"><svg class="ic"><use href="#i-users"/></svg>用户管理</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">系统</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色管理</div>
+        <div class="nav-item on"><svg class="ic"><use href="#i-gear"/></svg>系统设置</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-item"><svg class="ic"><use href="#i-user"/></svg>个人中心</div>
+      </div>
+      <div class="sider-foot">
+        <div class="k">当前角色</div>
+        <div class="v">超级管理员 · 全部权限</div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div class="crumb">系统 <svg viewBox="0 0 24 24"><path d="M9 6l7 6-7 6"/></svg> <b>系统设置</b></div>
+        <div class="grow"></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-search"/></svg></div>
+        <div class="icon-btn"><svg class="ic"><use href="#i-bell"/></svg><span class="bell-dot"></span></div>
+        <div class="user-chip">
+          <div class="avatar a1">陈</div>
+          <div><div class="n">陈嘉禾</div><div class="r">超级管理员</div></div>
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="pagehead">
+          <div>
+            <h1>系统设置</h1>
+            <div class="sub">5 项可配置字段 · 保存后对全部成员立即生效</div>
+          </div>
+          <div class="actions">
+            <button class="btn">恢复默认</button>
+            <button class="btn primary"><svg class="ic sm"><use href="#i-check"/></svg>保存设置</button>
+          </div>
+        </div>
+
+        <div class="set-cols">
+          <div class="card set-card">
+            <div class="set-sec">
+              <h4>基础信息</h4>
+              <p>对应 settings 表的 systemName / slogan / notice</p>
+              <div class="set-form" style="grid-template-columns:1fr">
+                <div class="form-item">
+                  <div class="field-label">系统名称 <span style="color:var(--muted);font-weight:400">systemName</span></div>
+                  <div class="input"><span>电商后台管理系统</span></div>
+                </div>
+                <div class="form-item">
+                  <div class="field-label">标语 <span style="color:var(--muted);font-weight:400">slogan</span></div>
+                  <div class="input"><span>用数据驱动每一次增长</span></div>
+                </div>
+                <div class="form-item">
+                  <div class="field-label">公告 <span style="color:var(--muted);font-weight:400">notice</span></div>
+                  <div class="set-textarea">双十一大促期间，订单导出功能每晚 22:00–23:00 暂停维护，请提前导出报表。</div>
+                </div>
+              </div>
+              <div class="set-hint">长度限制：系统名称 ≤ 30 字，标语 ≤ 50 字，公告 ≤ 200 字；公告留空时不展示公告条。</div>
+            </div>
+          </div>
+
+          <div class="card set-card">
+            <div class="set-sec">
+              <h4>外观与布局</h4>
+              <p>对应 settings 表的 themeColor / siderCollapsed</p>
+              <div class="set-row">
+                <div><div class="k">主题色</div><div class="d">写入 ConfigProvider token，影响主按钮与选中态</div></div>
+                <div class="ctl">
+                  <div class="swatches">
+                    <span class="sw on" style="background:#F5611D"></span>
+                    <span class="sw" style="background:#2F8F86"></span>
+                    <span class="sw" style="background:#C77A28"></span>
+                    <span class="sw" style="background:#5D5751"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="set-row" style="border-bottom:0">
+                <div><div class="k">侧栏默认折叠</div><div class="d">下次进入后台时侧栏收起，仅显示图标</div></div>
+                <div class="ctl"><span class="switch off"></span></div>
+              </div>
+              <div class="set-hint">当前主题色 <b>#F5611D</b>（brand_warm）。改色会同步所有页面主色，提交前需二次确认。</div>
+            </div>
+          </div>
+
+          <div class="card preview-card">
+            <div class="set-sec" style="border-bottom:0;padding-bottom:0">
+              <h4>即时预览</h4>
+              <p>左为登录页品牌区，右为侧栏折叠效果</p>
+            </div>
+            <div class="pv-row">
+              <div class="pv-login">
+                <div class="pv-logo">
+                  <span class="lg"><span style="color:#fff;font-weight:800;font-size:12px">H</span></span>
+                  <div class="pv-name">电商后台管理系统</div>
+                </div>
+                <div class="pv-slogan">用数据驱动每一次增长</div>
+                <div class="pv-notice">双十一大促期间，订单导出功能每晚 22:00–23:00 暂停维护。</div>
+              </div>
+              <div class="pv-sider">
+                <div class="s1"><i></i><i class="on"></i><i></i><i></i><i></i></div>
+                <div class="s2">折叠后仅保留图标<br>内容区自适应撑满</div>
+              </div>
+            </div>
+            <div class="pv-cap">预览按当前表单值渲染：slogan 为空只显示系统名称，notice 为空则隐藏公告条。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ================= 个人中心 ================= -->
 <section class="page" id="p-profile">
   <div class="app">
@@ -1013,7 +1560,7 @@ body.shot .frame{box-shadow:none;border-radius:0;transform:none!important}
       </div>
       <div class="nav-group">
         <div class="nav-label">系统</div>
-        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色权限</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-shield"/></svg>角色管理</div>
         <div class="nav-item"><svg class="ic"><use href="#i-gear"/></svg>系统设置</div>
       </div>
       <div class="nav-group">
@@ -1249,7 +1796,7 @@ body.shot .frame{box-shadow:none;border-radius:0;transform:none!important}
 
 <script>
 /* ---------- 页面切换 ---------- */
-const pages = ['login','home','goods','users','profile'];
+const pages = ['login','home','sales','goods','users','roles','settings','profile'];
 const frame = document.getElementById('frame');
 
 function go(name){
