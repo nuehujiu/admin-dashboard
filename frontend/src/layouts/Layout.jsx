@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { routes } from '../router/routes.jsx';
 import s from './Layout.module.scss';
+import '../styles/index.scss';
+
 import { Menu } from 'antd';
 import {
   DashboardOutlined,
@@ -156,7 +158,7 @@ export default function Layout() {
             <div className={s.userChip}>
               <Avatar
                 size={30}
-                style={{ background: token.colorPrimary, fontSize: 13 }}
+                style={{ background: 'var(--primary)', fontSize: 13 }}
               >
                 陈
               </Avatar>
