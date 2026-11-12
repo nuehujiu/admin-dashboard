@@ -1,0 +1,80 @@
+@use './variables' as *;
+
+// CSS 变量：给内联 style、ECharts 配色、自定义块用
+:root {
+  --primary: #{$primary};
+  --primary-hover: #{$primary-hover};
+  --primary-ink: #{$primary-ink};
+  --primary-soft: #{$primary-soft};
+  --primary-line: #{$primary-line};
+
+  --success: #{$success};
+  --success-soft: #{$success-soft};
+  --warn: #{$warn};
+  --warn-soft: #{$warn-soft};
+  --danger: #{$danger};
+  --danger-soft: #{$danger-soft};
+  --teal: #{$teal};
+
+  --text: #{$text};
+  --text-2: #{$text-2};
+  --text-3: #{$text-3};
+  --line: #{$line};
+  --line-soft: #{$line-soft};
+  --bg: #{$bg};
+  --card: #{$card};
+  --hover-bg: #{$hover-bg};
+
+  --r-card: #{$r-card};
+  --r-ctl: #{$r-ctl};
+  --shadow-card: #{$shadow-card};
+  --shadow-pop: #{$shadow-pop};
+}
+
+* { box-sizing: border-box; }
+
+html,
+body,
+#root { height: 100%; }
+
+body {
+  margin: 0;
+  background: $bg;
+  color: $text;
+  font-family: $font;
+  font-size: 13.5px;
+  -webkit-font-smoothing: antialiased;
+}
+
+// 卡片：白底 + 1px 描边 + 极浅阴影
+.ant-card {
+  border-color: $line;
+  border-radius: $r-card;
+  box-shadow: $shadow-card;
+}
+
+// 表格：表头 12px 灰字、仅横向分割线
+.ant-table-thead > tr > th {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: $text-3 !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom-color: $line-soft !important;
+}
+
+// 输入框聚焦：橙描边 + 10% 光晕
+.ant-input:focus,
+.ant-input-affix-wrapper-focused,
+.ant-select-focused .ant-select-selector {
+  border-color: $primary-line !important;
+  box-shadow: 0 0 0 3px rgba(245, 97, 29, .10) !important;
+}
+
+// 滚动条收细
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb {
+  background: $line;
+  border-radius: 4px;
+}
