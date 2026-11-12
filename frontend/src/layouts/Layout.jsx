@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { routes } from '../router/routes.jsx';
 import s from './Layout.module.scss';
-import '../styles/index.scss';
 
 import { Menu } from 'antd';
 import {
