@@ -9,6 +9,7 @@ import Roles from '../pages/Roles';
 import Settings from '../pages/Settings';
 import Profile from '../pages/Profile';
 import NotFound from '../pages/NotFound';
+import Guard from './guard';
 
 export const routes = [
   { path: '/login', name: '登录', element: <Login />, meta: { hidden: true } },
@@ -16,7 +17,11 @@ export const routes = [
   {
     path: '/',
     name: 'Layout',
-    element: <Layout />,
+    element: (
+      <Guard>
+        <Layout />
+      </Guard>
+    ),
     children: [
       // 默认页：访问 / 直接进看板
       { index: true, element: <Navigate to="/dashboard" replace /> },
