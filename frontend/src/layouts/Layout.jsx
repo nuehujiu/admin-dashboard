@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { routes } from '../router/routes.jsx';
 import s from './Layout.module.scss';
+import { useUserStore } from '../store/useUserStore';
+
 import { Menu } from 'antd';
 import {
   DashboardOutlined,
@@ -44,6 +46,10 @@ export default function Layout() {
   // 获取当前路径
   const { pathname } = useLocation();
   const { token } = theme.useToken();
+  const user = useUserStore((s) => s.user);
+  const menus = useUserStore((s) => s.menus);
+  const logout = useUserStore((s) => s.logout);
+
   const group = GROUP_BY_PATH[pathname];
   // 获取导航函数
   const navigate = useNavigate();
@@ -89,6 +95,7 @@ export default function Layout() {
     }
     // 如果点击的是退出登录菜单项
     if (key === 'logout') {
+      logout();
       // 导航到登录页面
       navigate('/login');
     }
@@ -117,7 +124,9 @@ export default function Layout() {
         </div>
         <div className={s.roleCard}>
           <p>当前角色</p>
-          <strong>超级管理员 · 全部权限</strong>
+          <strong>
+            {user?.role_name || '—'} · {menus.length} 项菜单
+          </strong>
         </div>
       </aside>
       {/* 主内容区域 */}
@@ -156,13 +165,16 @@ export default function Layout() {
             <div className={s.userChip}>
               <Avatar
                 size={30}
-                style={{ background: token.colorPrimary, fontSize: 13 }}
+                style={{ background: 'var(--primary)', fontSize: 13 }}
               >
-                陈
+                {(user?.nickname || user?.username || '?').slice(0, 1)}
               </Avatar>
+
               <div>
-                <div className={s.userName}>陈嘉禾</div>
-                <div className={s.userRole}>超级管理员</div>
+                <div className={s.userName}>
+                  {user?.nickname || user?.username || '未登录'}
+                </div>
+                <div className={s.userRole}>{user?.role_name || '—'}</div>
               </div>
               <DownOutlined
                 style={{ fontSize: 10, color: token.colorTextTertiary }}

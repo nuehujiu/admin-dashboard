@@ -1,0 +1,305 @@
+@use '../../styles/variables' as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  background: $card;
+}
+
+/* ================= 左侧品牌区 ================= */
+.brand {
+  position: relative;
+  flex: 0 0 43%;
+  min-width: 480px;
+  padding: 36px 40px 28px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(165deg, #FFF9F4 0%, #FFEFE3 38%, #FFE7D8 68%, #FFF6EF 100%);
+
+  // 两个同心装饰圆
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border: 1px solid rgba(245, 97, 29, .10);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  &::before {
+    width: 760px;
+    height: 760px;
+    left: -280px;
+    top: -120px;
+  }
+
+  &::after {
+    width: 1180px;
+    height: 1180px;
+    left: -450px;
+    top: -260px;
+  }
+}
+
+.brandTop {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoMark {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: $primary;
+  color: #fff;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(245, 97, 29, .28);
+}
+
+.logoName {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  color: $text;
+  line-height: 1.2;
+}
+
+.logoSub {
+  font-size: 11px;
+  color: $text-3;
+  margin-top: 2px;
+}
+
+.brandMain {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  margin-bottom: auto;
+  padding-top: 40px;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  color: $text-3;
+}
+
+.eyebrowLine {
+  width: 26px;
+  height: 1px;
+  background: rgba(245, 97, 29, .55);
+}
+
+.title {
+  margin: 18px 0 0;
+  font-size: 38px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: .5px;
+  color: $text;
+
+  em {
+    font-style: normal;
+    color: $primary;
+  }
+}
+
+.desc {
+  margin: 18px 0 0;
+  max-width: 380px;
+  font-size: 13px;
+  line-height: 1.9;
+  color: $text-2;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  margin-top: 34px;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    &:not(:last-child) {
+      padding-right: 26px;
+      border-right: 1px solid rgba(28, 25, 23, .10);
+    }
+
+    strong {
+      font-size: 19px;
+      font-weight: 700;
+      color: $text;
+      line-height: 1;
+    }
+
+    span {
+      font-size: 11.5px;
+      color: $text-3;
+    }
+  }
+}
+
+.brandFoot {
+  position: relative;
+  z-index: 1;
+  font-size: 11.5px;
+  color: $text-3;
+}
+
+/* ================= 右侧表单区 ================= */
+.formArea {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.topLinks {
+  position: absolute;
+  top: 26px;
+  right: 40px;
+  display: flex;
+  gap: 18px;
+
+  button {
+    border: 0;
+    background: none;
+    padding: 0;
+    font-size: 12.5px;
+    color: $text-2;
+    cursor: pointer;
+
+    &:hover { color: $primary; }
+  }
+}
+
+.card {
+  width: 100%;
+  max-width: 376px;
+
+  // 让"密码"这一行的 label 撑满，好把"忘记密码?"顶到右边
+  :global(.ant-form-item-label > label) { width: 100%; }
+}
+
+.welcome {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: $text;
+}
+
+.welcomeSub {
+  margin: 8px 0 0 0;
+  font-size: 12.5px;
+  color: $text-3;
+}
+
+.pwdLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+
+  button {
+    border: 0;
+    background: none;
+    padding: 0;
+    font-size: 11.5px;
+    color: $primary;
+    cursor: pointer;
+
+    &:hover { color: $primary-hover; }
+  }
+}
+
+.inputIcon { color: $text-3; }
+
+.rememberRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.envTag {
+  font-size: 11.5px;
+  color: $text-3;
+}
+
+.submit {
+  height: 42px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: $r-ctl;
+  box-shadow: 0 6px 16px rgba(245, 97, 29, .22);
+}
+
+.divider {
+  position: relative;
+  margin: 22px 0 18px;
+  text-align: center;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: $line;
+  }
+
+  span {
+    position: relative;
+    padding: 0 12px;
+    background: $card;
+    font-size: 11.5px;
+    color: $text-3;
+  }
+}
+
+.demoTip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border: 1px solid $line-soft;
+  background: #FCFAF8;
+  border-radius: $r-ctl;
+  font-size: 11.5px;
+  color: $text-2;
+
+  b { color: $text; font-weight: 600; }
+}
+
+.tipIcon { color: $warn; font-size: 13px; }
+.demoRight { margin-left: auto; color: $text-3; }
+
+.agree {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 11px;
+  color: $text-3;
+}
+
+/* ================= 窄屏 ================= */
+@media (max-width: 1000px) {
+  .brand { display: none; }
+  .formArea { padding: 72px 24px 32px; }
+  .topLinks { right: 24px; top: 20px; }
+}

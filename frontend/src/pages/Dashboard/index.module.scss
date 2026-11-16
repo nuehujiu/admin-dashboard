@@ -1,0 +1,278 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: 16px; }
+
+/* ---------- 顶部 ---------- */
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.hello {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  color: $text;
+}
+
+.meta { margin-top: 6px; font-size: 12px; color: $text-3; }
+
+.heroActions { display: flex; align-items: center; gap: 10px; }
+
+/* ---------- KPI ---------- */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.kpi {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 18px 18px 16px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-card;
+  box-shadow: $shadow-card;
+  min-width: 0;
+}
+
+.kpiMain { min-width: 0; flex: 1; }
+.kpiLabel { font-size: 12px; color: $text-3; }
+
+.kpiValue {
+  margin-top: 8px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: $text;
+  white-space: nowrap;
+  letter-spacing: -.2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiUnit {
+  margin-left: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  color: $text-3;
+}
+
+.kpiSub {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: $text-3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.up { color: $success; }
+.down { color: $danger; }
+
+.kpiRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex: none;
+  gap: 6px;
+}
+
+.kpiIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-2;
+  font-size: 15px;
+}
+
+/* ---------- 卡片 ---------- */
+.card {
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-card;
+  box-shadow: $shadow-card;
+  padding: 18px 20px 16px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cardTitle { font-size: 15px; font-weight: 700; color: $text; }
+.cardSub { margin-top: 4px; font-size: 12px; color: $text-3; }
+.cardHint { font-size: 11.5px; color: $text-3; }
+
+.row2,
+.row3 {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.emptyBox {
+  flex: 1;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- 趋势图例 ---------- */
+.legendTop { display: flex; gap: 14px; padding-top: 2px; }
+
+.legendKey {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: $text-2;
+
+  i { width: 8px; height: 8px; border-radius: 2px; }
+}
+
+/* ---------- 环形 + 图例 ---------- */
+.pieRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+}
+
+.pieBox {
+  position: relative;
+  width: 190px;
+  height: 190px;
+  flex: none;
+}
+
+.pieCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+
+  span { font-size: 11px; color: $text-3; }
+  strong { margin-top: 2px; font-size: 15px; font-weight: 700; color: $text; }
+}
+
+.pieLegend { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+
+.pieLegendRow { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+
+.dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.pieName { flex: 1; color: $text-2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.piePct { color: $text-3; font-variant-numeric: tabular-nums; }
+.pieAmt {
+  width: 74px;
+  text-align: right;
+  font-weight: 600;
+  color: $text;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 排行 ---------- */
+.rankList { display: flex; flex-direction: column; gap: 14px; padding-top: 4px; }
+
+.rankRow { display: flex; align-items: center; gap: 10px; }
+
+.rankIdx {
+  width: 19px;
+  height: 19px;
+  flex: none;
+  border-radius: 5px;
+  background: $line-soft;
+  color: $text-2;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rankIdxTop { background: $primary; color: #fff; }
+
+.rankName { width: 74px; flex: none; font-size: 12.5px; color: $text; }
+
+.rankBarWrap {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: $line-soft;
+  overflow: hidden;
+}
+
+.rankBar {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, $primary, #FF9A5A);
+}
+
+.rankAmt {
+  width: 92px;
+  text-align: right;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: $text;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 快捷入口 ---------- */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+.tile {
+  padding: 14px;
+  border: 1px solid $line-soft;
+  border-radius: 10px;
+  background: #FCFAF8;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+
+  &:hover { background: $hover-bg; border-color: $line; }
+}
+
+.tileIcon { font-size: 16px; color: $text-2; }
+.tileTitle { margin-top: 8px; font-size: 13px; font-weight: 600; color: $text; }
+.tileSub { margin-top: 3px; font-size: 11.5px; color: $text-3; }
+
+/* ---------- 其它 ---------- */
+.state {
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hint { font-size: 11.5px; color: $text-3; text-align: center; }
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 1280px) {
+  .kpiGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .row2, .row3 { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 760px) {
+  .kpiGrid { grid-template-columns: minmax(0, 1fr); }
+  .pieRow { flex-direction: column; align-items: stretch; }
+  .pieBox { align-self: center; }
+}
