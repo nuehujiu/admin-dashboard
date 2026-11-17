@@ -180,7 +180,9 @@ const DEFAULT_SETTINGS = {
 };
 let settings = { ...DEFAULT_SETTINGS };
 
-/** 近 30 天 × 5 分类的销售记录（LCG 保证每次启动数据一致，便于截图/断言复现） */
+/** 近 60 天 × 5 分类的销售记录（LCG 保证每次启动数据一致，便于截图/断言复现）
+ *  60 天是为了让「近 30 天 vs 上 30 天」的环比有上一期数据可比
+ */
 const sales = (() => {
   let seed = 20261109;
   const rnd = () => {
@@ -189,12 +191,22 @@ const sales = (() => {
   };
   const list = [];
   let id = 1;
-  for (let dayOffset = -29; dayOffset <= 0; dayOffset++) {
+  for (let dayOffset = -59; dayOffset <= 0; dayOffset++) {
     const date = localDate(dayOffset);
     for (const c of categories) {
       const amount = Number((500 + rnd() * 8000).toFixed(2));
-      const qty = 5 + Math.floor(rnd() * 80);
-      list.push({ id: id++, category_id: c.id, amount, qty, sale_date: date });
+      const orderCount = 8 + Math.floor(rnd() * 45);
+      const qty = orderCount + Math.floor(rnd() * 40);
+      const refundAmount = Number((amount * rnd() * 0.035).toFixed(2));
+      list.push({
+        id: id++,
+        category_id: c.id,
+        amount,
+        qty,
+        order_count: orderCount,
+        refund_amount: refundAmount,
+        sale_date: date,
+      });
     }
   }
   return list;
@@ -650,6 +662,126 @@ const server = http.createServer(async (req, res) => {
         };
       });
       return send(res, 200, ok(rows.sort((a, b) => b.amount - a.amount).slice(0, top)));
+    }
+
+    // ============================================== 销售明细 /api/sales
+    if (path === '/api/sales' && method === 'GET') {
+      if (scenario === 'empty') {
+        return send(res, 200, ok({ list: [], total: 0, page: 1, pageSize: 10 }));
+      }
+
+      const page = Math.max(1, Number(query.get('page')) || 1);
+      const pageSize = Math.min(100, Math.max(1, Number(query.get('pageSize')) || 10));
+      const start = query.get('start') || '';
+      const end = query.get('end') || '';
+      const categoryId = query.get('category_id') || '';
+
+      let list = sales.slice();
+      if (start) list = list.filter((s) => s.sale_date >= start);
+      if (end) list = list.filter((s) => s.sale_date <= end);
+      if (categoryId) list = list.filter((s) => String(s.category_id) === String(categoryId));
+
+      // 日期倒序；同一天按 id 倒序，保证分页稳定
+      list.sort((a, b) => {
+        if (a.sale_date !== b.sale_date) return a.sale_date < b.sale_date ? 1 : -1;
+        return b.id - a.id;
+      });
+
+      const total = list.length;
+      const offset = (page - 1) * pageSize;
+      const rows = list.slice(offset, offset + pageSize).map((s) => ({
+        id: s.id,
+        category_id: s.category_id,
+        category_name: (categories.find((c) => c.id === s.category_id) || {}).name || '',
+        amount: s.amount,
+        qty: s.qty,
+        order_count: s.order_count,
+        refund_amount: s.refund_amount,
+        sale_date: s.sale_date,
+      }));
+
+      return send(res, 200, ok({ list: rows, total, page, pageSize }));
+    }
+
+    // ============================================== 销售统计 /api/sales/stats
+    if (path === '/api/sales/stats' && method === 'GET') {
+      const days = Math.min(365, Math.max(1, Number(query.get('days')) || 30));
+      const start = localDate(-(days - 1));
+      const end = localDate(0);
+      const prevStart = localDate(-(days * 2 - 1));
+      const prevEnd = localDate(-days);
+
+      const sumOf = (rows, key) => rows.reduce((a, r) => a + Number(r[key] || 0), 0);
+
+      const curRows = sales.filter((s) => s.sale_date >= start && s.sale_date <= end);
+      const prevRows = sales.filter((s) => s.sale_date >= prevStart && s.sale_date <= prevEnd);
+
+      // 逐日补零，保证柱子连续
+      const trend = [];
+      for (let i = 0; i < days; i++) {
+        const ds = localDate(-(days - 1 - i));
+        const rows = curRows.filter((s) => s.sale_date === ds);
+        trend.push({
+          date: ds,
+          amount: Number(sumOf(rows, 'amount').toFixed(2)),
+          qty: sumOf(rows, 'qty'),
+          order_count: sumOf(rows, 'order_count'),
+          refund_amount: Number(sumOf(rows, 'refund_amount').toFixed(2)),
+        });
+      }
+
+      const cur = {
+        amount: sumOf(curRows, 'amount'),
+        qty: sumOf(curRows, 'qty'),
+        orderCount: sumOf(curRows, 'order_count'),
+        refundAmount: sumOf(curRows, 'refund_amount'),
+      };
+      const prev = {
+        amount: sumOf(prevRows, 'amount'),
+        orderCount: sumOf(prevRows, 'order_count'),
+        refundAmount: sumOf(prevRows, 'refund_amount'),
+      };
+
+      const rel = (c, p) => (p ? Number(((c - p) / p).toFixed(4)) : null);
+      const aov = cur.orderCount ? cur.amount / cur.orderCount : 0;
+      const pAov = prev.orderCount ? prev.amount / prev.orderCount : 0;
+      const rate = cur.amount ? cur.refundAmount / cur.amount : 0;
+      const pRate = prev.amount ? prev.refundAmount / prev.amount : 0;
+
+      const catRows = categories.map((c) => {
+        const rows = curRows.filter((s) => s.category_id === c.id);
+        return {
+          id: c.id,
+          name: c.name,
+          amount: sumOf(rows, 'amount'),
+          orderCount: sumOf(rows, 'order_count'),
+        };
+      });
+      catRows.sort((a, b) => b.amount - a.amount);
+      const catTotal = sumOf(catRows, 'amount');
+
+      return send(res, 200, ok({
+        range: { days, start, end, prevStart, prevEnd },
+        kpi: {
+          amount: Number(cur.amount.toFixed(2)),
+          orderCount: cur.orderCount,
+          avgOrderValue: Number(aov.toFixed(2)),
+          refundRate: Number(rate.toFixed(4)),
+          qty: cur.qty,
+          compare: {
+            amount: rel(cur.amount, prev.amount),
+            orderCount: rel(cur.orderCount, prev.orderCount),
+            avgOrderValue: rel(aov, pAov),
+            refundRate: prev.amount ? Number((rate - pRate).toFixed(4)) : null,
+          },
+        },
+        trend,
+        categories: catRows.map((c) => ({
+          ...c,
+          amount: Number(c.amount.toFixed(2)),
+          pct: catTotal ? Number((c.amount / catTotal).toFixed(4)) : 0,
+        })),
+      }));
     }
 
     // ============================================== 商品 /api/goods

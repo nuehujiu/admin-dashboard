@@ -95,17 +95,26 @@ async function run() {
     catIds.push(r[0].insertId);
   }
 
-  // 8) 近 30 天销售记录（每天每个分类一条，随机金额与销量）
-  const now = new Date();
-  for (let d = 29; d >= 0; d--) {
-    const date = new Date(now.getTime() - d * 86400000);
-    const dateStr = date.toISOString().slice(0, 10);
+  // 8) 近 60 天销售记录（每天每个分类一条，含订单数与退款金额）
+  //    60 天是为了让「近 30 天 vs 上 30 天」的环比有上一期数据可比
+  const today = new Date();
+  const localDate = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+  for (let d = 59; d >= 0; d--) {
+    const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - d);
+    const dateStr = localDate(date);
     for (const cid of catIds) {
-      const amount = (Math.random() * 8000 + 500).toFixed(2);
-      const qty = Math.floor(Math.random() * 80 + 5);
+      const amount = Number((Math.random() * 8000 + 500).toFixed(2));
+      const orderCount = Math.floor(Math.random() * 45) + 8; // 8 ~ 52 笔
+      const qty = orderCount + Math.floor(Math.random() * 40); // 每单至少 1 件
+      const refundAmount = Number((amount * Math.random() * 0.035).toFixed(2)); // 0 ~ 3.5%，均值≈1.8%
       await conn.query(
-        'INSERT INTO sales (category_id, amount, qty, sale_date) VALUES (?,?,?,?)',
-        [cid, amount, qty, dateStr]
+        'INSERT INTO sales (category_id, amount, qty, order_count, refund_amount, sale_date) VALUES (?,?,?,?,?,?)',
+        [cid, amount, qty, orderCount, refundAmount, dateStr]
       );
     }
   }
