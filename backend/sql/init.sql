@@ -11,6 +11,9 @@ CREATE DATABASE IF NOT EXISTS `admin_dashboard`
 
 USE `admin_dashboard`;
 
+-- 重建前先关外键检查，否则 DROP roles 会被 users.fk_user_role 拦住
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- ------------------------------------------------------------
 -- 1. 角色表
 -- ------------------------------------------------------------
@@ -94,9 +97,11 @@ DROP TABLE IF EXISTS `sales`;
 CREATE TABLE `sales` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录ID',
   `category_id` INT UNSIGNED NOT NULL COMMENT '分类ID',
-  `amount`      DECIMAL(12,2) NOT NULL COMMENT '销售金额',
-  `qty`         INT          NOT NULL DEFAULT 0 COMMENT '销量',
-  `sale_date`   DATE         NOT NULL COMMENT '销售日期',
+  `amount`        DECIMAL(12,2) NOT NULL COMMENT '销售金额',
+  `qty`           INT           NOT NULL DEFAULT 0 COMMENT '销量（件）',
+  `order_count`   INT           NOT NULL DEFAULT 0 COMMENT '订单数（笔）',
+  `refund_amount` DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '退款金额',
+  `sale_date`     DATE          NOT NULL COMMENT '销售日期',
   `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_date` (`sale_date`),
@@ -137,3 +142,6 @@ CREATE TABLE `settings` (
   `updated_at` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`key`)
 ) ENGINE=InnoDB COMMENT='系统设置表';
+
+-- 建表完成，恢复外键检查
+SET FOREIGN_KEY_CHECKS = 1;

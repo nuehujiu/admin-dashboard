@@ -1,0 +1,241 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: 16px; }
+
+/* ---------- 页头 ---------- */
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: $text;
+  letter-spacing: .2px;
+}
+
+.meta { margin: 6px 0 0; font-size: 12px; color: $text-3; }
+
+.actions { display: flex; align-items: center; gap: 10px; }
+
+/* ---------- KPI ---------- */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.kpi {
+  position: relative;
+  min-height: 104px;
+  padding: 15px 18px 13px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-card;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 右上角淡橙图标块（设计稿里有） */
+.kpiIcon {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $r-ctl;
+  background: $primary-soft;
+  color: $primary;
+  font-size: 15px;
+}
+
+.kpiLabel {
+  padding-right: 38px;
+  font-size: 12.5px;
+  color: $text-2;
+}
+
+.kpiValue {
+  margin-top: 10px;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.08;
+  color: $text;
+  letter-spacing: -.3px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiUnit {
+  margin-left: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  color: $text-3;
+}
+
+/* 环比行 */
+.kpiFoot { margin-top: 9px; }
+
+.footMuted { font-size: 12px; color: $text-3; }
+.up { color: $success; font-weight: 600; }
+.down { color: $danger; font-weight: 600; }
+
+/* ---------- 卡片 ---------- */
+.card {
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-card;
+  box-shadow: $shadow-card;
+  padding: 18px 20px 14px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.cardTitle { font-size: 15.5px; font-weight: 700; color: $text; }
+.cardSub { margin-top: 4px; font-size: 12px; color: $text-3; }
+
+/* 设计稿两侧宽度比约 1.45 : 1 */
+.row2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.emptyBox {
+  flex: 1;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- 图例 ---------- */
+.legendKey {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 2px;
+  font-size: 11.5px;
+  color: $text-2;
+
+  i { width: 8px; height: 8px; border-radius: 2px; background: $primary; }
+}
+
+.linkMore { padding: 0; font-size: 12px; }
+
+/* ---------- 品类明细：名称 ｜ 进度条 ｜ 金额+单量 ｜ 百分比 ---------- */
+.catList { flex: 1; display: flex; flex-direction: column; padding-top: 4px; }
+
+.catRow {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr) 92px 38px;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid $line-soft;
+
+  &:last-child { border-bottom: 0; }
+}
+
+.catName {
+  font-size: 13px;
+  font-weight: 600;
+  color: $text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.catBar {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: $line-soft;
+  overflow: hidden;
+
+  span { display: block; height: 100%; border-radius: 3px; transition: width .3s; }
+}
+
+.catAmtBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.catAmt {
+  font-size: 13px;
+  font-weight: 600;
+  color: $text;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.catQty {
+  font-size: 11.5px;
+  color: $text-3;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.catPct {
+  text-align: right;
+  font-size: 12px;
+  color: $text-3;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 明细抽屉 ---------- */
+.drawerToolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.drawerPager {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+/* ---------- 其它 ---------- */
+.state {
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 1280px) {
+  .kpiGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .row2 { grid-template-columns: minmax(0, 1fr); }
+  .catRow { padding: 15px 0; }
+}
+
+@media (max-width: 760px) {
+  .kpiGrid { grid-template-columns: minmax(0, 1fr); }
+  .catRow { grid-template-columns: 62px minmax(0, 1fr) 80px 34px; gap: 8px; }
+}
