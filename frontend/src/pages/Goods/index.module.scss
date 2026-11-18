@@ -1,0 +1,205 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: 16px; }
+
+/* ---------- 页头 ---------- */
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: $text;
+  letter-spacing: .2px;
+}
+
+.meta { margin: 6px 0 0; font-size: 12px; color: $text-3; }
+
+.actions { display: flex; align-items: center; gap: 10px; }
+
+/* ---------- 筛选栏 ---------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-card;
+  box-shadow: $shadow-card;
+}
+
+.search { width: 300px; }
+.selectCat { width: 140px; }
+.selectStatus { width: 120px; }
+
+.toolbarRight {
+  margin-left: auto;
+  font-size: 12px;
+  color: $text-3;
+}
+
+/* ---------- 表格卡片 ---------- */
+.tableCard {
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-card;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+.table {
+  :global(.ant-table) { background: transparent; }
+  :global(.ant-table-thead > tr > th) {
+    background: $card;
+    color: $text-2;
+    font-weight: 600;
+    font-size: 12.5px;
+    padding: 12px 16px;
+    border-bottom: 1px solid $line;
+  }
+  :global(.ant-table-tbody > tr > td) {
+    padding: 12px 16px;
+    border-bottom: 1px solid $line-soft;
+  }
+  :global(.ant-table-tbody > tr:hover > td) { background: $hover-bg; }
+}
+
+/* ---------- 商品信息单元格 ---------- */
+.goodsCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.thumb {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: $r-thumb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $primary-soft;
+  color: $primary;
+  font-size: 16px;
+  font-weight: 700;
+  overflow: hidden;
+
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.goodsText { min-width: 0; }
+
+.goodsName {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: $text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.goodsMeta {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: $text-3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- 库存 ---------- */
+.stockCell { display: flex; align-items: center; gap: 8px; }
+
+.stockNum {
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: $text;
+  min-width: 24px;
+}
+
+.stockBar {
+  width: 58px;
+  height: 4px;
+  border-radius: 2px;
+  background: $line-soft;
+  overflow: hidden;
+
+  span { display: block; height: 100%; border-radius: 2px; }
+}
+
+/* ---------- 状态 ---------- */
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: $r-tag;
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  i { width: 5px; height: 5px; border-radius: 50%; }
+}
+
+.statusUp { background: rgba(31, 157, 85, .09); color: $success; i { background: $success; } }
+.statusDown { background: $line-soft; color: $text-3; i { background: $text-3; } }
+
+/* ---------- 操作 ---------- */
+.dot { color: $line; }
+
+/* ---------- 底部 ---------- */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px 14px;
+  border-top: 1px solid $line-soft;
+  flex-wrap: wrap;
+}
+
+.footerLeft { font-size: 12px; color: $text-2; }
+
+/* ---------- 批量操作条 ---------- */
+.bulkBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 16px;
+  background: $primary-soft;
+  border-bottom: 1px solid $primary-line;
+}
+
+.bulkText {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: $primary-ink;
+}
+
+.bulkActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- 表单 ---------- */
+.formRow { display: flex; gap: 12px; }
+.formRow > * { flex: 1; }
+
+@media (max-width: 900px) {
+  .search { width: 100%; }
+  .footer { flex-direction: column; align-items: flex-start; }
+}
