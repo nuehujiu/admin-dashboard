@@ -785,6 +785,19 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ============================================== 商品 /api/goods
+    /** 批量 ids 校验：非空数组、正整数、去重、最多 100 条 */
+    const normalizeIds = (v, max = 100) => {
+      if (!Array.isArray(v) || !v.length) return { ok: false, message: 'ids 必须是非空数组' };
+      const set = new Set();
+      for (const item of v) {
+        const n = Number(item);
+        if (!Number.isInteger(n) || n <= 0) return { ok: false, message: 'ids 只能为正整数' };
+        set.add(n);
+      }
+      if (set.size > max) return { ok: false, message: `一次最多操作 ${max} 件商品` };
+      return { ok: true, ids: [...set] };
+    };
+
     const goodsOut = (g) => ({
       id: g.id,
       name: g.name,
@@ -856,6 +869,59 @@ const server = http.createServer(async (req, res) => {
     if (path === '/api/goods/categories' && method === 'GET') {
       const names = [...new Set(goods.map((g) => g.category).filter(Boolean))].sort();
       return send(res, 200, ok(names));
+    }
+
+    // 批量上下架
+    if (path === '/api/goods/batch/status' && method === 'PUT') {
+      const body = await readBody(req);
+      const idsCheck = normalizeIds(body.ids);
+      if (!idsCheck.ok) return send(res, 200, fail(idsCheck.message));
+
+      const statusNum = Number(body.status);
+      if (body.status === undefined || body.status === '' || (statusNum !== 0 && statusNum !== 1)) {
+        return send(res, 200, fail('status 只能为 0 或 1'));
+      }
+
+      const foundIds = idsCheck.ids.filter((id) => goods.some((g) => g.id === id));
+      const missing = idsCheck.ids.filter((id) => !foundIds.includes(id));
+      goods.forEach((g) => {
+        if (foundIds.includes(g.id)) {
+          g.status = statusNum;
+          g.updated_at = localDateTime();
+        }
+      });
+
+      const verb = statusNum === 1 ? '上架' : '下架';
+      return send(
+        res,
+        200,
+        ok(
+          { affected: foundIds.length, missing },
+          foundIds.length ? `已${verb} ${foundIds.length} 件商品` : '没有可操作的商品'
+        )
+      );
+    }
+
+    // 批量删除
+    if (path === '/api/goods/batch-delete' && method === 'POST') {
+      const body = await readBody(req);
+      const idsCheck = normalizeIds(body.ids);
+      if (!idsCheck.ok) return send(res, 200, fail(idsCheck.message));
+
+      const foundIds = idsCheck.ids.filter((id) => goods.some((g) => g.id === id));
+      const missing = idsCheck.ids.filter((id) => !foundIds.includes(id));
+      for (let i = goods.length - 1; i >= 0; i -= 1) {
+        if (foundIds.includes(goods[i].id)) goods.splice(i, 1);
+      }
+
+      return send(
+        res,
+        200,
+        ok(
+          { affected: foundIds.length, missing },
+          foundIds.length ? `已删除 ${foundIds.length} 件商品` : '没有可删除的商品'
+        )
+      );
     }
 
     const goodsMatch = path.match(/^\/api\/goods\/(\d+)(\/status)?$/);

@@ -78,3 +78,25 @@ body {
   background: $line;
   border-radius: 4px;
 }
+
+// 分页选中项：itemActiveBg 已设为橙色，文字必须转白，否则橙底橙字看不清
+.ant-pagination .ant-pagination-item-active {
+  background: $primary;
+  border-color: $primary;
+
+  > a {
+    color: #fff !important;
+  }
+
+  &:hover {
+    background: $primary-hover;
+    border-color: $primary-hover;
+
+    > a { color: #fff !important; }
+  }
+}
+
+// 未选中页码：默认字色偏浅，压到正文次要色
+.ant-pagination .ant-pagination-item > a {
+  color: $text-2;
+}

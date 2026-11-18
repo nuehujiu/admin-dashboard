@@ -249,4 +249,117 @@ async function remove(req, res, next) {
   }
 }
 
-module.exports = { list, categories, detail, create, update, toggleStatus, remove };
+/**
+ * 批量 ids 校验：非空数组、正整数、自动去重、最多 100 条
+ * 返回 { ok: true, ids } 或 { ok: false, message }
+ */
+function normalizeIds(v, max = 100) {
+  if (!Array.isArray(v) || !v.length) {
+    return { ok: false, message: 'ids 必须是非空数组' };
+  }
+  const set = new Set();
+  for (const item of v) {
+    const n = Number(item);
+    if (!Number.isInteger(n) || n <= 0) {
+      return { ok: false, message: 'ids 只能为正整数' };
+    }
+    set.add(n);
+  }
+  if (set.size > max) {
+    return { ok: false, message: `一次最多操作 ${max} 件商品` };
+  }
+  return { ok: true, ids: [...set] };
+}
+
+/**
+ * 批量上下架
+ * PUT /api/goods/batch/status  { ids: number[], status: 0 | 1 }
+ * 返回 { affected, missing }
+ */
+async function batchStatus(req, res, next) {
+  try {
+    const body = req.body || {};
+
+    const idsCheck = normalizeIds(body.ids);
+    if (!idsCheck.ok) return fail(res, idsCheck.message);
+
+    const statusNum = normalizeStatus(body.status);
+    if (statusNum === null || statusNum === false) {
+      return fail(res, 'status 只能为 0 或 1');
+    }
+
+    const { ids } = idsCheck;
+    const ph = ids.map(() => '?').join(',');
+
+    // 先查存在的 id，用于算出 missing（已被删除的）
+    const found = await query(`SELECT id FROM goods WHERE id IN (${ph})`, ids);
+    const foundIds = found.map((r) => r.id);
+    const missing = ids.filter((id) => !foundIds.includes(id));
+
+    let affected = 0;
+    if (foundIds.length) {
+      const result = await query(
+        `UPDATE goods SET status = ? WHERE id IN (${foundIds.map(() => '?').join(',')})`,
+        [statusNum, ...foundIds]
+      );
+      affected = result.affectedRows || 0;
+    }
+
+    const verb = statusNum === 1 ? '上架' : '下架';
+    return success(
+      res,
+      { affected, missing },
+      affected > 0 ? `已${verb} ${affected} 件商品` : '没有可操作的商品'
+    );
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * 批量删除
+ * POST /api/goods/batch-delete  { ids: number[] }
+ * 返回 { affected, missing }
+ */
+async function batchDelete(req, res, next) {
+  try {
+    const idsCheck = normalizeIds((req.body || {}).ids);
+    if (!idsCheck.ok) return fail(res, idsCheck.message);
+
+    const { ids } = idsCheck;
+    const ph = ids.map(() => '?').join(',');
+
+    const found = await query(`SELECT id FROM goods WHERE id IN (${ph})`, ids);
+    const foundIds = found.map((r) => r.id);
+    const missing = ids.filter((id) => !foundIds.includes(id));
+
+    let affected = 0;
+    if (foundIds.length) {
+      const result = await query(
+        `DELETE FROM goods WHERE id IN (${foundIds.map(() => '?').join(',')})`,
+        foundIds
+      );
+      affected = result.affectedRows || 0;
+    }
+
+    return success(
+      res,
+      { affected, missing },
+      affected > 0 ? `已删除 ${affected} 件商品` : '没有可删除的商品'
+    );
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = {
+  list,
+  categories,
+  detail,
+  create,
+  update,
+  toggleStatus,
+  remove,
+  batchStatus,
+  batchDelete,
+};
