@@ -79,6 +79,9 @@ async function login(req, res, next) {
       return fail(res, '用户名或密码错误');
     }
 
+    // 记录最近登录时间（用户管理列表的「最近登录」列与排序依赖它）
+    await query('UPDATE users SET last_login_at = NOW() WHERE id = ?', [user.id]);
+
     const token = signToken(user);
     return success(res, {
       token,
