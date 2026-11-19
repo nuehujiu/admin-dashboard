@@ -16,6 +16,8 @@ export default function Guard({ children }) {
   const token = useUserStore((state) => state.token);
   // 从用户状态管理中获取设置用户信息的方法
   const setProfile = useUserStore((state) => state.setProfile);
+  // 获取退出登录方法
+  const logout = useUserStore((state) => state.logout);
   // 用于控制组件是否准备就绪的状态
   const [ready, setReady] = useState(false);
   // 使用useEffect处理用户认证逻辑
@@ -37,14 +39,17 @@ export default function Guard({ children }) {
       })
       .catch((err) => {
         console.error('[guard] 拉取用户信息失败:', err);
-        if (alive) setReady(false); // 配合下面这条：失败就当未登录处理
+        if (!alive) return;
+        // 拉不到用户信息（后端没启动 / token 失效）：按未登录处理，回登录页
+        // 否则 ready 一直是 false，页面会无限转圈
+        logout();
       });
 
     // 清理函数，在组件卸载时执行
     return () => {
       alive = false;
     };
-  }, [token, setProfile]);
+  }, [token, setProfile, logout]);
   // 如果没有token，重定向到登录页面，并记录当前路径以便登录后跳回
   if (!token) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
