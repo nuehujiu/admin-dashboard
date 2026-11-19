@@ -48,6 +48,10 @@ async function run() {
     // 商品 / 设置（后端已补，仅菜单级可见性，不做接口级权限）
     { parent_id: 0, name: '商品管理', path: '/goods', icon: 'shopping', type: 1, permission: 'goods:view', sort: 4 },
     { parent_id: 3, name: '系统设置', path: '/settings', icon: 'setting', type: 1, permission: 'settings:view', sort: 3 },
+    // 角色管理「权限矩阵」需要的商品按钮项与个人中心
+    { parent_id: 12, name: '商品上下架', path: null, icon: null, type: 2, permission: 'goods:status', sort: 4 },
+    { parent_id: 12, name: '库存调整', path: null, icon: null, type: 2, permission: 'goods:stock', sort: 5 },
+    { parent_id: 0, name: '个人中心', path: '/profile', icon: 'user', type: 1, permission: 'profile:view', sort: 5 },
   ];
 
   // 3) 写入角色
@@ -55,6 +59,16 @@ async function run() {
   const adminRoleId = (await conn.query("SELECT id FROM roles WHERE code='admin'"))[0][0].id;
   await conn.query("INSERT INTO roles (name, code, description) VALUES (?, ?, ?)", ['运营', 'operator', '可查看数据看板与销售统计']);
   const operatorRoleId = (await conn.query("SELECT id FROM roles WHERE code='operator'"))[0][0].id;
+  await conn.query(
+    "INSERT INTO roles (name, code, description, status) VALUES (?, ?, ?, ?)",
+    ['商品编辑', 'goods-editor', '商品与库存维护', 1]
+  );
+  const goodsEditorRoleId = (await conn.query("SELECT id FROM roles WHERE code='goods-editor'"))[0][0].id;
+  await conn.query(
+    "INSERT INTO roles (name, code, description, status) VALUES (?, ?, ?, ?)",
+    ['访客', 'guest', '只读演示账号', 0]
+  );
+  const guestRoleId = (await conn.query("SELECT id FROM roles WHERE code='guest'"))[0][0].id;
 
   // 4) 写入菜单并记录 id 供授权
   const menuIds = {};
@@ -75,6 +89,13 @@ async function run() {
   for (const p of operatorPerms) {
     await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [operatorRoleId, menuIds[p]]);
   }
+  // 商品编辑：看板 + 商品菜单与库存类按钮 + 个人中心
+  const goodsEditorPerms = ['dashboard:view', 'goods:view', 'goods:status', 'goods:stock', 'profile:view'];
+  for (const p of goodsEditorPerms) {
+    await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [goodsEditorRoleId, menuIds[p]]);
+  }
+  // 访客：只有个人中心
+  await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [guestRoleId, menuIds['profile:view']]);
 
   // 6) 写入用户（密码统一 123456）
   //    last_login_at 供用户管理列表的「最近登录」列与排序使用

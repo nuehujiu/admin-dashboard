@@ -23,6 +23,7 @@ CREATE TABLE `roles` (
   `name`        VARCHAR(50)  NOT NULL COMMENT '角色名称',
   `code`        VARCHAR(50)  NOT NULL COMMENT '角色编码，如 admin / operator',
   `description` VARCHAR(200) DEFAULT NULL COMMENT '角色描述',
+  `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '状态：1启用 0停用',
   `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

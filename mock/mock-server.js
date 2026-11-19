@@ -110,23 +110,30 @@ const menus = [
   { id: 11, parent_id: 5, name: '删除角色', path: null, icon: null, type: 2, permission: 'role:delete', sort: 3 },
   { id: 12, parent_id: 0, name: '商品管理', path: '/goods', icon: 'shopping', type: 1, permission: 'goods:view', sort: 4 },
   { id: 13, parent_id: 3, name: '系统设置', path: '/settings', icon: 'setting', type: 1, permission: 'settings:view', sort: 3 },
+  { id: 14, parent_id: 12, name: '商品上下架', path: null, icon: null, type: 2, permission: 'goods:status', sort: 4 },
+  { id: 15, parent_id: 12, name: '库存调整', path: null, icon: null, type: 2, permission: 'goods:stock', sort: 5 },
+  { id: 16, parent_id: 0, name: '个人中心', path: '/profile', icon: 'user', type: 1, permission: 'profile:view', sort: 5 },
 ];
 
-let seq = {
-  role: 3,
-  user: 3,
-  goods: 13,
-};
+/**
+ * 新增记录的自增 id：取当前最大 id + 1
+ * 不能用写死的计数器，否则会和演示数据撞号（撞号会导致详情 / 登录取到别人的行）
+ */
+const nextId = (list) => (list.length ? Math.max(...list.map((i) => i.id)) + 1 : 1);
 
 const roles = [
-  { id: 1, name: '超级管理员', code: 'admin', description: '拥有全部权限', created_at: localDateTime(-30) },
-  { id: 2, name: '运营', code: 'operator', description: '可查看数据看板与销售统计', created_at: localDateTime(-30) },
+  { id: 1, name: '超级管理员', code: 'admin', description: '拥有全部权限', status: 1, created_at: localDateTime(-30) },
+  { id: 2, name: '运营', code: 'operator', description: '可查看数据看板与销售统计', status: 1, created_at: localDateTime(-30) },
+  { id: 3, name: '商品编辑', code: 'goods-editor', description: '商品与库存维护', status: 1, created_at: localDateTime(-30) },
+  { id: 4, name: '访客', code: 'guest', description: '只读演示账号', status: 0, created_at: localDateTime(-30) },
 ];
 
-/** role_menu：admin 全量，operator 仅 1、2 */
+/** role_menu：admin 全量；operator 看板+销售；商品编辑 看板+商品+商品按钮+个人中心；访客 仅个人中心 */
 const roleMenu = {
   1: menus.map((m) => m.id),
   2: [1, 2],
+  3: [1, 12, 14, 15, 16],
+  4: [16],
 };
 
 /** 用户演示数据：密码均为 123456；last_login_at 供「最近登录」列与排序使用 */
@@ -405,7 +412,7 @@ const server = http.createServer(async (req, res) => {
 
       const now = localDateTime();
       const item = {
-        id: seq.user++, username, password, nickname, email,
+        id: nextId(users), username, password, nickname, email,
         avatar: null, role_id: 2, status: 1, created_at: now, updated_at: now,
       };
       users.push(item);
@@ -571,7 +578,7 @@ const server = http.createServer(async (req, res) => {
 
         const now = localDateTime();
         const item = {
-          id: seq.user++, username, password, nickname, email,
+          id: nextId(users), username, password, nickname, email,
           avatar: null, role_id: Number(role_id), status: 1, created_at: now, updated_at: now,
         };
         users.push(item);
@@ -631,6 +638,11 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ============================================== 角色 /api/roles
+    // ---------------------------------------------- 菜单权限项 /api/menus
+    if (path === '/api/menus' && method === 'GET') {
+      return send(res, 200, ok(menus));
+    }
+
     if (path === '/api/roles') {
       if (method === 'GET') {
         let list = roles.map((r) => ({
@@ -638,8 +650,10 @@ const server = http.createServer(async (req, res) => {
           name: r.name,
           code: r.code,
           description: r.description,
+          status: r.status ?? 1,
           created_at: r.created_at,
           user_count: countUsersOfRole(r.id),
+          menu_count: (roleMenu[r.id] || []).length,
         }));
         if (scenario === 'empty') list = [];
         // 注意：真实后端这里返回裸数组，不是 {list,total}
@@ -652,7 +666,7 @@ const server = http.createServer(async (req, res) => {
         if (!name || !code) return send(res, 200, fail('角色名称和编码为必填项'));
         if (roles.some((r) => r.code === code)) return send(res, 200, fail('角色编码已存在'));
 
-        const item = { id: seq.role++, name, code, description, created_at: localDateTime() };
+        const item = { id: nextId(roles), name, code, description, created_at: localDateTime() };
         roles.push(item);
         return send(res, 200, ok({ id: item.id }, '新增成功'));
       }
@@ -949,7 +963,7 @@ const server = http.createServer(async (req, res) => {
         if (goods.some((g) => g.sku === sku)) return send(res, 200, fail('SKU 已存在'));
 
         const item = {
-          id: seq.goods++,
+          id: nextId(goods),
           name, sku, category,
           price: Math.round(priceNum * 100) / 100,
           stock: Math.max(0, Number(stock) || 0),

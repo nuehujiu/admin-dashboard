@@ -8,8 +8,9 @@ const { success, fail } = require('../utils/response');
 async function list(req, res, next) {
   try {
     const rows = await query(
-      `SELECT r.id, r.name, r.code, r.description, r.created_at,
-              (SELECT COUNT(*) FROM users u WHERE u.role_id = r.id) AS user_count
+      `SELECT r.id, r.name, r.code, r.description, r.status, r.created_at,
+              (SELECT COUNT(*) FROM users u WHERE u.role_id = r.id) AS user_count,
+              (SELECT COUNT(*) FROM role_menu rm WHERE rm.role_id = r.id) AS menu_count
        FROM roles r ORDER BY r.id`
     );
     return success(res, rows);
