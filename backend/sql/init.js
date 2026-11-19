@@ -48,13 +48,32 @@ async function run() {
     // 商品 / 设置（后端已补，仅菜单级可见性，不做接口级权限）
     { parent_id: 0, name: '商品管理', path: '/goods', icon: 'shopping', type: 1, permission: 'goods:view', sort: 4 },
     { parent_id: 3, name: '系统设置', path: '/settings', icon: 'setting', type: 1, permission: 'settings:view', sort: 3 },
+    // 角色管理「权限矩阵」需要的商品按钮项与个人中心
+    { parent_id: 12, name: '商品上下架', path: null, icon: null, type: 2, permission: 'goods:status', sort: 4 },
+    { parent_id: 12, name: '库存调整', path: null, icon: null, type: 2, permission: 'goods:stock', sort: 5 },
+    { parent_id: 0, name: '个人中心', path: '/profile', icon: 'user', type: 1, permission: 'profile:view', sort: 5 },
   ];
 
   // 3) 写入角色
-  await conn.query("INSERT INTO roles (name, code, description) VALUES (?, ?, ?)", ['超级管理员', 'admin', '拥有全部权限']);
-  const adminRoleId = (await conn.query("SELECT id FROM roles WHERE code='admin'"))[0][0].id;
-  await conn.query("INSERT INTO roles (name, code, description) VALUES (?, ?, ?)", ['运营', 'operator', '可查看数据看板与销售统计']);
-  const operatorRoleId = (await conn.query("SELECT id FROM roles WHERE code='operator'"))[0][0].id;
+  // 角色种子：icon / color 决定角色卡的图标与配色（可选图标清单见前端 roleIcons.js）
+  const roleSeeds = [
+    ['超级管理员', 'admin', '拥有全部权限', 1, 'Safety', '#F5611D'],
+    ['运营', 'operator', '可查看数据看板与销售统计', 1, 'BarChart', '#2F8F86'],
+    ['商品编辑', 'goods-editor', '商品与库存维护', 1, 'Shop', '#C77A28'],
+    ['访客', 'guest', '只读演示账号', 0, 'Eye', '#A8A29C'],
+  ];
+  const roleIds = {};
+  for (const [name, code, description, status, icon, color] of roleSeeds) {
+    const r = await conn.query(
+      'INSERT INTO roles (name, code, description, status, icon, color) VALUES (?,?,?,?,?,?)',
+      [name, code, description, status, icon, color]
+    );
+    roleIds[code] = r[0].insertId;
+  }
+  const adminRoleId = roleIds.admin;
+  const operatorRoleId = roleIds.operator;
+  const goodsEditorRoleId = roleIds['goods-editor'];
+  const guestRoleId = roleIds.guest;
 
   // 4) 写入菜单并记录 id 供授权
   const menuIds = {};
@@ -75,17 +94,52 @@ async function run() {
   for (const p of operatorPerms) {
     await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [operatorRoleId, menuIds[p]]);
   }
+  // 商品编辑：看板 + 商品菜单与库存类按钮 + 个人中心
+  const goodsEditorPerms = ['dashboard:view', 'goods:view', 'goods:status', 'goods:stock', 'profile:view'];
+  for (const p of goodsEditorPerms) {
+    await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [goodsEditorRoleId, menuIds[p]]);
+  }
+  // 访客：只有个人中心
+  await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [guestRoleId, menuIds['profile:view']]);
 
   // 6) 写入用户（密码统一 123456）
+  //    last_login_at 供用户管理列表的「最近登录」列与排序使用
   const hash = await bcrypt.hash('123456', 10);
-  await conn.query(
-    "INSERT INTO users (username, password, nickname, email, role_id, status) VALUES (?,?,?,?,?,?)",
-    ['admin', hash, '管理员', 'admin@example.com', adminRoleId, 1]
-  );
-  await conn.query(
-    "INSERT INTO users (username, password, nickname, email, role_id, status) VALUES (?,?,?,?,?,?)",
-    ['operator', hash, '运营小李', 'operator@example.com', operatorRoleId, 1]
-  );
+  const ts = (daysAgo) => {
+    const d = new Date(Date.now() - daysAgo * 86400000);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} `
+      + `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  };
+  // [登录名, 昵称, 邮箱, 角色ID, 状态, 注册于N天前, 最近登录于N天前(null=从未登录)]
+  const seedUsers = [
+    ['admin', '管理员', 'admin@example.com', adminRoleId, 1, 60, 0],
+    ['operator', '运营小李', 'operator@example.com', operatorRoleId, 1, 60, 0],
+    ['chenjh', '陈嘉禾', 'chenjh@houtai.cn', adminRoleId, 1, 48, 0],
+    ['linqy', '林清越', 'linqy@houtai.cn', operatorRoleId, 1, 40, 0],
+    ['zhoumz', '周牧之', 'zhoumz@houtai.cn', operatorRoleId, 1, 33, 1],
+    ['sunian', '苏念', 'sunian@houtai.cn', operatorRoleId, 0, 26, 8],
+    ['hezy', '何知远', 'hezy@houtai.cn', operatorRoleId, 1, 18, 12],
+    ['shenar', '沈安然', 'shenar@houtai.cn', operatorRoleId, 1, 12, 13],
+    ['guyan', '顾言', 'guyan@houtai.cn', operatorRoleId, 1, 6, 14],
+    ['bailu', '白露', 'bailu@houtai.cn', operatorRoleId, 0, 2, null],
+  ];
+  for (const [username, nickname, email, roleId, status, createdDays, loginDays] of seedUsers) {
+    await conn.query(
+      `INSERT INTO users (username, password, nickname, email, role_id, status, created_at, last_login_at)
+       VALUES (?,?,?,?,?,?,?,?)`,
+      [
+        username,
+        hash,
+        nickname,
+        email,
+        roleId,
+        status,
+        ts(createdDays),
+        loginDays === null ? null : ts(loginDays),
+      ]
+    );
+  }
 
   // 7) 销售分类
   const categories = ['电子产品', '服饰鞋包', '家居生活', '美妆个护', '食品生鲜'];

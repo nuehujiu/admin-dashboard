@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { message } from 'antd';
+import { toast } from '../utils/feedback';
 import { useUserStore } from '../store/useUserStore';
 
 const request = axios.create({
@@ -20,19 +20,19 @@ request.interceptors.response.use(
     if (code === 0) {
       return data;
     }
-    message.error(msg || '请求失败');
+    toast.error(msg || '请求失败');
     return Promise.reject(new Error(msg || '请求失败'));
   },
   (err) => {
     const status = err.response?.status;
     if (status === 401) {
       useUserStore.getState().logout();
-      message.error('登录过期，请重新登录');
+      toast.error('登录过期，请重新登录');
       if (!window.location.pathname.startsWith('/login')) {
         window.location.replace('/login');
       }
     } else {
-      message.error(err.response?.data?.message || '网络异常');
+      toast.error(err.response?.data?.message || '网络异常');
     }
     return Promise.reject(err);
   },

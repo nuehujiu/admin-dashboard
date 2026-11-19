@@ -17,6 +17,7 @@ const { connectDB } = require('./config/db');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const roleRoutes = require('./routes/role');
+const menuRoutes = require('./routes/menu');
 const dashboardRoutes = require('./routes/dashboard');
 const goodsRoutes = require('./routes/goods');
 const settingsRoutes = require('./routes/settings');
@@ -51,6 +52,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes); // 认证（注册 / 登录 / 获取当前用户）
 app.use('/api/users', userRoutes); // 用户管理
 app.use('/api/roles', roleRoutes); // 角色管理
+app.use('/api/menus', menuRoutes); // 菜单/权限项（角色管理权限矩阵）
 app.use('/api/dashboard', dashboardRoutes); // 数据看板统计
 app.use('/api/goods', goodsRoutes); // 商品管理
 app.use('/api/settings', settingsRoutes); // 系统设置

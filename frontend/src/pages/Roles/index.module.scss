@@ -1,0 +1,377 @@
+@use '../../styles/variables' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---------- 页头 ---------- */
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: $text;
+  letter-spacing: 0.2px;
+}
+.meta {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: $text-3;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ---------- 角色卡 ---------- */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.roleCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-card;
+  box-shadow: $shadow-card;
+  cursor: pointer;
+  transition: border-color 0.18s;
+
+  &:hover {
+    border-color: $primary-line;
+  }
+  &:focus-visible {
+    outline: none;
+    border-color: $primary-line;
+  }
+}
+
+/* 选中的卡 = 权限矩阵的「当前列」 */
+.roleCardActive {
+  border-color: $primary;
+  background: $hover-bg;
+}
+
+.roleHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+}
+/* 卡片操作区：默认隐形，hover 卡片时整组淡入 */
+.cardActions {
+  margin-left: auto;
+  align-self: flex-start;
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.cardAction {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: $text-3;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.88);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+
+  &:hover,
+  &:focus-visible {
+    background: $primary-soft;
+    color: $primary;
+    outline: none;
+  }
+}
+
+/* 删除按钮：hover 时换成红调，和编辑区分开 */
+.actionDanger {
+  &:hover,
+  &:focus-visible {
+    background: #fdecea;
+    color: $danger;
+  }
+}
+
+.roleCard:hover .cardAction,
+.roleCardActive .cardAction {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cardAction {
+    transition: none;
+  }
+}
+
+.roleIcon {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: $r-ctl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.roleTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.roleName {
+  font-size: 14px;
+  font-weight: 700;
+  color: $text;
+}
+.roleDesc {
+  font-size: 12px;
+  color: $text-3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.roleFoot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: $text-3;
+}
+.roleStat b {
+  color: $text;
+  font-weight: 600;
+  margin-right: 3px;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  padding: 2px 9px;
+  border: none;
+  border-radius: $r-tag;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  cursor: pointer;
+  transition: filter 0.18s ease;
+
+  i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+  }
+
+  &:hover {
+    filter: brightness(0.94);
+  }
+  &:focus-visible {
+    outline: 1px solid $primary-line;
+    outline-offset: 1px;
+  }
+}
+.statusOn {
+  background: #eaf6ef;
+  color: $success;
+  i {
+    background: $success;
+  }
+}
+.statusOff {
+  background: $line-soft;
+  color: $text-3;
+  i {
+    background: $text-3;
+  }
+}
+
+/* ---------- 权限矩阵 ---------- */
+.matrixCard {
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $r-card;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+.matrixHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px 12px;
+}
+
+.matrixTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: $text;
+}
+.matrixHint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: $text-3;
+}
+
+.table {
+  :global(.ant-table) {
+    background: transparent;
+  }
+  :global(.ant-table-thead > tr > th) {
+    background: #fbfaf8;
+    color: $text-3;
+    font-weight: 500;
+  }
+  :global(.ant-table-cell) {
+    font-size: 13px;
+  }
+}
+
+.rowLabel {
+  color: $text;
+  font-weight: 500;
+}
+
+/* 「其中：xxx」子项：缩进 + 浅灰，与主行区分 */
+.rowIndent {
+  padding-left: 22px;
+  color: $text-2;
+}
+
+.cellEmpty {
+  color: $text-3;
+}
+
+/* ---------- 编辑角色弹窗：图标 / 配色选择器 ---------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.fieldRow {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  color: $text;
+  font-weight: 500;
+}
+
+.fieldHint {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: $text-3;
+}
+
+.iconPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.iconOption {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid $line;
+  border-radius: $r-ctl;
+  background: $card;
+  color: $text-3;
+  font-size: 15px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    border-color: $primary-line;
+    color: $primary;
+  }
+  &:focus-visible {
+    outline: none;
+    border-color: $primary-line;
+  }
+}
+
+/* 选中态：边框/图标色由行内 style 覆盖，这里只做加粗提示 */
+.iconOptionActive {
+  border-width: 2px;
+  border-style: solid;
+}
+
+.colorPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.colorDot {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    transform: scale(1.12);
+  }
+  &:focus-visible {
+    outline: none;
+    border-color: $text-3;
+  }
+}
+
+/* 选中色点：白色内圈 + 深色外圈，浅色底也看得清 */
+.colorDotActive {
+  border-color: $card;
+  box-shadow:
+    0 0 0 2px $text,
+    inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}

@@ -110,33 +110,83 @@ const menus = [
   { id: 11, parent_id: 5, name: '删除角色', path: null, icon: null, type: 2, permission: 'role:delete', sort: 3 },
   { id: 12, parent_id: 0, name: '商品管理', path: '/goods', icon: 'shopping', type: 1, permission: 'goods:view', sort: 4 },
   { id: 13, parent_id: 3, name: '系统设置', path: '/settings', icon: 'setting', type: 1, permission: 'settings:view', sort: 3 },
+  { id: 14, parent_id: 12, name: '商品上下架', path: null, icon: null, type: 2, permission: 'goods:status', sort: 4 },
+  { id: 15, parent_id: 12, name: '库存调整', path: null, icon: null, type: 2, permission: 'goods:stock', sort: 5 },
+  { id: 16, parent_id: 0, name: '个人中心', path: '/profile', icon: 'user', type: 1, permission: 'profile:view', sort: 5 },
 ];
 
-let seq = {
-  role: 3,
-  user: 3,
-  goods: 13,
-};
+/**
+ * 新增记录的自增 id：取当前最大 id + 1
+ * 不能用写死的计数器，否则会和演示数据撞号（撞号会导致详情 / 登录取到别人的行）
+ */
+const nextId = (list) => (list.length ? Math.max(...list.map((i) => i.id)) + 1 : 1);
 
 const roles = [
-  { id: 1, name: '超级管理员', code: 'admin', description: '拥有全部权限', created_at: localDateTime(-30) },
-  { id: 2, name: '运营', code: 'operator', description: '可查看数据看板与销售统计', created_at: localDateTime(-30) },
+  { id: 1, name: '超级管理员', code: 'admin', description: '拥有全部权限', status: 1, icon: 'Safety', color: '#F5611D', created_at: localDateTime(-30) },
+  { id: 2, name: '运营', code: 'operator', description: '可查看数据看板与销售统计', status: 1, icon: 'BarChart', color: '#2F8F86', created_at: localDateTime(-30) },
+  { id: 3, name: '商品编辑', code: 'goods-editor', description: '商品与库存维护', status: 1, icon: 'Shop', color: '#C77A28', created_at: localDateTime(-30) },
+  { id: 4, name: '访客', code: 'guest', description: '只读演示账号', status: 0, icon: 'Eye', color: '#A8A29C', created_at: localDateTime(-30) },
 ];
 
-/** role_menu：admin 全量，operator 仅 1、2 */
+/** role_menu：admin 全量；operator 看板+销售；商品编辑 看板+商品+商品按钮+个人中心；访客 仅个人中心 */
 const roleMenu = {
   1: menus.map((m) => m.id),
   2: [1, 2],
+  3: [1, 12, 14, 15, 16],
+  4: [16],
 };
 
+/** 用户演示数据：密码均为 123456；last_login_at 供「最近登录」列与排序使用 */
 const users = [
   {
     id: 1, username: 'admin', password: '123456', nickname: '管理员', email: 'admin@example.com',
-    avatar: null, role_id: 1, status: 1, created_at: localDateTime(-30), updated_at: localDateTime(-30),
+    avatar: null, role_id: 1, status: 1, created_at: localDateTime(-60), updated_at: localDateTime(-60),
+    last_login_at: localDateTime(0),
   },
   {
     id: 2, username: 'operator', password: '123456', nickname: '运营小李', email: 'operator@example.com',
-    avatar: null, role_id: 2, status: 1, created_at: localDateTime(-30), updated_at: localDateTime(-30),
+    avatar: null, role_id: 2, status: 1, created_at: localDateTime(-60), updated_at: localDateTime(-60),
+    last_login_at: localDateTime(0),
+  },
+  {
+    id: 3, username: 'chenjh', password: '123456', nickname: '陈嘉禾', email: 'chenjh@houtai.cn',
+    avatar: null, role_id: 1, status: 1, created_at: localDateTime(-48), updated_at: localDateTime(-48),
+    last_login_at: localDateTime(0),
+  },
+  {
+    id: 4, username: 'linqy', password: '123456', nickname: '林清越', email: 'linqy@houtai.cn',
+    avatar: null, role_id: 2, status: 1, created_at: localDateTime(-40), updated_at: localDateTime(-40),
+    last_login_at: localDateTime(0),
+  },
+  {
+    id: 5, username: 'zhoumz', password: '123456', nickname: '周牧之', email: 'zhoumz@houtai.cn',
+    avatar: null, role_id: 2, status: 1, created_at: localDateTime(-33), updated_at: localDateTime(-33),
+    last_login_at: localDateTime(-1),
+  },
+  {
+    id: 6, username: 'sunian', password: '123456', nickname: '苏念', email: 'sunian@houtai.cn',
+    avatar: null, role_id: 2, status: 0, created_at: localDateTime(-26), updated_at: localDateTime(-26),
+    last_login_at: localDateTime(-8),
+  },
+  {
+    id: 7, username: 'hezy', password: '123456', nickname: '何知远', email: 'hezy@houtai.cn',
+    avatar: null, role_id: 2, status: 1, created_at: localDateTime(-18), updated_at: localDateTime(-18),
+    last_login_at: localDateTime(-12),
+  },
+  {
+    id: 8, username: 'shenar', password: '123456', nickname: '沈安然', email: 'shenar@houtai.cn',
+    avatar: null, role_id: 2, status: 1, created_at: localDateTime(-12), updated_at: localDateTime(-12),
+    last_login_at: localDateTime(-13),
+  },
+  {
+    id: 9, username: 'guyan', password: '123456', nickname: '顾言', email: 'guyan@houtai.cn',
+    avatar: null, role_id: 2, status: 1, created_at: localDateTime(-6), updated_at: localDateTime(-6),
+    last_login_at: localDateTime(-14),
+  },
+  {
+    id: 10, username: 'bailu', password: '123456', nickname: '白露', email: 'bailu@houtai.cn',
+    avatar: null, role_id: 2, status: 0, created_at: localDateTime(-2), updated_at: localDateTime(-2),
+    last_login_at: null,
   },
 ];
 
@@ -251,6 +301,19 @@ function roleNameOf(roleId) {
 
 // ---------------------------------------------------------------- 业务助手
 
+/** 批量 ids 校验：非空数组、正整数、去重、最多 max 条（商品 / 用户共用） */
+const normalizeIds = (v, max = 100) => {
+  if (!Array.isArray(v) || !v.length) return { ok: false, message: 'ids 必须是非空数组' };
+  const set = new Set();
+  for (const item of v) {
+    const n = Number(item);
+    if (!Number.isInteger(n) || n <= 0) return { ok: false, message: 'ids 只能为正整数' };
+    set.add(n);
+  }
+  if (set.size > max) return { ok: false, message: `一次最多操作 ${max} 条记录` };
+  return { ok: true, ids: [...set] };
+};
+
 function userToListItem(u) {
   return {
     id: u.id,
@@ -262,6 +325,7 @@ function userToListItem(u) {
     role_name: roleNameOf(u.role_id),
     status: u.status,
     created_at: u.created_at,
+    last_login_at: u.last_login_at || null,
   };
 }
 
@@ -348,7 +412,7 @@ const server = http.createServer(async (req, res) => {
 
       const now = localDateTime();
       const item = {
-        id: seq.user++, username, password, nickname, email,
+        id: nextId(users), username, password, nickname, email,
         avatar: null, role_id: 2, status: 1, created_at: now, updated_at: now,
       };
       users.push(item);
@@ -411,6 +475,51 @@ const server = http.createServer(async (req, res) => {
       }));
     }
 
+    // ---------------------------------------------- 用户概览 /api/users/summary
+    if (path === '/api/users/summary' && method === 'GET') {
+      const toTs = (s) => (s ? new Date(String(s).replace(' ', 'T')).getTime() : 0);
+      const weekAgo = Date.now() - 7 * 86400000;
+      return send(res, 200, ok({
+        total: users.length,
+        active: users.filter((u) => u.status === 1).length,
+        disabled: users.filter((u) => u.status === 0).length,
+        weekNew: users.filter((u) => toTs(u.created_at) >= weekAgo).length,
+      }));
+    }
+
+    // ---------------------------------------------- 批量启停 /api/users/batch/status
+    if (path === '/api/users/batch/status' && method === 'PUT') {
+      const body = await readBody(req);
+      const status = Number(body.status);
+      if (status !== 0 && status !== 1) return send(res, 200, fail('status 只能为 0 或 1'));
+
+      const idsCheck = normalizeIds(body.ids);
+      if (!idsCheck.ok) return send(res, 200, fail(idsCheck.message));
+
+      let ids = idsCheck.ids;
+      const skipped = [];
+      // 不能禁用当前登录账号
+      if (status === 0 && ids.includes(Number(req.user.id))) {
+        ids = ids.filter((id) => id !== Number(req.user.id));
+        skipped.push(Number(req.user.id));
+      }
+      if (!ids.length) return send(res, 200, fail('当前登录账号不能被禁用'));
+
+      const found = users.filter((u) => ids.includes(u.id));
+      const missing = ids.filter((id) => !found.some((u) => u.id === id));
+      const now = localDateTime();
+      found.forEach((u) => {
+        u.status = status;
+        u.updated_at = now;
+      });
+
+      const verb = status === 1 ? '启用' : '禁用';
+      return send(res, 200, ok(
+        { affected: found.length, missing, skipped },
+        found.length ? `已${verb} ${found.length} 个用户` : '没有可操作的用户'
+      ));
+    }
+
     // ============================================== 用户 /api/users
     if (path === '/api/users') {
       if (method === 'GET') {
@@ -419,11 +528,13 @@ const server = http.createServer(async (req, res) => {
         const keyword = query.get('keyword') || '';
         const roleId = query.get('role_id');
         const status = query.get('status');
+        const sort = query.get('sort');
 
         let list = users.filter((u) => {
           const hitKeyword = !keyword ||
             u.username.includes(keyword) ||
-            (u.nickname || '').includes(keyword);
+            (u.nickname || '').includes(keyword) ||
+            (u.email || '').includes(keyword);
           const hitRole = !roleId || String(u.role_id) === String(roleId);
           const hitStatus = status === null || status === '' || String(u.status) === String(status);
           return hitKeyword && hitRole && hitStatus;
@@ -431,7 +542,15 @@ const server = http.createServer(async (req, res) => {
 
         if (scenario === 'empty') list = [];
 
-        list = list.slice().sort((a, b) => b.id - a.id);
+        // sort=recent：最近登录倒序，从未登录排最后；同格式时间字符串可直接比较
+        list = list.slice().sort((a, b) => {
+          if (sort === 'recent') {
+            const av = a.last_login_at || '';
+            const bv = b.last_login_at || '';
+            if (av !== bv) return bv.localeCompare(av);
+          }
+          return b.id - a.id;
+        });
         const total = list.length;
         const offset = (page - 1) * pageSize;
 
@@ -459,7 +578,7 @@ const server = http.createServer(async (req, res) => {
 
         const now = localDateTime();
         const item = {
-          id: seq.user++, username, password, nickname, email,
+          id: nextId(users), username, password, nickname, email,
           avatar: null, role_id: Number(role_id), status: 1, created_at: now, updated_at: now,
         };
         users.push(item);
@@ -519,6 +638,11 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ============================================== 角色 /api/roles
+    // ---------------------------------------------- 菜单权限项 /api/menus
+    if (path === '/api/menus' && method === 'GET') {
+      return send(res, 200, ok(menus));
+    }
+
     if (path === '/api/roles') {
       if (method === 'GET') {
         let list = roles.map((r) => ({
@@ -526,8 +650,12 @@ const server = http.createServer(async (req, res) => {
           name: r.name,
           code: r.code,
           description: r.description,
+          status: r.status ?? 1,
+          icon: r.icon ?? null,
+          color: r.color ?? null,
           created_at: r.created_at,
           user_count: countUsersOfRole(r.id),
+          menu_count: (roleMenu[r.id] || []).length,
         }));
         if (scenario === 'empty') list = [];
         // 注意：真实后端这里返回裸数组，不是 {list,total}
@@ -536,11 +664,11 @@ const server = http.createServer(async (req, res) => {
 
       if (method === 'POST') {
         const body = await readBody(req);
-        const { name, code, description = '' } = body;
+        const { name, code, description = '', icon = null, color = null } = body;
         if (!name || !code) return send(res, 200, fail('角色名称和编码为必填项'));
         if (roles.some((r) => r.code === code)) return send(res, 200, fail('角色编码已存在'));
 
-        const item = { id: seq.role++, name, code, description, created_at: localDateTime() };
+        const item = { id: nextId(roles), name, code, description, icon, color, status: 1, created_at: localDateTime() };
         roles.push(item);
         return send(res, 200, ok({ id: item.id }, '新增成功'));
       }
@@ -573,10 +701,13 @@ const server = http.createServer(async (req, res) => {
       if (method === 'PUT' && !withMenus) {
         if (!role) return send(res, 404, fail('角色不存在', 404));
         const body = await readBody(req);
-        const { name, description } = body;
-        // 真实后端不校验 name，这里保持同样行为
-        role.name = name;
-        role.description = description;
+        // 部分更新：传哪个字段改哪个（code 不可改）
+        const { name, description, icon, color, status } = body;
+        if (name !== undefined) role.name = name;
+        if (description !== undefined) role.description = description;
+        if (icon !== undefined) role.icon = icon || null;
+        if (color !== undefined) role.color = color || null;
+        if (status !== undefined) role.status = Number(status) === 0 ? 0 : 1;
         return send(res, 200, ok(null, '更新成功'));
       }
 
@@ -785,19 +916,6 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ============================================== 商品 /api/goods
-    /** 批量 ids 校验：非空数组、正整数、去重、最多 100 条 */
-    const normalizeIds = (v, max = 100) => {
-      if (!Array.isArray(v) || !v.length) return { ok: false, message: 'ids 必须是非空数组' };
-      const set = new Set();
-      for (const item of v) {
-        const n = Number(item);
-        if (!Number.isInteger(n) || n <= 0) return { ok: false, message: 'ids 只能为正整数' };
-        set.add(n);
-      }
-      if (set.size > max) return { ok: false, message: `一次最多操作 ${max} 件商品` };
-      return { ok: true, ids: [...set] };
-    };
-
     const goodsOut = (g) => ({
       id: g.id,
       name: g.name,
@@ -850,7 +968,7 @@ const server = http.createServer(async (req, res) => {
         if (goods.some((g) => g.sku === sku)) return send(res, 200, fail('SKU 已存在'));
 
         const item = {
-          id: seq.goods++,
+          id: nextId(goods),
           name, sku, category,
           price: Math.round(priceNum * 100) / 100,
           stock: Math.max(0, Number(stock) || 0),

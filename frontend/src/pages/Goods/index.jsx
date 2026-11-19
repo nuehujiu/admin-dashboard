@@ -338,7 +338,7 @@ export default function Goods() {
         key: 'ops',
         width: 170,
         render: (_, r) => (
-          <Space size={0} split={<span className={s.dot}>·</span>}>
+          <Space size={0} separator={<span className={s.dot}>·</span>}>
             <Button type="link" size="small" className={s.opBtn} onClick={() => setEditing(r)}>
               编辑
             </Button>
