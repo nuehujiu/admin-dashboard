@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import s from './index.module.scss';
 import {
   Button,
@@ -9,14 +9,13 @@ import {
   Checkbox,
   Modal,
   Input,
+  Switch,
 } from 'antd';
 import {
   DownloadOutlined,
   PlusOutlined,
-  SafetyOutlined,
-  BarChartOutlined,
-  ShopOutlined,
-  EyeOutlined,
+  DeleteOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
 import {
   getRoles,
@@ -24,15 +23,10 @@ import {
   getRoleMenus,
   assignRoleMenus,
   createRole,
+  deleteRole,
+  updateRole,
 } from '../../api/roles';
-
-/** 角色卡图标与配色（按角色 code 取，未命中走访客样式） */
-const ROLE_ICONS = {
-  admin: { icon: <SafetyOutlined />, color: '#F5611D', bg: '#FFF2EA' },
-  operator: { icon: <BarChartOutlined />, color: '#2F8F86', bg: '#E7F4F2' },
-  'goods-editor': { icon: <ShopOutlined />, color: '#C77A28', bg: '#FCF1E3' },
-  guest: { icon: <EyeOutlined />, color: '#A8A29C', bg: '#F4F1ED' },
-};
+import { getRoleIcon, ICON_OPTIONS, COLOR_OPTIONS, softBg } from './roleIcons';
 /**
  * 权限矩阵的行：按设计稿的分组呈现
  * perms 用 permission 标识而不是写死 id，菜单表变动后依然能对上
@@ -84,7 +78,8 @@ const MATRIX_ROWS = [
 
 export default function Roles() {
   const [form] = Form.useForm();
-  const { message } = App.useApp();
+  const [editForm] = Form.useForm();
+  const { message, modal } = App.useApp();
   const [creating, setCreating] = useState(false);
   const [roles, setRoles] = useState([]);
   const [rolePerms, setRolePerms] = useState({});
@@ -93,6 +88,12 @@ export default function Roles() {
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  // 编辑弹窗：editing 存当前正在编辑的角色（null = 关闭）
+  const [editing, setEditing] = useState(null);
+  const [editIcon, setEditIcon] = useState('Safety');
+  const [editColor, setEditColor] = useState('#F5611D');
+  const [editStatus, setEditStatus] = useState(1);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -246,6 +247,90 @@ export default function Roles() {
       setSaving(false);
     }
   };
+
+  /** 删除角色：角色下还有用户时后端会拒绝 */
+  const onDelete = useCallback(
+    (role) => {
+      modal.confirm({
+        title: `删除角色「${role.name}」？`,
+        content: '该角色的权限配置会一并移除，删除后不可恢复。',
+        okText: '删除',
+        okButtonProps: { danger: true },
+        cancelText: '取消',
+        onOk: async () => {
+          try {
+            await deleteRole(role.id);
+            message.success('删除成功');
+            setRolePerms((prev) => {
+              const next = { ...prev };
+              delete next[role.id];
+              return next;
+            });
+            if (current === role.id) setCurrent(null);
+            await load();
+          } catch (e) {
+            message.error(e?.message || '删除失败');
+          }
+        },
+      });
+    },
+    [modal, message, current, load],
+  );
+
+  /** 打开编辑弹窗：把该角色当前的配置灌进表单与选择器 */
+  const onOpenEdit = (role) => {
+    editForm.setFieldsValue({
+      name: role.name,
+      description: role.description || '',
+    });
+    setEditIcon(role.icon || 'Safety');
+    setEditColor(role.color || '#F5611D');
+    setEditStatus(role.status ?? 1);
+    setEditing(role);
+  };
+
+  /** 保存编辑：名称 / 描述 / 图标 / 配色 / 启用状态一起提交 */
+  const onSaveEdit = async () => {
+    if (!editing) return;
+    let values;
+    try {
+      values = await editForm.validateFields();
+    } catch {
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      await updateRole(editing.id, {
+        name: values.name,
+        description: values.description || '',
+        icon: editIcon,
+        color: editColor,
+        status: editStatus,
+      });
+      message.success('已保存');
+      setEditing(null);
+      await load();
+    } catch (e) {
+      message.error(e?.message || '保存失败');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  /** 点状态 pill 直接切换启用 / 停用 */
+  const onToggleStatus = async (role) => {
+    const next = role.status === 1 ? 0 : 1;
+    try {
+      await updateRole(role.id, { status: next });
+      message.success(
+        next === 1 ? `已启用「${role.name}」` : `已停用「${role.name}」`,
+      );
+      await load();
+    } catch (e) {
+      message.error(e?.message || '切换状态失败');
+    }
+  };
+
   return (
     <div className={s.page}>
       <div className={s.hero}>
@@ -277,7 +362,8 @@ export default function Roles() {
 
       <div className={s.cards}>
         {roles.map((r) => {
-          const icon = ROLE_ICONS[r.code] || ROLE_ICONS.guest;
+          const icon = getRoleIcon(r);
+          const RoleIcon = icon.Icon;
           const count = (rolePerms[r.id] || []).length;
           return (
             <div
@@ -295,13 +381,43 @@ export default function Roles() {
                   className={s.roleIcon}
                   style={{ background: icon.bg, color: icon.color }}
                 >
-                  {icon.icon}
+                  <RoleIcon />
                 </span>
                 <div className={s.roleTitle}>
                   <div className={s.roleName}>{r.name}</div>
                   <div className={s.roleDesc}>{r.description || '—'}</div>
                 </div>
+                {/* hover 卡片才出现的两个圆形操作按钮 */}
+                <div className={s.cardActions}>
+                  <Tooltip title="编辑角色" placement="topRight">
+                    <button
+                      type="button"
+                      className={s.cardAction}
+                      aria-label="编辑角色"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenEdit(r);
+                      }}
+                    >
+                      <EditOutlined />
+                    </button>
+                  </Tooltip>
+                  <Tooltip title="删除角色" placement="topRight">
+                    <button
+                      type="button"
+                      className={`${s.cardAction} ${s.actionDanger}`}
+                      aria-label="删除角色"
+                      onClick={(e) => {
+                        e.stopPropagation(); // 关键：别触发卡片本身的「切换当前列」
+                        onDelete(r);
+                      }}
+                    >
+                      <DeleteOutlined />
+                    </button>
+                  </Tooltip>
+                </div>
               </div>
+
               <div className={s.roleFoot}>
                 <span className={s.roleStat}>
                   <b>{r.user_count ?? 0}</b>位成员
@@ -309,12 +425,18 @@ export default function Roles() {
                 <span className={s.roleStat}>
                   <b>{count}</b>项权限
                 </span>
-                <span
+                {/* 状态可点击：点一下即切换启用 / 停用 */}
+                <button
+                  type="button"
                   className={`${s.statusPill} ${r.status === 1 ? s.statusOn : s.statusOff}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleStatus(r);
+                  }}
                 >
                   <i />
                   {r.status === 1 ? '启用' : '停用'}
-                </span>
+                </button>
               </div>
             </div>
           );
@@ -325,9 +447,7 @@ export default function Roles() {
         <div className={s.matrixHead}>
           <div>
             <h2 className={s.matrixTitle}>权限矩阵</h2>
-            <p className={s.matrixHint}>
-              勾选 = 该角色拥有对应菜单 / 按钮权限
-            </p>
+            <p className={s.matrixHint}>勾选 = 该角色拥有对应菜单 / 按钮权限</p>
           </div>
           <Button
             type="link"
@@ -384,6 +504,88 @@ export default function Roles() {
           <Form.Item name="description" label="描述">
             <Input placeholder="一句话说明这个角色能做什么" />
           </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 编辑角色：图标 / 配色 / 启用状态都在这里改 */}
+      <Modal
+        title={editing ? `编辑角色 · ${editing.name}` : '编辑角色'}
+        open={Boolean(editing)}
+        forceRender
+        confirmLoading={savingEdit}
+        onOk={onSaveEdit}
+        onCancel={() => setEditing(null)}
+        okText="保存"
+        cancelText="取消"
+        width={520}
+      >
+        <Form form={editForm} layout="vertical" style={{ marginTop: 12 }}>
+          <Form.Item
+            name="name"
+            label="角色名称"
+            rules={[{ required: true, message: '请输入角色名称' }]}
+          >
+            <Input placeholder="如：商品编辑" />
+          </Form.Item>
+          <Form.Item name="description" label="描述">
+            <Input placeholder="一句话说明这个角色能做什么" />
+          </Form.Item>
+
+          <div className={s.field}>
+            <span className={s.fieldLabel}>图标</span>
+            <div className={s.iconPicker}>
+              {ICON_OPTIONS.map(({ name, label, component: OptIcon }) => (
+                <button
+                  key={name}
+                  type="button"
+                  title={label}
+                  className={`${s.iconOption} ${editIcon === name ? s.iconOptionActive : ''}`}
+                  style={
+                    editIcon === name
+                      ? {
+                          borderColor: editColor,
+                          color: editColor,
+                          background: softBg(editColor),
+                        }
+                      : undefined
+                  }
+                  onClick={() => setEditIcon(name)}
+                >
+                  <OptIcon />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className={s.field}>
+            <span className={s.fieldLabel}>配色</span>
+            <div className={s.colorPicker}>
+              {COLOR_OPTIONS.map((c) => (
+                <button
+                  key={c.value}
+                  type="button"
+                  title={c.label}
+                  aria-label={c.label}
+                  className={`${s.colorDot} ${editColor === c.value ? s.colorDotActive : ''}`}
+                  style={{ background: c.value }}
+                  onClick={() => setEditColor(c.value)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className={`${s.field} ${s.fieldRow}`}>
+            <div>
+              <span className={s.fieldLabel}>启用该角色</span>
+              <p className={s.fieldHint}>停用后卡片显示为灰色「停用」</p>
+            </div>
+            <Switch
+              checked={editStatus === 1}
+              onChange={(v) => setEditStatus(v ? 1 : 0)}
+              checkedChildren="启用"
+              unCheckedChildren="停用"
+            />
+          </div>
         </Form>
       </Modal>
     </div>

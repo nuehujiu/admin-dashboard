@@ -122,10 +122,10 @@ const menus = [
 const nextId = (list) => (list.length ? Math.max(...list.map((i) => i.id)) + 1 : 1);
 
 const roles = [
-  { id: 1, name: '超级管理员', code: 'admin', description: '拥有全部权限', status: 1, created_at: localDateTime(-30) },
-  { id: 2, name: '运营', code: 'operator', description: '可查看数据看板与销售统计', status: 1, created_at: localDateTime(-30) },
-  { id: 3, name: '商品编辑', code: 'goods-editor', description: '商品与库存维护', status: 1, created_at: localDateTime(-30) },
-  { id: 4, name: '访客', code: 'guest', description: '只读演示账号', status: 0, created_at: localDateTime(-30) },
+  { id: 1, name: '超级管理员', code: 'admin', description: '拥有全部权限', status: 1, icon: 'Safety', color: '#F5611D', created_at: localDateTime(-30) },
+  { id: 2, name: '运营', code: 'operator', description: '可查看数据看板与销售统计', status: 1, icon: 'BarChart', color: '#2F8F86', created_at: localDateTime(-30) },
+  { id: 3, name: '商品编辑', code: 'goods-editor', description: '商品与库存维护', status: 1, icon: 'Shop', color: '#C77A28', created_at: localDateTime(-30) },
+  { id: 4, name: '访客', code: 'guest', description: '只读演示账号', status: 0, icon: 'Eye', color: '#A8A29C', created_at: localDateTime(-30) },
 ];
 
 /** role_menu：admin 全量；operator 看板+销售；商品编辑 看板+商品+商品按钮+个人中心；访客 仅个人中心 */
@@ -651,6 +651,8 @@ const server = http.createServer(async (req, res) => {
           code: r.code,
           description: r.description,
           status: r.status ?? 1,
+          icon: r.icon ?? null,
+          color: r.color ?? null,
           created_at: r.created_at,
           user_count: countUsersOfRole(r.id),
           menu_count: (roleMenu[r.id] || []).length,
@@ -662,11 +664,11 @@ const server = http.createServer(async (req, res) => {
 
       if (method === 'POST') {
         const body = await readBody(req);
-        const { name, code, description = '' } = body;
+        const { name, code, description = '', icon = null, color = null } = body;
         if (!name || !code) return send(res, 200, fail('角色名称和编码为必填项'));
         if (roles.some((r) => r.code === code)) return send(res, 200, fail('角色编码已存在'));
 
-        const item = { id: nextId(roles), name, code, description, created_at: localDateTime() };
+        const item = { id: nextId(roles), name, code, description, icon, color, status: 1, created_at: localDateTime() };
         roles.push(item);
         return send(res, 200, ok({ id: item.id }, '新增成功'));
       }
@@ -699,10 +701,13 @@ const server = http.createServer(async (req, res) => {
       if (method === 'PUT' && !withMenus) {
         if (!role) return send(res, 404, fail('角色不存在', 404));
         const body = await readBody(req);
-        const { name, description } = body;
-        // 真实后端不校验 name，这里保持同样行为
-        role.name = name;
-        role.description = description;
+        // 部分更新：传哪个字段改哪个（code 不可改）
+        const { name, description, icon, color, status } = body;
+        if (name !== undefined) role.name = name;
+        if (description !== undefined) role.description = description;
+        if (icon !== undefined) role.icon = icon || null;
+        if (color !== undefined) role.color = color || null;
+        if (status !== undefined) role.status = Number(status) === 0 ? 0 : 1;
         return send(res, 200, ok(null, '更新成功'));
       }
 

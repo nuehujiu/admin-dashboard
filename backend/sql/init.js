@@ -55,20 +55,25 @@ async function run() {
   ];
 
   // 3) 写入角色
-  await conn.query("INSERT INTO roles (name, code, description) VALUES (?, ?, ?)", ['超级管理员', 'admin', '拥有全部权限']);
-  const adminRoleId = (await conn.query("SELECT id FROM roles WHERE code='admin'"))[0][0].id;
-  await conn.query("INSERT INTO roles (name, code, description) VALUES (?, ?, ?)", ['运营', 'operator', '可查看数据看板与销售统计']);
-  const operatorRoleId = (await conn.query("SELECT id FROM roles WHERE code='operator'"))[0][0].id;
-  await conn.query(
-    "INSERT INTO roles (name, code, description, status) VALUES (?, ?, ?, ?)",
-    ['商品编辑', 'goods-editor', '商品与库存维护', 1]
-  );
-  const goodsEditorRoleId = (await conn.query("SELECT id FROM roles WHERE code='goods-editor'"))[0][0].id;
-  await conn.query(
-    "INSERT INTO roles (name, code, description, status) VALUES (?, ?, ?, ?)",
-    ['访客', 'guest', '只读演示账号', 0]
-  );
-  const guestRoleId = (await conn.query("SELECT id FROM roles WHERE code='guest'"))[0][0].id;
+  // 角色种子：icon / color 决定角色卡的图标与配色（可选图标清单见前端 roleIcons.js）
+  const roleSeeds = [
+    ['超级管理员', 'admin', '拥有全部权限', 1, 'Safety', '#F5611D'],
+    ['运营', 'operator', '可查看数据看板与销售统计', 1, 'BarChart', '#2F8F86'],
+    ['商品编辑', 'goods-editor', '商品与库存维护', 1, 'Shop', '#C77A28'],
+    ['访客', 'guest', '只读演示账号', 0, 'Eye', '#A8A29C'],
+  ];
+  const roleIds = {};
+  for (const [name, code, description, status, icon, color] of roleSeeds) {
+    const r = await conn.query(
+      'INSERT INTO roles (name, code, description, status, icon, color) VALUES (?,?,?,?,?,?)',
+      [name, code, description, status, icon, color]
+    );
+    roleIds[code] = r[0].insertId;
+  }
+  const adminRoleId = roleIds.admin;
+  const operatorRoleId = roleIds.operator;
+  const goodsEditorRoleId = roleIds['goods-editor'];
+  const guestRoleId = roleIds.guest;
 
   // 4) 写入菜单并记录 id 供授权
   const menuIds = {};

@@ -8,7 +8,7 @@ const { success, fail } = require('../utils/response');
 async function list(req, res, next) {
   try {
     const rows = await query(
-      `SELECT r.id, r.name, r.code, r.description, r.status, r.created_at,
+      `SELECT r.id, r.name, r.code, r.description, r.status, r.icon, r.color, r.created_at,
               (SELECT COUNT(*) FROM users u WHERE u.role_id = r.id) AS user_count,
               (SELECT COUNT(*) FROM role_menu rm WHERE rm.role_id = r.id) AS menu_count
        FROM roles r ORDER BY r.id`
@@ -22,7 +22,7 @@ async function list(req, res, next) {
 /** 新增角色 */
 async function create(req, res, next) {
   try {
-    const { name, code, description = '' } = req.body || {};
+    const { name, code, description = '', icon = null, color = null } = req.body || {};
     if (!name || !code) {
       return fail(res, '角色名称和编码为必填项');
     }
@@ -31,8 +31,8 @@ async function create(req, res, next) {
       return fail(res, '角色编码已存在');
     }
     const result = await query(
-      'INSERT INTO roles (name, code, description) VALUES (?,?,?)',
-      [name, code, description]
+      'INSERT INTO roles (name, code, description, icon, color) VALUES (?,?,?,?,?)',
+      [name, code, description, icon, color]
     );
     return success(res, { id: result.insertId }, '新增成功');
   } catch (err) {
@@ -40,16 +40,47 @@ async function create(req, res, next) {
   }
 }
 
-/** 编辑角色 */
+/**
+ * 编辑角色：支持部分更新
+ * name / description / icon / color / status 传哪个改哪个（code 不允许改）
+ */
 async function update(req, res, next) {
   try {
     const id = req.params.id;
-    const { name, description } = req.body || {};
+    const { name, description, icon, color, status } = req.body || {};
     const exists = await query('SELECT id FROM roles WHERE id = ?', [id]);
     if (!exists.length) {
       return fail(res, '角色不存在', 404, 404);
     }
-    await query('UPDATE roles SET name = ?, description = ? WHERE id = ?', [name, description, id]);
+
+    const sets = [];
+    const params = [];
+    if (name !== undefined) {
+      sets.push('name = ?');
+      params.push(name);
+    }
+    if (description !== undefined) {
+      sets.push('description = ?');
+      params.push(description);
+    }
+    if (icon !== undefined) {
+      sets.push('icon = ?');
+      params.push(icon || null);
+    }
+    if (color !== undefined) {
+      sets.push('color = ?');
+      params.push(color || null);
+    }
+    if (status !== undefined) {
+      sets.push('status = ?');
+      params.push(Number(status) === 0 ? 0 : 1);
+    }
+    if (!sets.length) {
+      return success(res, null, '无变更');
+    }
+
+    params.push(id);
+    await query(`UPDATE roles SET ${sets.join(', ')} WHERE id = ?`, params);
     return success(res, null, '更新成功');
   } catch (err) {
     next(err);

@@ -24,6 +24,8 @@ CREATE TABLE `roles` (
   `code`        VARCHAR(50)  NOT NULL COMMENT '角色编码，如 admin / operator',
   `description` VARCHAR(200) DEFAULT NULL COMMENT '角色描述',
   `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '状态：1启用 0停用',
+  `icon`        VARCHAR(40)  DEFAULT NULL COMMENT '角色卡图标短名，如 Safety / Shop，对应前端 roleIcons.js',
+  `color`       VARCHAR(20)  DEFAULT NULL COMMENT '角色卡主色，如 #F5611D，底色由前端派生',
   `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
