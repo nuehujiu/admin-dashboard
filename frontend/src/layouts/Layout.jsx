@@ -1,14 +1,17 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { routes } from '../router/routes.jsx';
 import s from './Layout.module.scss';
 import { useUserStore } from '../store/useUserStore';
 import { getDefaultMenuPath } from '../utils/permissions';
+import { pushRecentPage } from '../utils/recentPages';
+import GlobalSearch from '../components/GlobalSearch';
+import NoticeBell from '../components/NoticeBell';
 
 import { Menu } from 'antd';
 import {
   DashboardOutlined, BarChartOutlined, ShoppingOutlined, UserOutlined,
-  TeamOutlined, SettingOutlined, SearchOutlined, BellOutlined,
+  TeamOutlined, SettingOutlined,
   LogoutOutlined, DownOutlined,
   MenuFoldOutlined, MenuUnfoldOutlined, IdcardOutlined,
 } from '@ant-design/icons';
@@ -79,6 +82,23 @@ export default function Layout() {
     })).filter((g) => g.children.length);
   }, [visiblePages]);
 
+  /** 全局搜索的数据源：有权限访问的页面 */
+  const searchItems = useMemo(
+    () => visiblePages.map((r) => ({
+      path: r.path,
+      name: r.name,
+      group: GROUP_BY_PATH[r.path] ?? '概览',
+      icon: ICONS[r.meta?.icon] ?? null,
+    })),
+    [visiblePages],
+  );
+
+  /** 记录最近访问（全局搜索的空态用） */
+  useEffect(() => {
+    const known = allPages.some((r) => r.path === pathname);
+    if (known) pushRecentPage(pathname);
+  }, [pathname, allPages]);
+
   /** 当前页面是否可访问（手输 URL 也挡） */
   const route = allPages.find((r) => r.path === pathname);
   const denied = !!(route?.meta?.permission && !permissions.includes(route.meta.permission));
@@ -143,8 +163,10 @@ export default function Layout() {
           </button>
           <Breadcrumb items={crumbs} />
           <div className={s.grow} />
-          <div className={s.iconBtn}><SearchOutlined /></div>
-          <div className={s.iconBtn}><BellOutlined /></div>
+          {/* 全局页面搜索（Ctrl+K） */}
+          <GlobalSearch items={searchItems} onSelect={navigate} />
+          {/* 通知：内容由后端按权限派生 */}
+          <NoticeBell />
           <Dropdown
             placement="bottomRight"
             menu={{

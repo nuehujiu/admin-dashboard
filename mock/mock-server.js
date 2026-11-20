@@ -1252,6 +1252,64 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
+    // ============================================== 通知中心 /api/notifications
+    if (path === '/api/notifications' && method === 'GET') {
+      const owned = new Set(
+        menusOfRole(req.user.role_id).map((m) => m.permission).filter(Boolean),
+      );
+      const items = [];
+
+      if (owned.has('goods:view')) {
+        const low = goods.filter((g) => Number(g.stock) < 50);
+        if (low.length) {
+          items.push({
+            id: 'goods-stock-low',
+            sig: String(low.length),
+            type: 'stock',
+            title: `${low.length} 件商品库存偏低`,
+            desc: '库存不足 50 件，建议尽快补货',
+            path: '/goods',
+            time: localDateTime(0),
+          });
+        }
+      }
+
+      if (owned.has('user:list')) {
+        const disabled = users.filter((u) => Number(u.status) === 0);
+        if (disabled.length) {
+          const latest = disabled
+            .map((u) => u.updated_at || '')
+            .sort()
+            .pop() || localDateTime(0);
+          items.push({
+            id: 'users-disabled',
+            sig: String(disabled.length),
+            type: 'user',
+            title: `${disabled.length} 个账号处于禁用状态`,
+            desc: '禁用账号无法登录，请确认是否符合预期',
+            path: '/system/users',
+            time: latest,
+          });
+        }
+      }
+
+      const noticeText = String(settings.notice || '').trim();
+      if (noticeText) {
+        items.push({
+          id: 'system-notice',
+          sig: noticeText.slice(0, 24),
+          type: 'notice',
+          title: '系统公告已更新',
+          desc: noticeText.length > 40 ? `${noticeText.slice(0, 40)}…` : noticeText,
+          path: '/settings',
+          time: localDateTime(0),
+        });
+      }
+
+      items.sort((a, b) => String(b.time || '').localeCompare(String(a.time || '')));
+      return send(res, 200, ok(items));
+    }
+
     // ============================================== 系统设置 /api/settings
     if (path === '/api/settings') {
       if (method === 'GET') {
