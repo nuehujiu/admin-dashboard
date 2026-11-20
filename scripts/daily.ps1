@@ -1,4 +1,4 @@
-# 每天提交代码（配合《04_开发协作规范.md》§1 的 Git Flow）
+﻿# 每天提交代码（配合《04_开发协作规范.md》§1 的 Git Flow）
 #
 # 用法（在项目任意目录执行都可以）：
 #   .\scripts\daily.ps1                                  # 当天第一次：自动开 feature/daily-yyyyMMdd，只提交 frontend/
@@ -34,23 +34,57 @@ function Get-GitPath {
 $Git = Get-GitPath
 $Repo = Split-Path -Parent $PSScriptRoot
 
+function Invoke-Git {
+    param([string[]]$GitArgs)
+    # 用 .NET 进程执行 git：分别拿 stdout / stderr / 退出码
+    # 不用 & $Git ... 2>&1 —— git 会把进度（如 fetch 的 "From github.com:..."）写到 stderr，
+    # 那种输出会被 PowerShell 当成 NativeCommandError，在 Stop 策略下直接把脚本打断
+    $psi = [System.Diagnostics.ProcessStartInfo]::new()
+    $psi.FileName = $Git
+    if ($psi.PSObject.Properties['ArgumentList']) {
+        # ArgumentList 是只读集合，只能逐个 Add
+        foreach ($a in (@('-C', $Repo) + $GitArgs)) { $psi.ArgumentList.Add([string]$a) }
+    }
+    else {
+        # Windows PowerShell 5.1 没有 ArgumentList，退回字符串形式
+        $args = (@('-C', $Repo) + $GitArgs | ForEach-Object {
+                if ($_ -match '[ "]') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
+            }) -join ' '
+        $psi.Arguments = $args
+    }
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow = $true
+    $psi.StandardOutputEncoding = [Text.Encoding]::UTF8
+    $psi.StandardErrorEncoding = [Text.Encoding]::UTF8
+    $p = [System.Diagnostics.Process]::Start($psi)
+    $out = $p.StandardOutput.ReadToEnd()
+    $err = $p.StandardError.ReadToEnd()
+    $p.WaitForExit()
+    [pscustomobject]@{ Code = $p.ExitCode; Out = $out; Err = $err }
+}
+
 function G {
     param([string[]]$GitArgs, [switch]$AllowFail)
     $line = "git " + ($GitArgs -join ' ')
     if ($DryRun) { Write-Host "  [dry-run] $line" -ForegroundColor DarkGray; return "" }
-    $out = & $Git -C $Repo @GitArgs 2>&1
-    if ($LASTEXITCODE -ne 0) {
+    $r = Invoke-Git $GitArgs
+    if ($r.Code -ne 0) {
         if ($AllowFail) { return "" }
-        throw "git 失败：$line`n$out"
+        throw "git 失败：$line`n$($r.Err)$($r.Out)"
     }
-    return ($out | Out-String)
+    return $r.Out
 }
 
 function GRead {
     param([string[]]$GitArgs, [switch]$AllowFail)
-    $out = & $Git -C $Repo @GitArgs 2>&1
-    if ($LASTEXITCODE -ne 0) { if ($AllowFail) { return "" } throw "git 失败：$($GitArgs -join ' ')`n$out" }
-    return ($out | Out-String).Trim()
+    $r = Invoke-Git $GitArgs
+    if ($r.Code -ne 0) {
+        if ($AllowFail) { return "" }
+        throw "git 失败：$($GitArgs -join ' ')`n$($r.Err)$($r.Out)"
+    }
+    return ($r.Out).Trim()
 }
 
 $inside = GRead @('rev-parse', '--is-inside-work-tree') -AllowFail
@@ -93,7 +127,7 @@ if ($DryRun) {
     $stArgs = @('status', '--porcelain')
     if ($Scope -eq 'frontend') { $stArgs += @('--', 'frontend') }
     # 不用 GRead：它对整体做了 Trim，会吃掉行首的状态位，Substring(3) 就会切错
-    $raw = (& $Git -C $Repo @stArgs 2>&1 | Out-String)
+    $raw = (Invoke-Git $stArgs).Out
     $changed = ((($raw -split '\r?\n') | Where-Object { $_.Length -gt 3 } |
         ForEach-Object { $_.Substring(3).Trim() }) -join "`n").Trim()
     $scopeText = if ($Scope -eq 'frontend') { 'frontend/' } else { '整个仓库' }
