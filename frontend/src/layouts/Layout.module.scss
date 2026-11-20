@@ -40,6 +40,10 @@
   justify-content: center;
 }
 //brand名称样式
+.brandText {
+  min-width: 0;
+  overflow: hidden;
+}
 .brandName {
   font-size: 15px;
   font-weight: 700;
@@ -47,8 +51,11 @@
   line-height: 1.15;
 }
 .brandSub {
+  overflow: hidden;
   font-size: 11px;
   color: $text-3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 //菜单样式
 .menuWarp {

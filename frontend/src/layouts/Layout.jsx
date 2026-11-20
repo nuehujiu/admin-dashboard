@@ -100,9 +100,12 @@ export default function Layout() {
         <div className={s.brand}>
           <div className={s.brandLogo}>H</div>
           {!collapsed && (
-            <div>
+            <div className={s.brandText}>
               <div className={s.brandName}>houtai</div>
-              <div className={s.brandSub}>商城后台</div>
+              {/* 副标题跟随系统设置里的「系统名称」 */}
+              <div className={s.brandSub} title={settings.systemName}>
+                {settings.systemName}
+              </div>
             </div>
           )}
         </div>
