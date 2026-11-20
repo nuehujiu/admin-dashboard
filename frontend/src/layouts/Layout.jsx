@@ -9,7 +9,7 @@ import { Menu } from 'antd';
 import {
   DashboardOutlined, BarChartOutlined, ShoppingOutlined, UserOutlined,
   TeamOutlined, SettingOutlined, SearchOutlined, BellOutlined,
-  ProfileOutlined, LogoutOutlined, DownOutlined,
+  LogoutOutlined, DownOutlined,
   MenuFoldOutlined, MenuUnfoldOutlined, IdcardOutlined,
 } from '@ant-design/icons';
 import { Breadcrumb, Dropdown, Avatar, theme, Result, Button } from 'antd';
@@ -88,7 +88,6 @@ export default function Layout() {
     : [{ title: '概览' }];
 
   const onUserMenu = ({ key }) => {
-    if (key === 'profile') navigate('/profile');
     if (key === 'logout') {
       logout();
       navigate('/login');
@@ -148,8 +147,6 @@ export default function Layout() {
             menu={{
               onClick: onUserMenu,
               items: [
-                { key: 'profile', label: '个人中心', icon: <ProfileOutlined /> },
-                { type: 'divider' },
                 { key: 'logout', label: '退出登录', icon: <LogoutOutlined />, danger: true },
               ],
             }}
