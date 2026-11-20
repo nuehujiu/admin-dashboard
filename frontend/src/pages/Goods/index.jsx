@@ -11,6 +11,8 @@ import {
 } from '../../api/goods';
 
 import { money, int } from '../../utils/format';
+import AuthButton from '../../components/AuthButton';
+import { PERM, usePermission } from '../../utils/permissions';
 import s from './index.module.scss';
 
 /** 库存预警线：低于它库存条变橙、数字变橙 */
@@ -32,6 +34,8 @@ export default function Goods() {
   const { message } = App.useApp();
   // 创建表单实例
   const [dialogForm] = Form.useForm();
+  // 当前用户的权限判定
+  const { can } = usePermission();
 
   // 筛选表单值（未提交）
   const [filters, setFilters] = useState({ keyword: '', category: undefined, status: undefined });
@@ -339,12 +343,12 @@ export default function Goods() {
         width: 170,
         render: (_, r) => (
           <Space size={0} separator={<span className={s.dot}>·</span>}>
-            <Button type="link" size="small" className={s.opBtn} onClick={() => setEditing(r)}>
+            <AuthButton type="link" size="small" className={s.opBtn} permission={PERM.GOODS_UPDATE} onClick={() => setEditing(r)}>
               编辑
-            </Button>
-            <Button type="link" size="small" className={s.opBtn} onClick={() => onToggle(r)}>
+            </AuthButton>
+            <AuthButton type="link" size="small" className={s.opBtn} permission={PERM.GOODS_STATUS} onClick={() => onToggle(r)}>
               {r.status === 1 ? '下架' : '上架'}
-            </Button>
+            </AuthButton>
             <Popconfirm
               title="删除这个商品？"
               description="删除后不可恢复"
@@ -352,9 +356,15 @@ export default function Goods() {
               okButtonProps={{ danger: true }}
               onConfirm={() => onDelete(r)}
             >
-              <Button type="link" size="small" danger className={s.opBtn}>
+              <AuthButton
+                type="link"
+                size="small"
+                danger
+                className={s.opBtn}
+                permission={PERM.GOODS_DELETE}
+              >
                 删除
-              </Button>
+              </AuthButton>
             </Popconfirm>
           </Space>
         ),
@@ -376,13 +386,14 @@ export default function Goods() {
               导入
             </Button>
           </Tooltip>
-          <Button
+          <AuthButton
             type="primary"
             icon={<PlusOutlined />}
+            permission={PERM.GOODS_CREATE}
             onClick={() => setEditing({})}
           >
             新增商品
-          </Button>
+          </AuthButton>
         </div>
       </div>
 
@@ -426,12 +437,12 @@ export default function Goods() {
           <div className={s.bulkBar}>
             <span className={s.bulkText}>已选 {selected.length} 项</span>
             <div className={s.bulkActions}>
-              <Button size="small" loading={bulkLoading} onClick={() => onBatchStatus(1)}>
+              <AuthButton size="small" permission={PERM.GOODS_STATUS} loading={bulkLoading} onClick={() => onBatchStatus(1)}>
                 批量上架
-              </Button>
-              <Button size="small" loading={bulkLoading} onClick={() => onBatchStatus(0)}>
+              </AuthButton>
+              <AuthButton size="small" permission={PERM.GOODS_STATUS} loading={bulkLoading} onClick={() => onBatchStatus(0)}>
                 批量下架
-              </Button>
+              </AuthButton>
               <Popconfirm
                 title={`删除选中的 ${selected.length} 件商品？`}
                 description="删除后不可恢复"
@@ -439,9 +450,14 @@ export default function Goods() {
                 okButtonProps={{ danger: true }}
                 onConfirm={onBatchDelete}
               >
-                <Button size="small" danger loading={bulkLoading}>
+                <AuthButton
+                  size="small"
+                  danger
+                  loading={bulkLoading}
+                  permission={PERM.GOODS_DELETE}
+                >
                   批量删除
-                </Button>
+                </AuthButton>
               </Popconfirm>
               <Button size="small" type="text" onClick={() => setSelected([])}>
                 取消选择
@@ -542,16 +558,29 @@ export default function Goods() {
             >
               <InputNumber min={0} precision={2} style={{ width: '100%' }} placeholder="0.00" />
             </Form.Item>
-            <Form.Item label="库存" name="stock">
-              <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+            <Form.Item
+              label="库存"
+              name="stock"
+              tooltip={can(PERM.GOODS_STOCK) ? undefined : '当前角色无库存调整权限'}
+            >
+              <InputNumber
+                min={0}
+                precision={0}
+                style={{ width: '100%' }}
+                disabled={!can(PERM.GOODS_STOCK)}
+              />
             </Form.Item>
             <Form.Item label="销量" name="sales">
               <InputNumber min={0} precision={0} style={{ width: '100%' }} />
             </Form.Item>
           </div>
 
-          <Form.Item label="状态" name="status">
-            <Select options={STATUS_OPTIONS} />
+          <Form.Item
+            label="状态"
+            name="status"
+            tooltip={can(PERM.GOODS_STATUS) ? undefined : '当前角色无商品上下架权限'}
+          >
+            <Select options={STATUS_OPTIONS} disabled={!can(PERM.GOODS_STATUS)} />
           </Form.Item>
 
           <Form.Item label="商品描述" name="description">

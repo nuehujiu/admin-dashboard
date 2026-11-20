@@ -27,6 +27,8 @@ import {
   updateRole,
 } from '../../api/roles';
 import { getRoleIcon, ICON_OPTIONS, COLOR_OPTIONS, softBg } from './roleIcons';
+import AuthButton from '../../components/AuthButton';
+import { PERM, usePermission } from '../../utils/permissions';
 /**
  * 权限矩阵的行：按设计稿的分组呈现
  * perms 用 permission 标识而不是写死 id，菜单表变动后依然能对上
@@ -70,6 +72,11 @@ const MATRIX_ROWS = [
     perms: ['role:create', 'role:update', 'role:delete'],
   },
   {
+    key: 'btn-goods-crud',
+    label: '按钮 · 商品新增 / 编辑 / 删除',
+    perms: ['goods:create', 'goods:update', 'goods:delete'],
+  },
+  {
     key: 'btn-goods',
     label: '按钮 · 商品上下架 / 库存调整',
     perms: ['goods:status', 'goods:stock'],
@@ -80,6 +87,7 @@ export default function Roles() {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
   const { message, modal } = App.useApp();
+  const { can } = usePermission();
   const [creating, setCreating] = useState(false);
   const [roles, setRoles] = useState([]);
   const [rolePerms, setRolePerms] = useState({});
@@ -204,14 +212,14 @@ export default function Roles() {
             <Checkbox
               checked={owned.length === ids.length}
               indeterminate={owned.length > 0 && owned.length < ids.length}
-              disabled={savingId === r.id}
+              disabled={savingId === r.id || !can(PERM.ROLE_UPDATE)}
               onChange={(e) => toggleCell(r.id, ids, e.target.checked)}
             />
           );
         },
       })),
     ],
-    [roles, rolePerms, savingId, rowIds, toggleCell],
+    [roles, rolePerms, savingId, rowIds, toggleCell, can],
   );
 
   /** 整列全选 / 清空 */
@@ -347,16 +355,17 @@ export default function Roles() {
               导出配置
             </Button>
           </Tooltip>
-          <Button
+          <AuthButton
             type="primary"
             icon={<PlusOutlined />}
+            permission={PERM.ROLE_CREATE}
             onClick={() => {
               form.resetFields();
               setCreating(true);
             }}
           >
             新增角色
-          </Button>
+          </AuthButton>
         </div>
       </div>
 
@@ -387,35 +396,41 @@ export default function Roles() {
                   <div className={s.roleName}>{r.name}</div>
                   <div className={s.roleDesc}>{r.description || '—'}</div>
                 </div>
-                {/* hover 卡片才出现的两个圆形操作按钮 */}
-                <div className={s.cardActions}>
-                  <Tooltip title="编辑角色" placement="topRight">
-                    <button
-                      type="button"
-                      className={s.cardAction}
-                      aria-label="编辑角色"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onOpenEdit(r);
-                      }}
-                    >
-                      <EditOutlined />
-                    </button>
-                  </Tooltip>
-                  <Tooltip title="删除角色" placement="topRight">
-                    <button
-                      type="button"
-                      className={`${s.cardAction} ${s.actionDanger}`}
-                      aria-label="删除角色"
-                      onClick={(e) => {
-                        e.stopPropagation(); // 关键：别触发卡片本身的「切换当前列」
-                        onDelete(r);
-                      }}
-                    >
-                      <DeleteOutlined />
-                    </button>
-                  </Tooltip>
-                </div>
+                {/* hover 卡片才出现的两个圆形操作按钮：无权限则不渲染 */}
+                {(can(PERM.ROLE_UPDATE) || can(PERM.ROLE_DELETE)) && (
+                  <div className={s.cardActions}>
+                    {can(PERM.ROLE_UPDATE) && (
+                      <Tooltip title="编辑角色" placement="topRight">
+                        <button
+                          type="button"
+                          className={s.cardAction}
+                          aria-label="编辑角色"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenEdit(r);
+                          }}
+                        >
+                          <EditOutlined />
+                        </button>
+                      </Tooltip>
+                    )}
+                    {can(PERM.ROLE_DELETE) && (
+                      <Tooltip title="删除角色" placement="topRight">
+                        <button
+                          type="button"
+                          className={`${s.cardAction} ${s.actionDanger}`}
+                          aria-label="删除角色"
+                          onClick={(e) => {
+                            e.stopPropagation(); // 关键：别触发卡片本身的「切换当前列」
+                            onDelete(r);
+                          }}
+                        >
+                          <DeleteOutlined />
+                        </button>
+                      </Tooltip>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className={s.roleFoot}>
@@ -429,6 +444,7 @@ export default function Roles() {
                 <button
                   type="button"
                   className={`${s.statusPill} ${r.status === 1 ? s.statusOn : s.statusOff}`}
+                  disabled={!can(PERM.ROLE_UPDATE)}
                   onClick={(e) => {
                     e.stopPropagation();
                     onToggleStatus(r);
@@ -452,7 +468,7 @@ export default function Roles() {
           <Button
             type="link"
             onClick={toggleColumn}
-            disabled={!current}
+            disabled={!current || !can(PERM.ROLE_UPDATE)}
             loading={savingId === current}
           >
             {currentAll ? '清空当前列' : '全选当前列'} ›

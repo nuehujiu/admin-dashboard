@@ -3,108 +3,93 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { routes } from '../router/routes.jsx';
 import s from './Layout.module.scss';
 import { useUserStore } from '../store/useUserStore';
+import { getDefaultMenuPath } from '../utils/permissions';
 
 import { Menu } from 'antd';
 import {
-  DashboardOutlined,
-  BarChartOutlined,
-  ShoppingOutlined,
-  UserOutlined,
-  TeamOutlined,
-  SettingOutlined,
-  SearchOutlined,
-  BellOutlined,
-  ProfileOutlined,
-  LogoutOutlined,
-  DownOutlined,
+  DashboardOutlined, BarChartOutlined, ShoppingOutlined, UserOutlined,
+  TeamOutlined, SettingOutlined, SearchOutlined, BellOutlined,
+  ProfileOutlined, LogoutOutlined, DownOutlined,
 } from '@ant-design/icons';
-import { Breadcrumb, Dropdown, Avatar, theme } from 'antd';
+import { Breadcrumb, Dropdown, Avatar, theme, Result, Button } from 'antd';
 
 const ICONS = {
-  dashboard: <DashboardOutlined />,
-  'bar-chart': <BarChartOutlined />,
-  shopping: <ShoppingOutlined />,
-  user: <UserOutlined />,
-  team: <TeamOutlined />,
-  setting: <SettingOutlined />,
+  dashboard: <DashboardOutlined />, 'bar-chart': <BarChartOutlined />,
+  shopping: <ShoppingOutlined />, user: <UserOutlined />,
+  team: <TeamOutlined />, setting: <SettingOutlined />,
 };
 const GROUP_BY_PATH = {
-  '/dashboard': '概览',
-  '/sales': '概览',
-  '/goods': '运营',
-  '/system/users': '运营',
-  '/system/roles': '系统',
-  '/settings': '系统',
+  '/dashboard': '概览', '/sales': '概览', '/goods': '运营',
+  '/system/users': '运营', '/system/roles': '系统', '/settings': '系统',
 };
 const GROUP_ORDER = ['概览', '运营', '系统'];
 
 /**
- * Layout组件
- * 作为应用程序的主要布局容器，包含页面标题和内容区域
+ * 页面列表缓存：延迟到首次渲染时才读 routes
+ * Layout 由 routes.jsx import，若在模块顶层直接访问 routes 会撞上循环依赖的 TDZ 报错；
+ * 缓存保证只建一次、引用稳定，useMemo 才有效
  */
+let pagesCache = null;
+const getPages = () => {
+  if (!pagesCache) {
+    pagesCache = (routes.find((r) => r.path === '/')?.children ?? []).filter(
+      (r) => r.path,
+    );
+  }
+  return pagesCache;
+};
+
 export default function Layout() {
-  // 获取当前路径
+  const allPages = getPages();
   const { pathname } = useLocation();
   const { token } = theme.useToken();
   const user = useUserStore((s) => s.user);
   const menus = useUserStore((s) => s.menus);
+  const permissions = useUserStore((s) => s.permissions);
   const logout = useUserStore((s) => s.logout);
+  const navigate = useNavigate();
 
   const group = GROUP_BY_PATH[pathname];
-  // 获取导航函数
-  const navigate = useNavigate();
-  // 使用 useMemo 缓存菜单项，避免不必要的重复计算
-  // 获取所有页面路由，过滤掉隐藏的路由
-  const allPages = (routes.find((r) => r.path === '/')?.children ?? []).filter(
-    (r) => r.path,
-  );
-  const menuItems = useMemo(() => {
-    // 根据分组顺序映射菜单项
-    return GROUP_ORDER.map((group) => ({
-      type: 'group', // 菜单项类型为分组
-      label: group, // 分组标签
-      children: allPages
-        .filter(
-          // 过滤掉隐藏的路由，并根据路径分组
-          (r) => !r.meta?.hidden && (GROUP_BY_PATH[r.path] ?? '概览') === group,
-        )
-        .map((r) => ({
-          key: r.path, // 菜单项的键为路径
-          icon: ICONS[r.meta?.icon] ?? null, // 菜单项图标
-          label: r.name, // 菜单项标签
-        })),
-    })).filter((g) => g.children.length); // 过滤掉没有子项的分组
-  }, []); // 依赖数组为空，表示只在组件挂载时计算一次
-  const active = allPages.find((r) => r.path === pathname);
-  const crumbs = active
-    ? group
-      ? [{ title: group }, { title: active.name }]
-      : [{ title: active.name }]
-    : [{ tilte: '概览' }];
 
-  /**
-   * 处理用户菜单点击事件的函数
-   * @param {Object} param - 包含菜单项key的对象
-   * @param {string} param.key - 菜单项的标识值
-   */
+  /** 侧栏可见页面：后端菜单里有这个 path + 非 hidden + 权限点满足 */
+  const visiblePages = useMemo(() => {
+    return allPages.filter((r) => {
+      if (r.meta?.hidden) return false;
+      if (!menus.some((m) => m.path === r.path)) return false;
+      const perm = r.meta?.permission;
+      return !perm || permissions.includes(perm);
+    });
+  }, [allPages, menus, permissions]);
+
+  const menuItems = useMemo(() => {
+    return GROUP_ORDER.map((g) => ({
+      type: 'group',
+      label: g,
+      children: visiblePages
+        .filter((r) => (GROUP_BY_PATH[r.path] ?? '概览') === g)
+        .map((r) => ({ key: r.path, icon: ICONS[r.meta?.icon] ?? null, label: r.name })),
+    })).filter((g) => g.children.length);
+  }, [visiblePages]);
+
+  /** 当前页面是否可访问（手输 URL 也挡） */
+  const route = allPages.find((r) => r.path === pathname);
+  const denied = !!(route?.meta?.permission && !permissions.includes(route.meta.permission));
+
+  const crumbs = route
+    ? group ? [{ title: group }, { title: route.name }] : [{ title: route.name }]
+    : [{ title: '概览' }];
+
   const onUserMenu = ({ key }) => {
-    // 如果点击的是个人资料菜单项
-    if (key === 'profile') {
-      // 导航到个人资料页面
-      navigate('/profile');
-    }
-    // 如果点击的是退出登录菜单项
+    if (key === 'profile') navigate('/profile');
     if (key === 'logout') {
       logout();
-      // 导航到登录页面
       navigate('/login');
     }
   };
+
   return (
     <div className={s.app}>
-      {/* 侧边栏 */}
       <aside className={s.sider}>
-        {/* 侧边栏logo */}
         <div className={s.brand}>
           <div className={s.brandLogo}>H</div>
           <div>
@@ -112,7 +97,6 @@ export default function Layout() {
             <div className={s.brandSub}>商城后台</div>
           </div>
         </div>
-        {/* 侧边栏菜单 */}
         <div className={s.menuWarp}>
           <Menu
             mode="inline"
@@ -125,65 +109,56 @@ export default function Layout() {
         <div className={s.roleCard}>
           <p>当前角色</p>
           <strong>
-            {user?.role_name || '—'} · {menus.length} 项菜单
+            {user?.role_name || '—'} · {visiblePages.length} 项菜单
           </strong>
         </div>
       </aside>
-      {/* 主内容区域 */}
+
       <div className={s.main}>
         <header className={s.header}>
           <Breadcrumb items={crumbs} />
           <div className={s.grow} />
-          <div className={s.iconBtn}>
-            <SearchOutlined />
-          </div>
-          <div className={s.iconBtn}>
-            <BellOutlined />
-          </div>
+          <div className={s.iconBtn}><SearchOutlined /></div>
+          <div className={s.iconBtn}><BellOutlined /></div>
           <Dropdown
             placement="bottomRight"
             menu={{
               onClick: onUserMenu,
               items: [
-                {
-                  key: 'profile',
-                  label: '个人中心',
-                  icon: <ProfileOutlined />,
-                },
-                {
-                  type: 'divider',
-                },
-                {
-                  key: 'logout',
-                  label: '退出登录',
-                  icon: <LogoutOutlined />,
-                  danger: true,
-                },
+                { key: 'profile', label: '个人中心', icon: <ProfileOutlined /> },
+                { type: 'divider' },
+                { key: 'logout', label: '退出登录', icon: <LogoutOutlined />, danger: true },
               ],
             }}
           >
             <div className={s.userChip}>
-              <Avatar
-                size={30}
-                style={{ background: 'var(--primary)', fontSize: 13 }}
-              >
+              <Avatar size={30} style={{ background: 'var(--primary)', fontSize: 13 }}>
                 {(user?.nickname || user?.username || '?').slice(0, 1)}
               </Avatar>
-
               <div>
-                <div className={s.userName}>
-                  {user?.nickname || user?.username || '未登录'}
-                </div>
+                <div className={s.userName}>{user?.nickname || user?.username || '未登录'}</div>
                 <div className={s.userRole}>{user?.role_name || '—'}</div>
               </div>
-              <DownOutlined
-                style={{ fontSize: 10, color: token.colorTextTertiary }}
-              />
+              <DownOutlined style={{ fontSize: 10, color: token.colorTextTertiary }} />
             </div>
           </Dropdown>
         </header>
+
         <div className={s.content}>
-          <Outlet />
+          {denied ? (
+            <Result
+              status="403"
+              title="403"
+              subTitle={`当前角色（${user?.role_name || '未知'}）没有访问该页面的权限`}
+              extra={
+                <Button type="primary" onClick={() => navigate(getDefaultMenuPath(menus))}>
+                  回到可访问页面
+                </Button>
+              }
+            />
+          ) : (
+            <Outlet />
+          )}
         </div>
       </div>
     </div>

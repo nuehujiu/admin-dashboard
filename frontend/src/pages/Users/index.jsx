@@ -29,6 +29,8 @@ import {
   createUser,
   deleteUser,
 } from '../../api/users';
+import AuthButton from '../../components/AuthButton';
+import { PERM, usePermission } from '../../utils/permissions';
 
 const STATUS_OPTIONS = [
   { label: '启用', value: 1 },
@@ -66,6 +68,7 @@ export default function Users() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const { message } = App.useApp();
+  const { can } = usePermission();
   const [summary, setSummary] = useState({
     total: 0,
     weekNew: 0,
@@ -291,6 +294,7 @@ export default function Users() {
           <Switch
             checked={v === 1}
             loading={switching.includes(r.id)}
+            disabled={!can(PERM.USER_UPDATE)}
             onChange={(checked) => onToggleStatus(r, checked)}
           />
         ),
@@ -307,22 +311,24 @@ export default function Users() {
         width: 160,
         render: (_, r) => (
           <Space size={0} separator={<span className={s.dot}>·</span>}>
-            <Button
+            <AuthButton
               type="link"
               size="small"
               className={s.opBtn}
+              permission={PERM.USER_UPDATE}
               onClick={() => openEdit(r)}
             >
               编辑
-            </Button>
-            <Button
+            </AuthButton>
+            <AuthButton
               type="link"
               size="small"
               className={s.opBtn}
+              permission={PERM.USER_UPDATE}
               onClick={() => onToggleStatus(r, r.status !== 1)}
             >
               {r.status === 1 ? '禁用' : '启用'}
-            </Button>
+            </AuthButton>
             <Popconfirm
               title="删除这个用户？"
               description="删除后不可恢复"
@@ -330,15 +336,21 @@ export default function Users() {
               okButtonProps={{ danger: true }}
               onConfirm={() => onDelete(r)}
             >
-              <Button type="link" size="small" className={s.opBtn} danger>
+              <AuthButton
+                type="link"
+                size="small"
+                className={s.opBtn}
+                danger
+                permission={PERM.USER_DELETE}
+              >
                 删除
-              </Button>
+              </AuthButton>
             </Popconfirm>
           </Space>
         ),
       },
     ],
-    [switching, onToggleStatus, onDelete, openEdit],
+    [switching, onToggleStatus, onDelete, openEdit, can],
   );
 
   const roleClass = (id) =>
@@ -399,13 +411,14 @@ export default function Users() {
           >
             角色配置
           </Button>
-          <Button
+          <AuthButton
             type="primary"
             onClick={() => openEdit(null)}
             icon={<PlusOutlined />}
+            permission={PERM.USER_CREATE}
           >
             新增用户
-          </Button>
+          </AuthButton>
         </div>
       </div>
 
@@ -458,22 +471,24 @@ export default function Users() {
         <div className={s.bulkBar}>
           <span className={s.bulkText}>已选{selected.length}项</span>
           <div className={s.bulkActions}>
-            <Button
+            <AuthButton
               size="small"
+              permission={PERM.USER_UPDATE}
               disabled={!selected.length}
               loading={bulkLoading}
               onClick={() => onBatchStatus(1)}
             >
               批量启用
-            </Button>
-            <Button
+            </AuthButton>
+            <AuthButton
               size="small"
+              permission={PERM.USER_UPDATE}
               disabled={!selected.length}
               loading={bulkLoading}
               onClick={() => onBatchStatus(0)}
             >
               批量禁用
-            </Button>
+            </AuthButton>
           </div>
           <span className={s.bulkHint}>
             {sort === 'recent'
