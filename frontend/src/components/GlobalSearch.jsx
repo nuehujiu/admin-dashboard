@@ -142,19 +142,6 @@ export default function GlobalSearch({ items = [], onSelect }) {
             </div>
           )}
         </div>
-
-        <div className={s.footer}>
-          <span>
-            <kbd>↑</kbd>
-            <kbd>↓</kbd> 选择
-          </span>
-          <span>
-            <kbd>Enter</kbd> 打开
-          </span>
-          <span>
-            <kbd>Esc</kbd> 关闭
-          </span>
-        </div>
       </Modal>
     </>
   );
