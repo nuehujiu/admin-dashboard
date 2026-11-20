@@ -3,7 +3,8 @@ import { toast } from '../utils/feedback';
 import { useUserStore } from '../store/useUserStore';
 
 const request = axios.create({
-  baseURL: '/api',
+  // 由 .env.* 提供，未配置时回落到相对路径（交给 Nginx / proxy 转发）
+  baseURL: import.meta.env.VITE_API_BASE || '/api',
   timeout: 5000,
 });
 
