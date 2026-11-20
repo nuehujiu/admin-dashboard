@@ -10,6 +10,7 @@ import {
   DashboardOutlined, BarChartOutlined, ShoppingOutlined, UserOutlined,
   TeamOutlined, SettingOutlined, SearchOutlined, BellOutlined,
   ProfileOutlined, LogoutOutlined, DownOutlined,
+  MenuFoldOutlined, MenuUnfoldOutlined,
 } from '@ant-design/icons';
 import { Breadcrumb, Dropdown, Avatar, theme, Result, Button } from 'antd';
 
@@ -46,6 +47,11 @@ export default function Layout() {
   const user = useUserStore((s) => s.user);
   const menus = useUserStore((s) => s.menus);
   const permissions = useUserStore((s) => s.permissions);
+  // 侧栏折叠：手动切换的会话态优先，否则跟随系统设置里的默认折叠
+  const settings = useUserStore((s) => s.settings);
+  const siderFolded = useUserStore((s) => s.siderFolded);
+  const toggleSider = useUserStore((s) => s.toggleSider);
+  const collapsed = siderFolded ?? settings.siderCollapsed === 1;
   const logout = useUserStore((s) => s.logout);
   const navigate = useNavigate();
 
@@ -89,33 +95,48 @@ export default function Layout() {
 
   return (
     <div className={s.app}>
-      <aside className={s.sider}>
+      <aside className={`${s.sider} ${collapsed ? s.siderCollapsed : ''}`}>
         <div className={s.brand}>
           <div className={s.brandLogo}>H</div>
-          <div>
-            <div className={s.brandName}>houtai</div>
-            <div className={s.brandSub}>商城后台</div>
-          </div>
+          {!collapsed && (
+            <div>
+              <div className={s.brandName}>houtai</div>
+              <div className={s.brandSub}>商城后台</div>
+            </div>
+          )}
         </div>
         <div className={s.menuWarp}>
           <Menu
             mode="inline"
+            inlineCollapsed={collapsed}
             items={menuItems}
             selectedKeys={[pathname]}
             onClick={({ key }) => navigate(key)}
             style={{ borderInlineEnd: 'none', background: 'transparent' }}
           ></Menu>
         </div>
-        <div className={s.roleCard}>
-          <p>当前角色</p>
-          <strong>
-            {user?.role_name || '—'} · {visiblePages.length} 项菜单
-          </strong>
-        </div>
+        {!collapsed && (
+          <div className={s.roleCard}>
+            <p>当前角色</p>
+            <strong>
+              {user?.role_name || '—'} · {visiblePages.length} 项菜单
+            </strong>
+          </div>
+        )}
       </aside>
 
       <div className={s.main}>
         <header className={s.header}>
+          {/* 折叠开关 */}
+          <button
+            type="button"
+            className={s.iconBtn}
+            aria-label={collapsed ? '展开侧栏' : '折叠侧栏'}
+            title={collapsed ? '展开侧栏' : '折叠侧栏'}
+            onClick={toggleSider}
+          >
+            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          </button>
           <Breadcrumb items={crumbs} />
           <div className={s.grow} />
           <div className={s.iconBtn}><SearchOutlined /></div>
