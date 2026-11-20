@@ -128,9 +128,12 @@ export default function GlobalSearch({ items = [], onSelect }) {
               >
                 <span className={s.itemIcon}>{it.icon}</span>
                 <span className={s.itemName}>{it.name}</span>
-                <span className={s.itemPath}>
-                  {it.group} · {it.path}
-                </span>
+                {/* 最近访问只显示图标 + 名称；搜索匹配结果才带路径辅助定位 */}
+                {grouped ? null : (
+                  <span className={s.itemPath}>
+                    {it.group} · {it.path}
+                  </span>
+                )}
               </button>
             ))
           ) : (
