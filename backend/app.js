@@ -22,6 +22,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const goodsRoutes = require('./routes/goods');
 const settingsRoutes = require('./routes/settings');
 const salesRoutes = require('./routes/sales');
+const notificationRoutes = require('./routes/notification');
 
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 
@@ -57,6 +58,7 @@ app.use('/api/dashboard', dashboardRoutes); // 数据看板统计
 app.use('/api/goods', goodsRoutes); // 商品管理
 app.use('/api/settings', settingsRoutes); // 系统设置
 app.use('/api/sales', salesRoutes); // 销售明细
+app.use('/api/notifications', notificationRoutes); // 通知中心（从业务数据派生）
 
 // 404 与统一错误处理
 app.use(notFound);

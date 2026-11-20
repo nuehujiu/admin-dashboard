@@ -8,6 +8,9 @@ build/
 .env
 .env.*
 !.env.example
+# 前端 env 只有公开配置（标题、接口前缀、mock 开关），可进仓库；各自的 .local 覆盖文件仍忽略
+!frontend/.env.development
+!frontend/.env.production
 
 # 编辑器 / 系统
 .vscode/

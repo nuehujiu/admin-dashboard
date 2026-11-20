@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Spin } from 'antd';
 import { getProfile } from '../api/auth';
+import { getSettings } from '../api/settings';
+import { applyCssVars } from '../utils/theme';
 import { useUserStore } from '../store/useUserStore';
 import s from './guard.module.scss';
 
@@ -10,6 +12,7 @@ import s from './guard.module.scss';
  * 检查用户是否已登录并获取用户信息，根据验证结果决定渲染内容
  */
 export default function Guard({ children }) {
+  const setSettings = useUserStore((state) => state.setSettings);
   // 获取当前路由信息
   const location = useLocation();
   // 从用户状态管理中获取token
@@ -27,14 +30,22 @@ export default function Guard({ children }) {
     // 设置一个标志位，用于在组件卸载时取消异步操作
     let alive = true;
     // 获取用户信息
-    getProfile()
-      .then((res) => {
+    Promise.all([
+      getProfile(),
+      // 设置拉失败不该挡住登录，兜底成 null
+      getSettings().catch(() => null),
+    ])
+      .then(([res, cfg]) => {
         if (!alive) return;
         setProfile({
           user: res,
           menus: res.menus || [],
           permissions: res.permissions || [],
         });
+        if (cfg) {
+          applyCssVars(cfg.themeColor);
+          setSettings(cfg);
+        }
         setReady(true);
       })
       .catch((err) => {
@@ -49,7 +60,7 @@ export default function Guard({ children }) {
     return () => {
       alive = false;
     };
-  }, [token, setProfile, logout]);
+  }, [token, setProfile, setSettings, logout]);
   // 如果没有token，重定向到登录页面，并记录当前路径以便登录后跳回
   if (!token) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;

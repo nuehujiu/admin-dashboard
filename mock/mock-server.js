@@ -113,6 +113,9 @@ const menus = [
   { id: 14, parent_id: 12, name: '商品上下架', path: null, icon: null, type: 2, permission: 'goods:status', sort: 4 },
   { id: 15, parent_id: 12, name: '库存调整', path: null, icon: null, type: 2, permission: 'goods:stock', sort: 5 },
   { id: 16, parent_id: 0, name: '个人中心', path: '/profile', icon: 'user', type: 1, permission: 'profile:view', sort: 5 },
+  { id: 17, parent_id: 12, name: '新增商品', path: null, icon: null, type: 2, permission: 'goods:create', sort: 1 },
+  { id: 18, parent_id: 12, name: '编辑商品', path: null, icon: null, type: 2, permission: 'goods:update', sort: 2 },
+  { id: 19, parent_id: 12, name: '删除商品', path: null, icon: null, type: 2, permission: 'goods:delete', sort: 3 },
 ];
 
 /**
@@ -128,11 +131,11 @@ const roles = [
   { id: 4, name: '访客', code: 'guest', description: '只读演示账号', status: 0, icon: 'Eye', color: '#A8A29C', created_at: localDateTime(-30) },
 ];
 
-/** role_menu：admin 全量；operator 看板+销售；商品编辑 看板+商品+商品按钮+个人中心；访客 仅个人中心 */
+/** role_menu：admin 全量；operator 看板+销售+个人中心；商品编辑 看板+商品+商品按钮（除删除）+个人中心；访客 仅个人中心 */
 const roleMenu = {
   1: menus.map((m) => m.id),
-  2: [1, 2],
-  3: [1, 12, 14, 15, 16],
+  2: [1, 2, 16],
+  3: [1, 12, 14, 15, 16, 17, 18],
   4: [16],
 };
 
@@ -140,16 +143,19 @@ const roleMenu = {
 const users = [
   {
     id: 1, username: 'admin', password: '123456', nickname: '管理员', email: 'admin@example.com',
+    phone: '13800000001', intro: '负责商城整体运营与后台权限管理，如需调整权限请联系系统管理员。',
     avatar: null, role_id: 1, status: 1, created_at: localDateTime(-60), updated_at: localDateTime(-60),
     last_login_at: localDateTime(0),
   },
   {
     id: 2, username: 'operator', password: '123456', nickname: '运营小李', email: 'operator@example.com',
+    phone: '13800000002', intro: '负责日常销售数据跟进与商品活动排期。',
     avatar: null, role_id: 2, status: 1, created_at: localDateTime(-60), updated_at: localDateTime(-60),
     last_login_at: localDateTime(0),
   },
   {
     id: 3, username: 'chenjh', password: '123456', nickname: '陈嘉禾', email: 'chenjh@houtai.cn',
+    phone: '13800138000', intro: '负责商城整体运营与后台权限管理，如需调整请联系系统管理员。',
     avatar: null, role_id: 1, status: 1, created_at: localDateTime(-48), updated_at: localDateTime(-48),
     last_login_at: localDateTime(0),
   },
@@ -299,6 +305,25 @@ function roleNameOf(roleId) {
   return r ? r.name : null;
 }
 
+/** /me 与「保存资料」共用的基础资料字段 */
+function selfPayload(user) {
+  return {
+    id: user.id,
+    username: user.username,
+    nickname: user.nickname,
+    email: user.email,
+    phone: user.phone || null,
+    intro: user.intro || null,
+    avatar: user.avatar || null,
+    role_id: user.role_id,
+    status: user.status,
+    role_name: roleNameOf(user.role_id),
+    created_at: user.created_at,
+    updated_at: user.updated_at,
+    last_login_at: user.last_login_at,
+  };
+}
+
 // ---------------------------------------------------------------- 业务助手
 
 /** 批量 ids 校验：非空数组、正整数、去重、最多 max 条（商品 / 用户共用） */
@@ -336,6 +361,49 @@ function userToDetail(u) {
 function menusOfRole(roleId) {
   const ids = roleMenu[Number(roleId)] || [];
   return menus.filter((m) => ids.includes(m.id));
+}
+
+/**
+ * 接口级权限表：与真后端 middleware/auth.js 的 requirePerm 保持一致
+ * 多个权限点之间是「任一满足即放行」；顺序敏感，具体路径要排在 /:id 之前
+ */
+const PERM_RULES = [
+  // 用户
+  { method: 'GET', re: /^\/api\/users\/summary$/, perms: ['user:list'] },
+  { method: 'GET', re: /^\/api\/users$/, perms: ['user:list'] },
+  { method: 'GET', re: /^\/api\/users\/\d+$/, perms: ['user:list'] },
+  { method: 'POST', re: /^\/api\/users$/, perms: ['user:create'] },
+  { method: 'PUT', re: /^\/api\/users\/batch\/status$/, perms: ['user:update'] },
+  { method: 'PUT', re: /^\/api\/users\/\d+\/status$/, perms: ['user:update'] },
+  { method: 'PUT', re: /^\/api\/users\/\d+$/, perms: ['user:update'] },
+  { method: 'DELETE', re: /^\/api\/users\/\d+$/, perms: ['user:delete'] },
+  // 角色
+  { method: 'GET', re: /^\/api\/roles$/, perms: ['role:list', 'user:list'] },
+  { method: 'POST', re: /^\/api\/roles$/, perms: ['role:create'] },
+  { method: 'GET', re: /^\/api\/roles\/\d+\/menus$/, perms: ['role:list'] },
+  { method: 'PUT', re: /^\/api\/roles\/\d+\/menus$/, perms: ['role:update'] },
+  { method: 'PUT', re: /^\/api\/roles\/\d+$/, perms: ['role:update'] },
+  { method: 'DELETE', re: /^\/api\/roles\/\d+$/, perms: ['role:delete'] },
+  // 菜单
+  { method: 'GET', re: /^\/api\/menus$/, perms: ['role:list', 'user:list'] },
+  // 商品
+  { method: 'GET', re: /^\/api\/goods$/, perms: ['goods:view'] },
+  { method: 'GET', re: /^\/api\/goods\/categories$/, perms: ['goods:view'] },
+  { method: 'GET', re: /^\/api\/goods\/\d+$/, perms: ['goods:view'] },
+  { method: 'POST', re: /^\/api\/goods$/, perms: ['goods:create'] },
+  { method: 'POST', re: /^\/api\/goods\/batch-delete$/, perms: ['goods:delete'] },
+  { method: 'PUT', re: /^\/api\/goods\/batch\/status$/, perms: ['goods:status'] },
+  { method: 'PUT', re: /^\/api\/goods\/\d+\/status$/, perms: ['goods:status'] },
+  { method: 'PUT', re: /^\/api\/goods\/\d+$/, perms: ['goods:update'] },
+  { method: 'DELETE', re: /^\/api\/goods\/\d+$/, perms: ['goods:delete'] },
+  // 设置（写操作）
+  { method: 'PUT', re: /^\/api\/settings$/, perms: ['settings:view'] },
+  { method: 'POST', re: /^\/api\/settings\/reset$/, perms: ['settings:view'] },
+];
+
+function permsOfRule(method, path) {
+  const rule = PERM_RULES.find((r) => r.method === method && r.re.test(path));
+  return rule ? rule.perms : null;
 }
 
 function countUsersOfRole(roleId) {
@@ -395,6 +463,17 @@ const server = http.createServer(async (req, res) => {
         return send(res, 401, fail('token 无效或已过期', 401));
       }
       req.user = payload;
+    }
+
+    // ---- 接口级权限（与真后端 requirePerm 对齐）
+    const needPerms = permsOfRule(method, path);
+    if (needPerms) {
+      const owned = new Set(
+        menusOfRole(req.user.role_id).map((m) => m.permission).filter(Boolean),
+      );
+      if (!needPerms.some((p) => owned.has(p))) {
+        return send(res, 403, fail('当前角色无此操作权限', 403));
+      }
     }
 
     // ============================================== 认证 /api/auth
@@ -462,17 +541,74 @@ const server = http.createServer(async (req, res) => {
       const empty = scenario === 'empty';
 
       return send(res, 200, ok({
-        id: user.id,
-        username: user.username,
-        nickname: user.nickname,
-        email: user.email,
-        avatar: user.avatar,
-        role_id: user.role_id,
-        status: user.status,
-        role_name: roleNameOf(user.role_id),
+        ...selfPayload(user),
         menus: empty ? [] : menuRows,
         permissions: empty ? [] : permissions,
       }));
+    }
+
+    // ---- 修改个人资料（只改自己，id 取自 token）
+    if (method === 'PUT' && path === '/api/auth/profile') {
+      const user = users.find((u) => u.id === req.user.id);
+      if (!user) return send(res, 404, fail('用户不存在', 404));
+
+      const body = await readBody(req);
+      const patch = {};
+
+      if (body.nickname !== undefined) {
+        const v = String(body.nickname ?? '').trim();
+        if (!v) return send(res, 200, fail('昵称不能为空'));
+        if (v.length > 50) return send(res, 200, fail('昵称不能超过 50 个字'));
+        patch.nickname = v;
+      }
+      if (body.phone !== undefined) {
+        const v = String(body.phone ?? '').trim();
+        if (v && !/^1[3-9]\d{9}$/.test(v)) return send(res, 200, fail('手机号格式不正确'));
+        patch.phone = v || null;
+      }
+      if (body.email !== undefined) {
+        const v = String(body.email ?? '').trim();
+        if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return send(res, 200, fail('邮箱格式不正确'));
+        if (v.length > 100) return send(res, 200, fail('邮箱不能超过 100 个字符'));
+        patch.email = v || null;
+      }
+      if (body.intro !== undefined) {
+        const v = String(body.intro ?? '');
+        if (v.length > 200) return send(res, 200, fail('个人简介不能超过 200 个字'));
+        patch.intro = v;
+      }
+      if (body.avatar !== undefined) {
+        const v = String(body.avatar || '');
+        if (v && !v.startsWith('data:image/')) return send(res, 200, fail('头像格式不支持'));
+        if (v.length > 200 * 1024) return send(res, 200, fail('头像文件过大，请重新选择'));
+        patch.avatar = v || null;
+      }
+
+      if (!Object.keys(patch).length) return send(res, 200, fail('没有可保存的资料项'));
+
+      Object.assign(user, patch, { updated_at: localDateTime(0) });
+      return send(res, 200, ok({
+        ...selfPayload(user),
+        menus: menusOfRole(user.role_id).filter((m) => m.type === 1),
+        permissions: menusOfRole(user.role_id).map((m) => m.permission).filter(Boolean),
+      }, '资料已保存'));
+    }
+
+    // ---- 修改密码（mock 明文比对）
+    if (method === 'PUT' && path === '/api/auth/password') {
+      const user = users.find((u) => u.id === req.user.id);
+      if (!user) return send(res, 404, fail('用户不存在', 404));
+
+      const { oldPassword, newPassword } = await readBody(req);
+      if (!oldPassword || !newPassword) return send(res, 200, fail('请填写当前密码与新密码'));
+      if (newPassword.length < 6) return send(res, 200, fail('新密码至少 6 位'));
+      if (newPassword.length > 32) return send(res, 200, fail('新密码不能超过 32 位'));
+      if (oldPassword === newPassword) return send(res, 200, fail('新密码不能与当前密码相同'));
+      if (user.password !== oldPassword) return send(res, 200, fail('当前密码不正确'));
+
+      user.password = newPassword;
+      user.updated_at = localDateTime(0);
+      return send(res, 200, ok(null, '密码已修改，请重新登录'));
     }
 
     // ---------------------------------------------- 用户概览 /api/users/summary
@@ -1114,6 +1250,64 @@ const server = http.createServer(async (req, res) => {
         goods.splice(goods.indexOf(item), 1);
         return send(res, 200, ok(null, '删除成功'));
       }
+    }
+
+    // ============================================== 通知中心 /api/notifications
+    if (path === '/api/notifications' && method === 'GET') {
+      const owned = new Set(
+        menusOfRole(req.user.role_id).map((m) => m.permission).filter(Boolean),
+      );
+      const items = [];
+
+      if (owned.has('goods:view')) {
+        const low = goods.filter((g) => Number(g.stock) < 50);
+        if (low.length) {
+          items.push({
+            id: 'goods-stock-low',
+            sig: String(low.length),
+            type: 'stock',
+            title: `${low.length} 件商品库存偏低`,
+            desc: '库存不足 50 件，建议尽快补货',
+            path: '/goods',
+            time: localDateTime(0),
+          });
+        }
+      }
+
+      if (owned.has('user:list')) {
+        const disabled = users.filter((u) => Number(u.status) === 0);
+        if (disabled.length) {
+          const latest = disabled
+            .map((u) => u.updated_at || '')
+            .sort()
+            .pop() || localDateTime(0);
+          items.push({
+            id: 'users-disabled',
+            sig: String(disabled.length),
+            type: 'user',
+            title: `${disabled.length} 个账号处于禁用状态`,
+            desc: '禁用账号无法登录，请确认是否符合预期',
+            path: '/system/users',
+            time: latest,
+          });
+        }
+      }
+
+      const noticeText = String(settings.notice || '').trim();
+      if (noticeText) {
+        items.push({
+          id: 'system-notice',
+          sig: noticeText.slice(0, 24),
+          type: 'notice',
+          title: '系统公告已更新',
+          desc: noticeText.length > 40 ? `${noticeText.slice(0, 40)}…` : noticeText,
+          path: '/settings',
+          time: localDateTime(0),
+        });
+      }
+
+      items.sort((a, b) => String(b.time || '').localeCompare(String(a.time || '')));
+      return send(res, 200, ok(items));
     }
 
     // ============================================== 系统设置 /api/settings

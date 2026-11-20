@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Form, Input, Checkbox, App } from 'antd';
 import { ShopOutlined, UserOutlined ,SafetyCertificateOutlined } from '@ant-design/icons';
@@ -29,8 +29,8 @@ export default function Login() {
   const setAuth = useUserStore((s) => s.setAuth);
   // 设置用户资料
   const setProfile = useUserStore((s) => s.setProfile);
-  // 设置登录后重定向目标，默认为仪表板页面
-  const target = location.state?.from || '/dashboard';
+  // 登录后落到根路径，由路由的 DefaultPage 按角色权限决定实际页面
+  const target = location.state?.from || '/';
   useEffect(() => {
     if (token) navigate(target, { replace: true });
   }, [token, target, navigate]);
@@ -123,7 +123,7 @@ export default function Login() {
         </div>
 
         <div className={s.brandFoot}>
-          © 2026 houtai　|　内部系统，仅限授权账号访问
+          © 2026 houtai | 内部系统，仅限授权账号访问
         </div>
       </aside>
       {/*右侧登录区*/}

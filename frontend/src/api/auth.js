@@ -12,10 +12,16 @@ export const login = (data) => request.post('/auth/login', data); // 发送POST�
  * @param {Object} data - 请求数据对象
  * @returns {Promise} 返回一个Promise对象，包含服务器响应的用户个人资料信息
  */
-export const getProfile = (data) => request.get('/auth/me'); // 发送GET请求到'/auth/me'端点获取用户资料
+export const getProfile = () => request.get('/auth/me'); // 发送GET请求到'/auth/me'端点获取用户资料
 /**
  * 用户注册函数
  * @param {Object} data - 注册所需的数据对象
  * @returns {Promise} - 返回一个Promise对象，包含服务器响应结果
  */
 export const register = (data) => request.post('/auth/register', data);
+
+/** 修改个人资料（昵称 / 手机号 / 邮箱 / 简介 / 头像） */
+export const updateProfile = (data) => request.put('/auth/profile', data);
+
+/** 修改密码（当前密码 + 新密码） */
+export const updatePassword = (data) => request.put('/auth/password', data);

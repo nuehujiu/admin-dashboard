@@ -52,6 +52,10 @@ async function run() {
     { parent_id: 12, name: '商品上下架', path: null, icon: null, type: 2, permission: 'goods:status', sort: 4 },
     { parent_id: 12, name: '库存调整', path: null, icon: null, type: 2, permission: 'goods:stock', sort: 5 },
     { parent_id: 0, name: '个人中心', path: '/profile', icon: 'user', type: 1, permission: 'profile:view', sort: 5 },
+    // 商品的新增 / 编辑 / 删除按钮权限（parent 12 = 商品管理）
+    { parent_id: 12, name: '新增商品', path: null, icon: null, type: 2, permission: 'goods:create', sort: 1 },
+    { parent_id: 12, name: '编辑商品', path: null, icon: null, type: 2, permission: 'goods:update', sort: 2 },
+    { parent_id: 12, name: '删除商品', path: null, icon: null, type: 2, permission: 'goods:delete', sort: 3 },
   ];
 
   // 3) 写入角色
@@ -90,12 +94,16 @@ async function run() {
   for (const mid of allMenuIds) {
     await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [adminRoleId, mid]);
   }
-  const operatorPerms = ['dashboard:view', 'sales:view'];
+  // 运营：看板 + 销售统计 + 个人中心（个人中心是所有角色都该有的）
+  const operatorPerms = ['dashboard:view', 'sales:view', 'profile:view'];
   for (const p of operatorPerms) {
     await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [operatorRoleId, menuIds[p]]);
   }
-  // 商品编辑：看板 + 商品菜单与库存类按钮 + 个人中心
-  const goodsEditorPerms = ['dashboard:view', 'goods:view', 'goods:status', 'goods:stock', 'profile:view'];
+  // 商品编辑：看板 + 商品菜单 + 商品操控按钮（不含删除）+ 个人中心
+  const goodsEditorPerms = [
+    'dashboard:view', 'goods:view', 'goods:status', 'goods:stock',
+    'goods:create', 'goods:update', 'profile:view',
+  ];
   for (const p of goodsEditorPerms) {
     await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [goodsEditorRoleId, menuIds[p]]);
   }

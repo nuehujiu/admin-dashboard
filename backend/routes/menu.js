@@ -1,14 +1,14 @@
 /**
  * 菜单/权限项路由（需鉴权）
- *   GET /api/menus  全量菜单与按钮权限
+ *   GET /api/menus  全量菜单与按钮权限（角色权限矩阵用）
  */
 const express = require('express');
 const router = express.Router();
 const { list } = require('../controllers/menuController');
-const { authRequired } = require('../middleware/auth');
+const { authRequired, requirePerm } = require('../middleware/auth');
 
 router.use(authRequired);
 
-router.get('/', list);
+router.get('/', requirePerm('role:list', 'user:list'), list);
 
 module.exports = router;

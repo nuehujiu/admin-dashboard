@@ -1,5 +1,5 @@
 /**
- * 用户管理路由（全部需鉴权）
+ * 用户管理路由（全部需鉴权 + 接口级权限）
  *   GET    /api/users                分页列表（keyword / role_id / status / sort）
  *   GET    /api/users/summary        概览：总数 / 本周新增 / 启用 / 禁用
  *   PUT    /api/users/batch/status   批量启用 / 禁用
@@ -21,18 +21,18 @@ const {
   toggleStatus,
   remove,
 } = require('../controllers/userController');
-const { authRequired } = require('../middleware/auth');
+const { authRequired, requirePerm } = require('../middleware/auth');
 
 router.use(authRequired);
 
 // 静态路径必须写在 /:id 之前，否则会被当成 id
-router.get('/', list);
-router.get('/summary', summary);
-router.put('/batch/status', batchStatus);
-router.get('/:id', detail);
-router.post('/', create);
-router.put('/:id', update);
-router.put('/:id/status', toggleStatus);
-router.delete('/:id', remove);
+router.get('/', requirePerm('user:list'), list);
+router.get('/summary', requirePerm('user:list'), summary);
+router.put('/batch/status', requirePerm('user:update'), batchStatus);
+router.get('/:id', requirePerm('user:list'), detail);
+router.post('/', requirePerm('user:create'), create);
+router.put('/:id', requirePerm('user:update'), update);
+router.put('/:id/status', requirePerm('user:update'), toggleStatus);
+router.delete('/:id', requirePerm('user:delete'), remove);
 
 module.exports = router;

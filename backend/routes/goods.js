@@ -1,5 +1,5 @@
 /**
- * 商品管理路由（全部需鉴权）
+ * 商品管理路由（全部需鉴权 + 接口级权限）
  *   GET    /api/goods                分页列表（keyword / category / status）
  *   GET    /api/goods/categories     分类选项（裸字符串数组）
  *   PUT    /api/goods/batch/status   批量上下架
@@ -23,20 +23,20 @@ const {
   toggleStatus,
   remove,
 } = require('../controllers/goodsController');
-const { authRequired } = require('../middleware/auth');
+const { authRequired, requirePerm } = require('../middleware/auth');
 
 router.use(authRequired);
 
 // 注意：所有静态路径（categories / batch/status / batch-delete）
 // 必须写在 /:id 之前，否则会被当成 id 去查详情
-router.get('/', list);
-router.get('/categories', categories);
-router.put('/batch/status', batchStatus);
-router.post('/batch-delete', batchDelete);
-router.get('/:id', detail);
-router.post('/', create);
-router.put('/:id', update);
-router.put('/:id/status', toggleStatus);
-router.delete('/:id', remove);
+router.get('/', requirePerm('goods:view'), list);
+router.get('/categories', requirePerm('goods:view'), categories);
+router.put('/batch/status', requirePerm('goods:status'), batchStatus);
+router.post('/batch-delete', requirePerm('goods:delete'), batchDelete);
+router.get('/:id', requirePerm('goods:view'), detail);
+router.post('/', requirePerm('goods:create'), create);
+router.put('/:id', requirePerm('goods:update'), update);
+router.put('/:id/status', requirePerm('goods:status'), toggleStatus);
+router.delete('/:id', requirePerm('goods:delete'), remove);
 
 module.exports = router;
