@@ -113,6 +113,9 @@ const menus = [
   { id: 14, parent_id: 12, name: '商品上下架', path: null, icon: null, type: 2, permission: 'goods:status', sort: 4 },
   { id: 15, parent_id: 12, name: '库存调整', path: null, icon: null, type: 2, permission: 'goods:stock', sort: 5 },
   { id: 16, parent_id: 0, name: '个人中心', path: '/profile', icon: 'user', type: 1, permission: 'profile:view', sort: 5 },
+  { id: 17, parent_id: 12, name: '新增商品', path: null, icon: null, type: 2, permission: 'goods:create', sort: 1 },
+  { id: 18, parent_id: 12, name: '编辑商品', path: null, icon: null, type: 2, permission: 'goods:update', sort: 2 },
+  { id: 19, parent_id: 12, name: '删除商品', path: null, icon: null, type: 2, permission: 'goods:delete', sort: 3 },
 ];
 
 /**
@@ -128,11 +131,11 @@ const roles = [
   { id: 4, name: '访客', code: 'guest', description: '只读演示账号', status: 0, icon: 'Eye', color: '#A8A29C', created_at: localDateTime(-30) },
 ];
 
-/** role_menu：admin 全量；operator 看板+销售；商品编辑 看板+商品+商品按钮+个人中心；访客 仅个人中心 */
+/** role_menu：admin 全量；operator 看板+销售；商品编辑 看板+商品+商品按钮（除删除）+个人中心；访客 仅个人中心 */
 const roleMenu = {
   1: menus.map((m) => m.id),
   2: [1, 2],
-  3: [1, 12, 14, 15, 16],
+  3: [1, 12, 14, 15, 16, 17, 18],
   4: [16],
 };
 
@@ -338,6 +341,49 @@ function menusOfRole(roleId) {
   return menus.filter((m) => ids.includes(m.id));
 }
 
+/**
+ * 接口级权限表：与真后端 middleware/auth.js 的 requirePerm 保持一致
+ * 多个权限点之间是「任一满足即放行」；顺序敏感，具体路径要排在 /:id 之前
+ */
+const PERM_RULES = [
+  // 用户
+  { method: 'GET', re: /^\/api\/users\/summary$/, perms: ['user:list'] },
+  { method: 'GET', re: /^\/api\/users$/, perms: ['user:list'] },
+  { method: 'GET', re: /^\/api\/users\/\d+$/, perms: ['user:list'] },
+  { method: 'POST', re: /^\/api\/users$/, perms: ['user:create'] },
+  { method: 'PUT', re: /^\/api\/users\/batch\/status$/, perms: ['user:update'] },
+  { method: 'PUT', re: /^\/api\/users\/\d+\/status$/, perms: ['user:update'] },
+  { method: 'PUT', re: /^\/api\/users\/\d+$/, perms: ['user:update'] },
+  { method: 'DELETE', re: /^\/api\/users\/\d+$/, perms: ['user:delete'] },
+  // 角色
+  { method: 'GET', re: /^\/api\/roles$/, perms: ['role:list', 'user:list'] },
+  { method: 'POST', re: /^\/api\/roles$/, perms: ['role:create'] },
+  { method: 'GET', re: /^\/api\/roles\/\d+\/menus$/, perms: ['role:list'] },
+  { method: 'PUT', re: /^\/api\/roles\/\d+\/menus$/, perms: ['role:update'] },
+  { method: 'PUT', re: /^\/api\/roles\/\d+$/, perms: ['role:update'] },
+  { method: 'DELETE', re: /^\/api\/roles\/\d+$/, perms: ['role:delete'] },
+  // 菜单
+  { method: 'GET', re: /^\/api\/menus$/, perms: ['role:list', 'user:list'] },
+  // 商品
+  { method: 'GET', re: /^\/api\/goods$/, perms: ['goods:view'] },
+  { method: 'GET', re: /^\/api\/goods\/categories$/, perms: ['goods:view'] },
+  { method: 'GET', re: /^\/api\/goods\/\d+$/, perms: ['goods:view'] },
+  { method: 'POST', re: /^\/api\/goods$/, perms: ['goods:create'] },
+  { method: 'POST', re: /^\/api\/goods\/batch-delete$/, perms: ['goods:delete'] },
+  { method: 'PUT', re: /^\/api\/goods\/batch\/status$/, perms: ['goods:status'] },
+  { method: 'PUT', re: /^\/api\/goods\/\d+\/status$/, perms: ['goods:status'] },
+  { method: 'PUT', re: /^\/api\/goods\/\d+$/, perms: ['goods:update'] },
+  { method: 'DELETE', re: /^\/api\/goods\/\d+$/, perms: ['goods:delete'] },
+  // 设置（写操作）
+  { method: 'PUT', re: /^\/api\/settings$/, perms: ['settings:view'] },
+  { method: 'POST', re: /^\/api\/settings\/reset$/, perms: ['settings:view'] },
+];
+
+function permsOfRule(method, path) {
+  const rule = PERM_RULES.find((r) => r.method === method && r.re.test(path));
+  return rule ? rule.perms : null;
+}
+
 function countUsersOfRole(roleId) {
   return users.filter((u) => Number(u.role_id) === Number(roleId)).length;
 }
@@ -395,6 +441,17 @@ const server = http.createServer(async (req, res) => {
         return send(res, 401, fail('token 无效或已过期', 401));
       }
       req.user = payload;
+    }
+
+    // ---- 接口级权限（与真后端 requirePerm 对齐）
+    const needPerms = permsOfRule(method, path);
+    if (needPerms) {
+      const owned = new Set(
+        menusOfRole(req.user.role_id).map((m) => m.permission).filter(Boolean),
+      );
+      if (!needPerms.some((p) => owned.has(p))) {
+        return send(res, 403, fail('当前角色无此操作权限', 403));
+      }
     }
 
     // ============================================== 认证 /api/auth
