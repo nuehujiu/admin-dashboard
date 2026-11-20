@@ -1,13 +1,52 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>电商后台管理系统</title>
+    <!-- 首屏骨架：JS 下载解析期间先显示，React 挂载时会被自动清除 -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #f7f5f2;
+      }
+      .boot {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        gap: 14px;
+      }
+      .boot-spinner {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2px solid #ffd8c4;
+        border-top-color: #f5611d;
+        animation: boot-spin 0.8s linear infinite;
+      }
+      .boot-text {
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-size: 12.5px;
+        color: #a8a29c;
+      }
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="boot">
+        <div class="boot-spinner"></div>
+        <div class="boot-text">正在加载…</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

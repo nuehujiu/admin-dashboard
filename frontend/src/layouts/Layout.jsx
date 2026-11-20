@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { Suspense, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { routes } from '../router/routes.jsx';
 import s from './Layout.module.scss';
@@ -15,7 +15,17 @@ import {
   LogoutOutlined, DownOutlined,
   MenuFoldOutlined, MenuUnfoldOutlined, IdcardOutlined,
 } from '@ant-design/icons';
-import { Breadcrumb, Dropdown, Avatar, theme, Result, Button } from 'antd';
+import { Breadcrumb, Dropdown, Avatar, theme, Result, Button, Spin } from 'antd';
+
+/** 懒加载页面的占位：侧栏与顶栏已在，只等内容区 */
+function PageFallback() {
+  return (
+    <div className={s.pageLoad}>
+      <Spin />
+      <span className={s.pageLoadText}>页面加载中…</span>
+    </div>
+  );
+}
 
 const ICONS = {
   dashboard: <DashboardOutlined />, 'bar-chart': <BarChartOutlined />,
@@ -206,7 +216,9 @@ export default function Layout() {
               }
             />
           ) : (
-            <Outlet />
+            <Suspense fallback={<PageFallback />}>
+              <Outlet />
+            </Suspense>
           )}
         </div>
       </div>

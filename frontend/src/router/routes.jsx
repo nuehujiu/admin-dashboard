@@ -1,16 +1,15 @@
 import Layout from '../layouts/Layout';
 import Login from '../pages/Login';
-import Dashboard from '../pages/Dashboard';
-import Sales from '../pages/Sales';
-import Goods from '../pages/Goods';
-import Users from '../pages/Users';
-import Roles from '../pages/Roles';
-import Settings from '../pages/Settings';
-import Profile from '../pages/Profile';
 import NotFound from '../pages/NotFound';
 import Guard from './guard';
 import DefaultPage from './DefaultPage';
+import { Dashboard, Sales, Goods, Users, Roles, Settings, Profile } from './lazyPages';
 import { PERM } from '../utils/permissions';
+
+/**
+ * 内容页全部懒加载：首屏只带 Layout + 登录页 + 404，
+ * 其余页面在真正进入时按需下载（配合 Layout 里的 Suspense）。
+ */
 
 export const routes = [
   { path: '/login', name: '登录', element: <Login />, meta: { hidden: true } },
