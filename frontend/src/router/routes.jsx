@@ -66,7 +66,7 @@ export const routes = [
         path: '/profile',
         name: '个人中心',
         element: <Profile />,
-        meta: { hidden: true, permission: PERM.PROFILE_VIEW },
+        meta: { icon: 'idcard', permission: PERM.PROFILE_VIEW },
       },
     ],
   },

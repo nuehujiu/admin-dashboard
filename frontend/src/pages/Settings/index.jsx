@@ -15,10 +15,9 @@ const THEME_COLORS = [
 ];
 
 /** label 里带一个等宽小灰字的字段名 */
-const fieldLabel = (text, key) => (
+const fieldLabel = (text) => (
   <span className={s.labelRow}>
     <span className={s.label}>{text}</span>
-    <span className={s.key}>{key}</span>
   </span>
 );
 
@@ -169,7 +168,7 @@ export default function Settings() {
           <div className={s.field}>
             <div className={s.labelRow}>
               <span className={s.label}>主题色</span>
-              <span className={s.key}>themeColor</span>
+              {/* <span className={s.key}>themeColor</span> */}
             </div>
             <div className={s.swatches}>
               {THEME_COLORS.map((c) => (
@@ -189,7 +188,7 @@ export default function Settings() {
           <div className={s.row}>
             <div className={s.labelRow}>
               <span className={s.label}>侧栏默认折叠</span>
-              <span className={s.key}>siderCollapsed</span>
+              {/* <span className={s.key}>siderCollapsed</span> */}
             </div>
             <Form.Item
               name="siderCollapsed"

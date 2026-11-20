@@ -94,7 +94,8 @@ async function run() {
   for (const mid of allMenuIds) {
     await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [adminRoleId, mid]);
   }
-  const operatorPerms = ['dashboard:view', 'sales:view'];
+  // 运营：看板 + 销售统计 + 个人中心（个人中心是所有角色都该有的）
+  const operatorPerms = ['dashboard:view', 'sales:view', 'profile:view'];
   for (const p of operatorPerms) {
     await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [operatorRoleId, menuIds[p]]);
   }

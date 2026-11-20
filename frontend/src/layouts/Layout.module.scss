@@ -15,14 +15,15 @@
   border-right: 1px solid $line;
   transition: width 0.2s ease;
 }
-//brand样式
+//brand样式：高度与 header 对齐（$header-h 含 1px 下边框）
 .brand {
   width: 100%;
+  height: $header-h;
   flex: none;
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 10px 18px;
+  padding: 0 18px;
   border-bottom: 1px solid $line-soft;
 }
 //Logo样式
@@ -65,7 +66,7 @@
   width: 64px;
 
   .brand {
-    padding: 10px 0;
+    padding: 0;
     justify-content: center;
     gap: 0;
   }

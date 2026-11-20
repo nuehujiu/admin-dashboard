@@ -131,10 +131,10 @@ const roles = [
   { id: 4, name: '访客', code: 'guest', description: '只读演示账号', status: 0, icon: 'Eye', color: '#A8A29C', created_at: localDateTime(-30) },
 ];
 
-/** role_menu：admin 全量；operator 看板+销售；商品编辑 看板+商品+商品按钮（除删除）+个人中心；访客 仅个人中心 */
+/** role_menu：admin 全量；operator 看板+销售+个人中心；商品编辑 看板+商品+商品按钮（除删除）+个人中心；访客 仅个人中心 */
 const roleMenu = {
   1: menus.map((m) => m.id),
-  2: [1, 2],
+  2: [1, 2, 16],
   3: [1, 12, 14, 15, 16, 17, 18],
   4: [16],
 };
@@ -143,16 +143,19 @@ const roleMenu = {
 const users = [
   {
     id: 1, username: 'admin', password: '123456', nickname: '管理员', email: 'admin@example.com',
+    phone: '13800000001', intro: '负责商城整体运营与后台权限管理，如需调整权限请联系系统管理员。',
     avatar: null, role_id: 1, status: 1, created_at: localDateTime(-60), updated_at: localDateTime(-60),
     last_login_at: localDateTime(0),
   },
   {
     id: 2, username: 'operator', password: '123456', nickname: '运营小李', email: 'operator@example.com',
+    phone: '13800000002', intro: '负责日常销售数据跟进与商品活动排期。',
     avatar: null, role_id: 2, status: 1, created_at: localDateTime(-60), updated_at: localDateTime(-60),
     last_login_at: localDateTime(0),
   },
   {
     id: 3, username: 'chenjh', password: '123456', nickname: '陈嘉禾', email: 'chenjh@houtai.cn',
+    phone: '13800138000', intro: '负责商城整体运营与后台权限管理，如需调整请联系系统管理员。',
     avatar: null, role_id: 1, status: 1, created_at: localDateTime(-48), updated_at: localDateTime(-48),
     last_login_at: localDateTime(0),
   },
@@ -300,6 +303,25 @@ function verifyToken(token) {
 function roleNameOf(roleId) {
   const r = roles.find((x) => x.id === Number(roleId));
   return r ? r.name : null;
+}
+
+/** /me 与「保存资料」共用的基础资料字段 */
+function selfPayload(user) {
+  return {
+    id: user.id,
+    username: user.username,
+    nickname: user.nickname,
+    email: user.email,
+    phone: user.phone || null,
+    intro: user.intro || null,
+    avatar: user.avatar || null,
+    role_id: user.role_id,
+    status: user.status,
+    role_name: roleNameOf(user.role_id),
+    created_at: user.created_at,
+    updated_at: user.updated_at,
+    last_login_at: user.last_login_at,
+  };
 }
 
 // ---------------------------------------------------------------- 业务助手
@@ -519,17 +541,74 @@ const server = http.createServer(async (req, res) => {
       const empty = scenario === 'empty';
 
       return send(res, 200, ok({
-        id: user.id,
-        username: user.username,
-        nickname: user.nickname,
-        email: user.email,
-        avatar: user.avatar,
-        role_id: user.role_id,
-        status: user.status,
-        role_name: roleNameOf(user.role_id),
+        ...selfPayload(user),
         menus: empty ? [] : menuRows,
         permissions: empty ? [] : permissions,
       }));
+    }
+
+    // ---- 修改个人资料（只改自己，id 取自 token）
+    if (method === 'PUT' && path === '/api/auth/profile') {
+      const user = users.find((u) => u.id === req.user.id);
+      if (!user) return send(res, 404, fail('用户不存在', 404));
+
+      const body = await readBody(req);
+      const patch = {};
+
+      if (body.nickname !== undefined) {
+        const v = String(body.nickname ?? '').trim();
+        if (!v) return send(res, 200, fail('昵称不能为空'));
+        if (v.length > 50) return send(res, 200, fail('昵称不能超过 50 个字'));
+        patch.nickname = v;
+      }
+      if (body.phone !== undefined) {
+        const v = String(body.phone ?? '').trim();
+        if (v && !/^1[3-9]\d{9}$/.test(v)) return send(res, 200, fail('手机号格式不正确'));
+        patch.phone = v || null;
+      }
+      if (body.email !== undefined) {
+        const v = String(body.email ?? '').trim();
+        if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return send(res, 200, fail('邮箱格式不正确'));
+        if (v.length > 100) return send(res, 200, fail('邮箱不能超过 100 个字符'));
+        patch.email = v || null;
+      }
+      if (body.intro !== undefined) {
+        const v = String(body.intro ?? '');
+        if (v.length > 200) return send(res, 200, fail('个人简介不能超过 200 个字'));
+        patch.intro = v;
+      }
+      if (body.avatar !== undefined) {
+        const v = String(body.avatar || '');
+        if (v && !v.startsWith('data:image/')) return send(res, 200, fail('头像格式不支持'));
+        if (v.length > 200 * 1024) return send(res, 200, fail('头像文件过大，请重新选择'));
+        patch.avatar = v || null;
+      }
+
+      if (!Object.keys(patch).length) return send(res, 200, fail('没有可保存的资料项'));
+
+      Object.assign(user, patch, { updated_at: localDateTime(0) });
+      return send(res, 200, ok({
+        ...selfPayload(user),
+        menus: menusOfRole(user.role_id).filter((m) => m.type === 1),
+        permissions: menusOfRole(user.role_id).map((m) => m.permission).filter(Boolean),
+      }, '资料已保存'));
+    }
+
+    // ---- 修改密码（mock 明文比对）
+    if (method === 'PUT' && path === '/api/auth/password') {
+      const user = users.find((u) => u.id === req.user.id);
+      if (!user) return send(res, 404, fail('用户不存在', 404));
+
+      const { oldPassword, newPassword } = await readBody(req);
+      if (!oldPassword || !newPassword) return send(res, 200, fail('请填写当前密码与新密码'));
+      if (newPassword.length < 6) return send(res, 200, fail('新密码至少 6 位'));
+      if (newPassword.length > 32) return send(res, 200, fail('新密码不能超过 32 位'));
+      if (oldPassword === newPassword) return send(res, 200, fail('新密码不能与当前密码相同'));
+      if (user.password !== oldPassword) return send(res, 200, fail('当前密码不正确'));
+
+      user.password = newPassword;
+      user.updated_at = localDateTime(0);
+      return send(res, 200, ok(null, '密码已修改，请重新登录'));
     }
 
     // ---------------------------------------------- 用户概览 /api/users/summary

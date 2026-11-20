@@ -10,7 +10,7 @@ import {
   DashboardOutlined, BarChartOutlined, ShoppingOutlined, UserOutlined,
   TeamOutlined, SettingOutlined, SearchOutlined, BellOutlined,
   ProfileOutlined, LogoutOutlined, DownOutlined,
-  MenuFoldOutlined, MenuUnfoldOutlined,
+  MenuFoldOutlined, MenuUnfoldOutlined, IdcardOutlined,
 } from '@ant-design/icons';
 import { Breadcrumb, Dropdown, Avatar, theme, Result, Button } from 'antd';
 
@@ -18,10 +18,12 @@ const ICONS = {
   dashboard: <DashboardOutlined />, 'bar-chart': <BarChartOutlined />,
   shopping: <ShoppingOutlined />, user: <UserOutlined />,
   team: <TeamOutlined />, setting: <SettingOutlined />,
+  idcard: <IdcardOutlined />,
 };
 const GROUP_BY_PATH = {
   '/dashboard': '概览', '/sales': '概览', '/goods': '运营',
   '/system/users': '运营', '/system/roles': '系统', '/settings': '系统',
+  '/profile': '系统',
 };
 const GROUP_ORDER = ['概览', '运营', '系统'];
 
@@ -153,7 +155,11 @@ export default function Layout() {
             }}
           >
             <div className={s.userChip}>
-              <Avatar size={30} style={{ background: 'var(--primary)', fontSize: 13 }}>
+              <Avatar
+                size={30}
+                src={user?.avatar || undefined}
+                style={{ background: 'var(--primary)', fontSize: 13 }}
+              >
                 {(user?.nickname || user?.username || '?').slice(0, 1)}
               </Avatar>
               <div>
