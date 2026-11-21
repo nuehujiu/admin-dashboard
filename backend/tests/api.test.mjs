@@ -500,13 +500,18 @@ await test('未登录访问看板返回 401', async () => {
 await test('overview 概览字段完整且为数值', async () => {
   const { json } = await api('GET', '/api/dashboard/overview', { token: adminToken });
   eq(json?.code, 0, '业务码');
+  // 非负的绝对量指标
   for (const key of [
-    'today_amount', 'today_amount_change', 'today_qty',
+    'today_amount', 'today_qty',
     'total_amount', 'total_qty', 'user_count', 'record_count',
   ]) {
     assert(typeof json?.data?.[key] === 'number', `字段 ${key} 应为数值`);
     assert(json.data[key] >= 0, `字段 ${key} 不应为负`);
   }
+  // 环比是百分比，今天不如昨天时为负，只校验类型与合理范围
+  const change = json?.data?.today_amount_change;
+  assert(typeof change === 'number' && Number.isFinite(change), 'today_amount_change 应为数值');
+  assert(change > -100, `环比跌幅不应小于 -100%，实际 ${change}`);
 });
 await test('trend 默认返回 30 天且日期连续升序', async () => {
   const { json } = await api('GET', '/api/dashboard/trend', { token: adminToken });

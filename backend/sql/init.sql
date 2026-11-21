@@ -43,7 +43,7 @@ CREATE TABLE `users` (
   `nickname`   VARCHAR(50)  DEFAULT NULL COMMENT '昵称',
   `email`      VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
   `phone`      VARCHAR(20)  DEFAULT NULL COMMENT '手机号',
-  `avatar`     TEXT         COMMENT '头像：图片 dataURL（前端压到 128px）',
+  `avatar`     TEXT         COMMENT '头像：文件 URL（/uploads/avatars/xxx.jpg）；兼容旧 dataURL',
   `intro`      VARCHAR(200) DEFAULT NULL COMMENT '个人简介',
   `role_id`    INT UNSIGNED NOT NULL COMMENT '角色ID',
   `status`     TINYINT      NOT NULL DEFAULT 1 COMMENT '状态：1启用 0禁用',

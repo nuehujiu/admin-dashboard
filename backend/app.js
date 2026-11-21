@@ -11,8 +11,10 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { assertEnv } = require('./config/env');
 const { connectDB, pool } = require('./config/db');
+const { ensureAvatarDir } = require('./config/upload');
 const logger = require('./utils/logger');
 const { securityHeaders } = require('./middleware/security');
 
@@ -53,9 +55,20 @@ app.use(
   })
 );
 
-// 解析 JSON 与表单（头像 dataURL 上限 200KB，这里放到 1MB 留余量）
+// 解析 JSON 与表单（头像 base64 上传也走 JSON，这里放到 1MB 留余量）
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// 上传文件（头像等）静态访问：/uploads/avatars/xxx.jpg
+ensureAvatarDir();
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, process.env.UPLOAD_DIR || 'uploads'), {
+    maxAge: '7d',
+    index: false,
+    dotfiles: 'deny',
+  })
+);
 
 // 健康检查
 app.get('/api/health', (req, res) => {

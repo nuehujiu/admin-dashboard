@@ -3,6 +3,7 @@
  *   POST /api/auth/register   注册（需登录 + 拥有 user:create 权限）
  *   POST /api/auth/login      登录，返回 token（限流）
  *   GET  /api/auth/me         获取当前登录用户信息（需鉴权）
+ *   POST /api/auth/avatar     上传头像，落盘后返回 URL（需鉴权）
  *   PUT  /api/auth/profile    修改个人资料（需鉴权）
  *   PUT  /api/auth/password   修改密码（需鉴权）
  *
@@ -16,6 +17,7 @@ const {
   login,
   me,
   updateProfile,
+  uploadAvatar,
   updatePassword,
 } = require('../controllers/authController');
 const { authRequired, requirePerm } = require('../middleware/auth');
@@ -26,6 +28,7 @@ const { loginLimiter } = require('../middleware/rateLimit');
 router.post('/register', authRequired, requirePerm('user:create'), register);
 router.post('/login', loginLimiter, login);
 router.get('/me', authRequired, me);
+router.post('/avatar', authRequired, uploadAvatar); // 头像上传（落盘存 URL）
 router.put('/profile', authRequired, updateProfile);
 router.put('/password', authRequired, updatePassword);
 

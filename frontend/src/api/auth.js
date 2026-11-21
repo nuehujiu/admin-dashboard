@@ -23,5 +23,11 @@ export const register = (data) => request.post('/auth/register', data);
 /** 修改个人资料（昵称 / 手机号 / 邮箱 / 简介 / 头像） */
 export const updateProfile = (data) => request.put('/auth/profile', data);
 
+/**
+ * 上传头像
+ * 传压缩后的 dataURL，后端落盘后返回 { avatar: '/uploads/avatars/xxx.jpg' }
+ */
+export const uploadAvatar = (dataUrl) => request.post('/auth/avatar', { dataUrl });
+
 /** 修改密码（当前密码 + 新密码） */
 export const updatePassword = (data) => request.put('/auth/password', data);

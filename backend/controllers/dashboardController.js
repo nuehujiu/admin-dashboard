@@ -4,11 +4,18 @@
 const { query } = require('../config/db');
 const { success, fail } = require('../utils/response');
 
+/** 本地时区的 YYYY-MM-DD（直接 toISOString 会按 UTC 算，东八区 0~8 点会把「今天」算成昨天） */
+function localDateStr(ts = Date.now()) {
+  const d = new Date(ts);
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
 /** 概览卡片：今日销售额/销量/订单数、累计销售额、用户数，含环比 */
 async function overview(req, res, next) {
   try {
-    const today = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const today = localDateStr();
+    const yesterday = localDateStr(Date.now() - 86400000);
 
     // 今日与昨日销售
     const [todaySales, yesterdaySales] = await Promise.all([
@@ -44,7 +51,7 @@ async function overview(req, res, next) {
 async function trend(req, res, next) {
   try {
     const days = Math.min(90, Math.max(1, Number(req.query.days) || 30));
-    const start = new Date(Date.now() - (days - 1) * 86400000).toISOString().slice(0, 10);
+    const start = localDateStr(Date.now() - (days - 1) * 86400000);
 
     const rows = await query(
       `SELECT sale_date AS date, IFNULL(SUM(amount),0) AS amount, IFNULL(SUM(qty),0) AS qty
@@ -57,7 +64,7 @@ async function trend(req, res, next) {
     const map = new Map(rows.map((r) => [r.date, r]));
     const result = [];
     for (let i = 0; i < days; i++) {
-      const d = new Date(Date.now() - (days - 1 - i) * 86400000).toISOString().slice(0, 10);
+      const d = localDateStr(Date.now() - (days - 1 - i) * 86400000);
       const row = map.get(d);
       result.push({ date: d, amount: row ? Number(row.amount) : 0, qty: row ? Number(row.qty) : 0 });
     }

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import s from './index.module.scss';
 import {
   Button,
@@ -126,6 +126,8 @@ export default function Roles() {
   }, [message]);
 
   useEffect(() => {
+    // load 首屏拉数据并回填多个 state，属于「向外部系统取数」的必要同步起点
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, [load]);
 
@@ -137,99 +139,76 @@ export default function Roles() {
     if (!current) return;
     applyPerms(current, currentAll ? [] : allRowIds);
   };
-  const permToId = useMemo(() => {
-    const map = {};
-    menus.forEach((m) => {
-      if (m.permission) map[m.permission] = m.id;
-    });
-    return map;
-  }, [menus]);
+  // 以下计算与回调交给 React Compiler 自动缓存，手写 useMemo/useCallback 反而会因依赖链变化频繁失效
+  const permToId = {};
+  menus.forEach((m) => {
+    if (m.permission) permToId[m.permission] = m.id;
+  });
 
-  const rowIds = useCallback(
-    (row) => row.perms.map((p) => permToId[p]).filter(Boolean),
-    [permToId],
-  );
-  const applyPerms = useCallback(
-    async (roleId, nextIds) => {
-      const prev = rolePerms[roleId] || [];
-      setRolePerms((p) => ({ ...p, [roleId]: nextIds }));
-      setSavingId(roleId);
-      try {
-        await assignRoleMenus(roleId, nextIds);
-        message.success('权限已保存');
-      } catch (e) {
-        setRolePerms((p) => ({ ...p, [roleId]: prev }));
-        message.error(e?.message || '权限保存失败');
-      } finally {
-        setSavingId(null);
-      }
-    },
-    [message, rolePerms],
-  );
-  const toggleCell = useCallback(
-    (roleId, ids, checked) => {
-      const cur = rolePerms[roleId] || [];
-      const nextIds = checked
-        ? Array.from(new Set([...cur, ...ids]))
-        : cur.filter((id) => !ids.includes(id));
-      applyPerms(roleId, nextIds);
-    },
-    [rolePerms, applyPerms],
+  const rowIds = (row) => row.perms.map((p) => permToId[p]).filter(Boolean);
+  const applyPerms = async (roleId, nextIds) => {
+    const prev = rolePerms[roleId] || [];
+    setRolePerms((p) => ({ ...p, [roleId]: nextIds }));
+    setSavingId(roleId);
+    try {
+      await assignRoleMenus(roleId, nextIds);
+      message.success('权限已保存');
+    } catch (e) {
+      setRolePerms((p) => ({ ...p, [roleId]: prev }));
+      message.error(e?.message || '权限保存失败');
+    } finally {
+      setSavingId(null);
+    }
+  };
+  const toggleCell = (roleId, ids, checked) => {
+    const cur = rolePerms[roleId] || [];
+    const nextIds = checked
+      ? Array.from(new Set([...cur, ...ids]))
+      : cur.filter((id) => !ids.includes(id));
+    applyPerms(roleId, nextIds);
+  };
+
+  const allRowIds = Array.from(
+    new Set(
+      MATRIX_ROWS.flatMap((row) => row.perms.map((p) => permToId[p]).filter(Boolean)),
+    ),
   );
 
-  const allRowIds = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          MATRIX_ROWS.flatMap((row) =>
-            row.perms.map((p) => permToId[p]).filter(Boolean),
-          ),
-        ),
+  const columns = [
+    {
+      title: '权限项',
+      dataIndex: 'label',
+      width: 300,
+      render: (v, row) => (
+        <span className={row.indent ? s.rowIndent : s.rowLabel}>{v}</span>
       ),
-    [permToId],
-  );
-
-  const columns = useMemo(
-    () => [
-      {
-        title: '权限项',
-        dataIndex: 'label',
-        width: 300,
-        render: (v, row) => (
-          <span className={row.indent ? s.rowIndent : s.rowLabel}>{v}</span>
-        ),
+    },
+    ...roles.map((r) => ({
+      title: r.name,
+      key: `role-${r.id}`,
+      align: 'center',
+      render: (_, row) => {
+        const ids = rowIds(row);
+        if (!ids.length) return <span className={s.cellEmpty}>—</span>;
+        const cur = rolePerms[r.id] || [];
+        const owned = ids.filter((id) => cur.includes(id));
+        return (
+          <Checkbox
+            checked={owned.length === ids.length}
+            indeterminate={owned.length > 0 && owned.length < ids.length}
+            disabled={savingId === r.id || !can(PERM.ROLE_UPDATE)}
+            onChange={(e) => toggleCell(r.id, ids, e.target.checked)}
+          />
+        );
       },
-      ...roles.map((r) => ({
-        title: r.name,
-        key: `role-${r.id}`,
-        align: 'center',
-        render: (_, row) => {
-          const ids = rowIds(row);
-          if (!ids.length) return <span className={s.cellEmpty}>—</span>;
-          const cur = rolePerms[r.id] || [];
-          const owned = ids.filter((id) => cur.includes(id));
-          return (
-            <Checkbox
-              checked={owned.length === ids.length}
-              indeterminate={owned.length > 0 && owned.length < ids.length}
-              disabled={savingId === r.id || !can(PERM.ROLE_UPDATE)}
-              onChange={(e) => toggleCell(r.id, ids, e.target.checked)}
-            />
-          );
-        },
-      })),
-    ],
-    [roles, rolePerms, savingId, rowIds, toggleCell, can],
-  );
+    })),
+  ];
 
   /** 整列全选 / 清空 */
-  const currentAll = useMemo(
-    () =>
-      Boolean(current) &&
-      allRowIds.length > 0 &&
-      allRowIds.every((id) => (rolePerms[current] || []).includes(id)),
-    [current, allRowIds, rolePerms],
-  );
+  const currentAll =
+    Boolean(current) &&
+    allRowIds.length > 0 &&
+    allRowIds.every((id) => (rolePerms[current] || []).includes(id));
 
   const onCreate = async () => {
     let values;

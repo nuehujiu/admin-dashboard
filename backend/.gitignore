@@ -3,5 +3,8 @@ node_modules/
 *.log
 .DS_Store
 
+# 上传文件（头像等），运行期产物不入库
+uploads/
+
 # 测试产物
 tests/report.json

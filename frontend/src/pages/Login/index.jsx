@@ -25,6 +25,9 @@ export default function Login() {
   const navigate = useNavigate();
   // 获取用户令牌
   const token = useUserStore((s) => s.token);
+  // 品牌区跟随系统设置（登录前用 store 里的默认值兜底）
+  const systemName = useUserStore((s) => s.settings.systemName);
+  const slogan = useUserStore((s) => s.settings.slogan);
   // 设置认证状态
   const setAuth = useUserStore((s) => s.setAuth);
   // 设置用户资料
@@ -87,8 +90,8 @@ export default function Login() {
             <ShopOutlined />
           </div>
           <div>
-            <div className={s.logoName}>houtai</div>
-            <div className={s.logoSub}>商城后台管理系统</div>
+            <div className={s.logoName} title={systemName}>{systemName}</div>
+            <div className={s.logoSub}>{slogan || '商城后台管理系统'}</div>
           </div>
         </div>
 

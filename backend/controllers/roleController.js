@@ -56,8 +56,11 @@ async function update(req, res, next) {
     const sets = [];
     const params = [];
     if (name !== undefined) {
+      const v = String(name).trim();
+      if (!v) return fail(res, '角色名称不能为空');
+      if (v.length > 50) return fail(res, '角色名称不能超过 50 个字');
       sets.push('name = ?');
-      params.push(name);
+      params.push(v);
     }
     if (description !== undefined) {
       sets.push('description = ?');

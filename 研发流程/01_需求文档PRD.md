@@ -55,7 +55,7 @@
 | 销售统计（明细） | ❌ 只有聚合接口 | 真实后端（rank / category-ratio） | P0（只做聚合视图） |
 | 商品管理 | ✅ 7 个接口（`/api/goods*`） | 真实后端 | P1 |
 | 系统设置 | ✅ 3 个接口（`/api/settings*`） | 真实后端 | P1 |
-| 个人中心 | 🟡 部分（复用 `/api/auth/me` + `PUT /api/users/:id`） | 真实后端 | P1（无手机号字段、无头像上传） |
+| 个人中心 | 🟡 部分（复用 `/api/auth/me` + `PUT /api/users/:id`） | 真实后端 | P1（无手机号字段；头像上传已支持） |
 
 **明确不在本期**：会员体系、商品 SKU/库存流水、审计日志、接口级权限中间件、刷新 token、登录限流。
 
@@ -153,7 +153,7 @@
 ### F7 个人中心 `/profile`
 
 - **能力边界**：读 `GET /api/auth/me`；写 `PUT /api/users/:id`（`nickname` / `email` / `password`）。
-- **明确没有**：`phone` 字段（`users` 表无该列）、头像上传接口（`avatar` 只能存外链）。
+- **明确没有**：`phone` 字段（`users` 表无该列）；头像上传已于 2026-11-21 补齐（`POST /api/auth/avatar`，落盘存 URL）。
 - **改密**：走同一个 `PUT` 带 `password`；成功后旧 token 仍有效 2h → 提示重新登录并主动登出。
 - **验收**
   - [ ] 资料回显与保存正确；
