@@ -7,17 +7,17 @@ on:
     branches: [main, develop]
 
 jobs:
-  check:
-    name: check
+  backend:
+    name: backend-check
     runs-on: ubuntu-latest
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 安装 Node 20
+      - name: 安装 Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
 
       - name: 后端语法检查
         run: |
@@ -47,11 +47,33 @@ jobs:
           fi
           echo "无敏感文件、无 node_modules/dist"
 
-      # 说明：前端当前依赖未补齐（antd/axios/zustand/echarts/react-router-dom），
-      # 此处不跑 npm run build，避免 PR 恒红。依赖补全后再打开下面这段。
-      #
-      # - name: 前端构建
-      #   run: |
-      #     cd frontend
-      #     npm ci || npm install
-      #     npm run build
+  frontend:
+    name: frontend-lint-build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: 安装 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: ESLint
+        run: pnpm exec eslint .
+
+      - name: 构建（验证可打包，不产出部署产物）
+        run: pnpm build

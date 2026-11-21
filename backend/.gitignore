@@ -2,3 +2,6 @@ node_modules/
 .env
 *.log
 .DS_Store
+
+# 测试产物
+tests/report.json

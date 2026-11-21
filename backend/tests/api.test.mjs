@@ -6,6 +6,8 @@
  * 说明：会创建带 t_api_ 前缀的临时用户与角色，用例结束前自动清理，不影响演示数据
  */
 const BASE = process.env.API_BASE || 'http://localhost:3000';
+// 初始密码由 init-db 时的 SEED_PASSWORD 决定，未设置时开发环境为 123456
+const ADMIN_PWD = process.env.SEED_PASSWORD || '123456';
 
 // ---------- 轻量断言 ----------
 function assert(cond, msg) {
@@ -83,10 +85,27 @@ await test('GET /api/health 返回 200 且 code=0', async () => {
   assert(json?.data?.time, '缺少 data.time');
 });
 
-// ==================== 1. 认证 - 注册 ====================
+// ==================== 1. 认证 - 注册（需管理员权限） ====================
 console.log('\n[1] 认证 - 注册');
+await test('未登录调用注册返回 401', async () => {
+  const { status, json } = await api('POST', '/api/auth/register', {
+    body: { username: `t_${ts}_anon`, password: '123456' },
+  });
+  eq(status, 401, 'HTTP 状态码');
+  eq(json?.code, 401, '业务码');
+});
+
+// 注册接口已收紧为「登录 + user:create」，后续用例统一带管理员 token
+if (!adminToken) {
+  const { json } = await api('POST', '/api/auth/login', {
+    body: { username: 'admin', password: ADMIN_PWD },
+  });
+  adminToken = json?.data?.token;
+  adminId = json?.data?.user?.id;
+}
 await test('注册成功返回用户 id', async () => {
   const { status, json } = await api('POST', '/api/auth/register', {
+    token: adminToken,
     body: { username: regUser, password: regPwd, nickname: '自动化测试', email: 't@t.com' },
   });
   eq(status, 200, 'HTTP 状态码');
@@ -96,6 +115,7 @@ await test('注册成功返回用户 id', async () => {
 });
 await test('重复注册被拒绝(用户名已被占用)', async () => {
   const { json } = await api('POST', '/api/auth/register', {
+    token: adminToken,
     body: { username: regUser, password: regPwd },
   });
   eq(json?.code, 1, '业务码');
@@ -103,6 +123,7 @@ await test('重复注册被拒绝(用户名已被占用)', async () => {
 });
 await test('用户名少于 3 位被拒绝', async () => {
   const { json } = await api('POST', '/api/auth/register', {
+    token: adminToken,
     body: { username: 'ab', password: '123456' },
   });
   eq(json?.code, 1, '业务码');
@@ -110,13 +131,17 @@ await test('用户名少于 3 位被拒绝', async () => {
 });
 await test('密码少于 6 位被拒绝', async () => {
   const { json } = await api('POST', '/api/auth/register', {
+    token: adminToken,
     body: { username: `t_${ts}`, password: '123' },
   });
   eq(json?.code, 1, '业务码');
   assert(json?.message?.includes('6 位'), `提示不正确: ${json?.message}`);
 });
 await test('缺少用户名/密码被拒绝', async () => {
-  const { json } = await api('POST', '/api/auth/register', { body: { username: 'x_only' } });
+  const { json } = await api('POST', '/api/auth/register', {
+    token: adminToken,
+    body: { username: 'x_only' },
+  });
   assert(json?.code === 1 && json?.message?.includes('不能为空'), `应拒绝: ${json?.message}`);
 });
 
@@ -124,7 +149,7 @@ await test('缺少用户名/密码被拒绝', async () => {
 console.log('\n[2] 认证 - 登录与鉴权');
 await test('admin 登录成功返回 token 与角色', async () => {
   const { json } = await api('POST', '/api/auth/login', {
-    body: { username: 'admin', password: '123456' },
+    body: { username: 'admin', password: ADMIN_PWD },
   });
   eq(json?.code, 0, '业务码');
   assert(json?.data?.token?.length > 20, 'token 缺失或过短');
@@ -135,7 +160,7 @@ await test('admin 登录成功返回 token 与角色', async () => {
 });
 await test('operator 登录成功', async () => {
   const { json } = await api('POST', '/api/auth/login', {
-    body: { username: 'operator', password: '123456' },
+    body: { username: 'operator', password: ADMIN_PWD },
   });
   eq(json?.code, 0, '业务码');
   eq(json?.data?.user?.role_name, '运营', '角色名');

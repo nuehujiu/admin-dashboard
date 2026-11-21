@@ -18,6 +18,7 @@ export const PERM = {
   ROLE_UPDATE: 'role:update',
   ROLE_DELETE: 'role:delete',
   SETTINGS_VIEW: 'settings:view',
+  SETTINGS_UPDATE: 'settings:update',
   PROFILE_VIEW: 'profile:view',
 };
 

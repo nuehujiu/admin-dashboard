@@ -13,9 +13,10 @@ const {
   categoryRatio,
   rank,
 } = require('../controllers/dashboardController');
-const { authRequired } = require('../middleware/auth');
+const { authRequired, requirePerm } = require('../middleware/auth');
 
 router.use(authRequired);
+router.use(requirePerm('dashboard:view'));
 
 router.get('/overview', overview);
 router.get('/trend', trend);

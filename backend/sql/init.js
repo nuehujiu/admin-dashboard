@@ -7,9 +7,10 @@
  *   2. 执行 sql/init.sql 建库、建表
  *   3. 写入演示数据：角色、用户、菜单、分类、近 30 天销售记录
  *
- * 内置账号（密码均为 123456）：
- *   admin   / 123456   超级管理员
- *   operator / 123456  运营（仅数据看板、销售统计相关权限）
+ * 内置账号（密码取 SEED_PASSWORD，未设置时开发环境回落到 123456）：
+ *   admin     超级管理员
+ *   operator  运营（仅数据看板、销售统计相关权限）
+ * 生产环境（NODE_ENV=production）必须显式设置 SEED_PASSWORD（≥12 位），否则脚本中止。
  */
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const fs = require('fs');
@@ -56,6 +57,8 @@ async function run() {
     { parent_id: 12, name: '新增商品', path: null, icon: null, type: 2, permission: 'goods:create', sort: 1 },
     { parent_id: 12, name: '编辑商品', path: null, icon: null, type: 2, permission: 'goods:update', sort: 2 },
     { parent_id: 12, name: '删除商品', path: null, icon: null, type: 2, permission: 'goods:delete', sort: 3 },
+    // 系统设置写权限：parent 13 = 系统设置菜单（parent_id 用插入序号，请勿调整上面顺序）
+    { parent_id: 13, name: '保存系统设置', path: null, icon: null, type: 2, permission: 'settings:update', sort: 1 },
   ];
 
   // 3) 写入角色
@@ -110,9 +113,18 @@ async function run() {
   // 访客：只有个人中心
   await conn.query('INSERT INTO role_menu (role_id, menu_id) VALUES (?,?)', [guestRoleId, menuIds['profile:view']]);
 
-  // 6) 写入用户（密码统一 123456）
+  // 6) 写入用户
+  //    初始密码由 SEED_PASSWORD 决定；生产环境必须显式提供，杜绝 123456 进生产库
   //    last_login_at 供用户管理列表的「最近登录」列与排序使用
-  const hash = await bcrypt.hash('123456', 10);
+  const isProd = process.env.NODE_ENV === 'production';
+  const seedPassword = process.env.SEED_PASSWORD || (isProd ? '' : '123456');
+  if (!seedPassword) {
+    throw new Error('生产环境初始化必须设置 SEED_PASSWORD（初始管理员密码），已中止');
+  }
+  if (isProd && seedPassword.length < 12) {
+    throw new Error('生产环境 SEED_PASSWORD 至少 12 位，已中止');
+  }
+  const hash = await bcrypt.hash(seedPassword, 10);
   const ts = (daysAgo) => {
     const d = new Date(Date.now() - daysAgo * 86400000);
     const pad = (n) => String(n).padStart(2, '0');
@@ -218,7 +230,11 @@ async function run() {
   }
 
   console.log('[init] 演示数据写入完成');
-  console.log('[init] 登录账号: admin / 123456  或  operator / 123456');
+  if (isProd) {
+    console.log('[init] 登录账号: admin / operator，密码为 SEED_PASSWORD 指定的值');
+  } else {
+    console.log(`[init] 登录账号: admin / operator，密码 ${seedPassword}`);
+  }
   await conn.end();
 }
 

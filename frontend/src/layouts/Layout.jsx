@@ -131,11 +131,15 @@ export default function Layout() {
           <div className={s.brandLogo}>H</div>
           {!collapsed && (
             <div className={s.brandText}>
-              <div className={s.brandName}>houtai</div>
-              {/* 副标题跟随系统设置里的「系统名称」 */}
-              <div className={s.brandSub} title={settings.systemName}>
+              {/* 品牌名与副标题都跟随系统设置，不再写死 */}
+              <div className={s.brandName} title={settings.systemName}>
                 {settings.systemName}
               </div>
+              {settings.slogan && (
+                <div className={s.brandSub} title={settings.slogan}>
+                  {settings.slogan}
+                </div>
+              )}
             </div>
           )}
         </div>

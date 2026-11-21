@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Form, Input, Checkbox, App } from 'antd';
-import { ShopOutlined, UserOutlined ,SafetyCertificateOutlined } from '@ant-design/icons';
+import { ShopOutlined, UserOutlined } from '@ant-design/icons';
 import s from './index.module.scss';
 import { useUserStore } from '../../store/useUserStore';
 import { login as loginApi, getProfile } from '../../api/auth';
@@ -123,7 +123,7 @@ export default function Login() {
         </div>
 
         <div className={s.brandFoot}>
-          © 2026 houtai | 内部系统，仅限授权账号访问
+          © 2026 内部系统，仅限授权账号访问
         </div>
       </aside>
       {/*右侧登录区*/}
@@ -131,13 +131,13 @@ export default function Login() {
         <div className={s.topLinks}>
           <button
             type="button"
-            onClick={() => message.info('演示环境，请联系系统管理员')}
+            onClick={() => message.info('请通过内部渠道联系系统管理员')}
           >
             帮助中心
           </button>
           <button
             type="button"
-            onClick={() => message.info('演示环境，请联系系统管理员')}
+            onClick={() => message.info('请通过内部渠道联系系统管理员')}
           >
             联系管理员
           </button>
@@ -165,7 +165,7 @@ export default function Login() {
             >
               <Input
                 prefix={<UserOutlined className={s.inputIcon} />}
-                placeholder="admin"
+                placeholder="请输入账号"
                 autoComplete="username"
               />
             </Form.Item>
@@ -178,7 +178,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() =>
-                      message.info('演示环境，请联系管理员重置密码')
+                      message.info('请联系系统管理员重置密码')
                     }
                   >
                     忘记密码？
@@ -210,18 +210,6 @@ export default function Login() {
               登录
             </Button>
           </Form>
-
-          <div className={s.divider}>
-            <span>演示环境</span>
-          </div>
-
-          <div className={s.demoTip}>
-            <SafetyCertificateOutlined className={s.tipIcon} />
-            <span>
-              账号 <b>admin</b> · 密码 <b>123456</b>
-            </span>
-            <span className={s.demoRight}>运营账号 operator</span>
-          </div>
 
           <p className={s.agree}>
             登录即表示同意《内部系统使用规范》与《数据安全承诺》

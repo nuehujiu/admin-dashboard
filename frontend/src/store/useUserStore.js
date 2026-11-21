@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export const useUserStore = create(
   persist(
@@ -40,6 +40,8 @@ export const useUserStore = create(
     }),
     {
       name: 'houtai-auth',
+      // 存 sessionStorage：关闭标签页即失效，降低共用设备上的 token 残留风险
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         token: state.token,
         user: state.user,
