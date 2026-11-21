@@ -1,9 +1,9 @@
-import Layout from '../layouts/Layout';
+import { Suspense } from 'react';
 import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
 import Guard from './guard';
 import DefaultPage from './DefaultPage';
-import { Dashboard, Sales, Goods, Users, Roles, Settings, Profile } from './lazyPages';
+import { Layout, Dashboard, Sales, Goods, Users, Roles, Settings, Profile } from './lazyPages';
 import { PERM } from '../utils/permissions';
 
 /**
@@ -19,7 +19,23 @@ export const routes = [
     name: 'Layout',
     element: (
       <Guard>
-        <Layout />
+        <Suspense
+          fallback={
+            <div
+              style={{
+                minHeight: '100vh',
+                display: 'grid',
+                placeItems: 'center',
+                color: '#8a827b',
+                fontSize: 13,
+              }}
+            >
+              正在加载工作台…
+            </div>
+          }
+        >
+          <Layout />
+        </Suspense>
       </Guard>
     ),
     children: [

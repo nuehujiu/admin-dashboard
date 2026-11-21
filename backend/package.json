@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "后台管理 + 数据看板练习项目 —— Node + Express + MySQL 后端接口服务",
   "main": "app.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",

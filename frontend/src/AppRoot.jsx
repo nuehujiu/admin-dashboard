@@ -1,6 +1,7 @@
 import { ConfigProvider, App as AntdApp } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import App from './App.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import FeedbackBridge from './utils/FeedbackBridge.jsx';
 import { createTheme } from './utils/theme.js';
 import { useUserStore } from './store/useUserStore';
@@ -16,7 +17,9 @@ export default function AppRoot() {
       <AntdApp>
         {/* 注入 message 实例，让 request 层也能跟随主题 */}
         <FeedbackBridge />
-        <App />
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
       </AntdApp>
     </ConfigProvider>
   );

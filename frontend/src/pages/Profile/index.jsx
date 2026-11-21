@@ -3,7 +3,7 @@ import { App, Avatar, Button, Form, Input, Tooltip } from 'antd';
 import { LockOutlined, MobileOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import s from './index.module.scss';
-import { getProfile, updateProfile, updatePassword } from '../../api/auth';
+import { getProfile, updateProfile, updatePassword, uploadAvatar } from '../../api/auth';
 import { useUserStore } from '../../store/useUserStore';
 
 const PHONE_RE = /^1[3-9]\d{9}$/;
@@ -67,6 +67,7 @@ export default function Profile() {
 
   const [profile, setLocal] = useState(null);
   const [avatar, setAvatar] = useState('');
+  const [avatarLoading, setAvatarLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pwdLoading, setPwdLoading] = useState(false);
 
@@ -104,6 +105,10 @@ export default function Profile() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileForm, message, setProfile]);
 
+  /**
+   * 选图 → 居中裁方 → 缩到 128px → 上传到服务端落盘
+   * 上传成功直接拿到 /uploads/avatars/xxx.jpg，不再把 base64 存进数据库
+   */
   const onPick = async (e) => {
     const file = e.target.files?.[0];
     e.target.value = ''; // 允许重复选同一张图
@@ -116,10 +121,20 @@ export default function Profile() {
       message.error('图片不能超过 2MB');
       return;
     }
+    setAvatarLoading(true);
     try {
-      setAvatar(await fileToAvatar(file));
+      const dataUrl = await fileToAvatar(file);
+      const res = await uploadAvatar(dataUrl);
+      const next = res?.avatar || dataUrl;
+      setAvatar(next);
+      // 头像是独立上传接口，顺手同步全局用户，顶栏立即更新
+      const { user, menus, permissions } = useUserStore.getState();
+      setProfile({ user: { ...(user || {}), avatar: next }, menus, permissions });
+      message.success('头像已更新');
     } catch (err) {
-      message.error(err?.message || '图片处理失败');
+      message.error(err?.message || '头像上传失败');
+    } finally {
+      setAvatarLoading(false);
     }
   };
 
@@ -222,14 +237,25 @@ export default function Profile() {
                   登录名 {profile?.username || '—'} · 用户 ID {profile?.id ?? '—'}
                 </div>
                 <div className={s.avatarActions}>
-                  <Tooltip title="图片会压缩到 128px 再保存">
+                  <Tooltip title="图片会压缩到 128px，上传后保存在服务器">
                     <label className={s.uploadBtn}>
-                      换头像
-                      <input type="file" accept="image/png,image/jpeg" hidden onChange={onPick} />
+                      {avatarLoading ? '上传中…' : '换头像'}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        hidden
+                        disabled={avatarLoading}
+                        onChange={onPick}
+                      />
                     </label>
                   </Tooltip>
                   {avatar ? (
-                    <button type="button" className={s.textBtn} onClick={() => setAvatar('')}>
+                    <button
+                      type="button"
+                      className={s.textBtn}
+                      disabled={avatarLoading}
+                      onClick={() => setAvatar('')}
+                    >
                       移除
                     </button>
                   ) : null}

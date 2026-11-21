@@ -6,9 +6,10 @@
 const express = require('express');
 const router = express.Router();
 const { list, stats } = require('../controllers/salesController');
-const { authRequired } = require('../middleware/auth');
+const { authRequired, requirePerm } = require('../middleware/auth');
 
 router.use(authRequired);
+router.use(requirePerm('sales:view'));
 router.get('/stats', stats);
 router.get('/', list);
 

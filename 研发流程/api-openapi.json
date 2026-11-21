@@ -333,7 +333,54 @@
         }
       }
     },
-    "/api/users": {
+    "/api/auth/avatar": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "上传头像（落盘保存，DB 存 URL）",
+        "description": "前端把图片压缩到 128px 后以 dataURL 提交；服务端解码写入 uploads/avatars，返回可访问的 /uploads/avatars/xxx.jpg。会同时删除该用户的旧头像文件。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["dataUrl"],
+                "properties": {
+                  "dataUrl": { "type": "string", "description": "data:image/(png|jpeg);base64,...（解码后 ≤ 400KB）" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "返回新的头像 URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/RespBase" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "avatar": { "type": "string", "example": "/uploads/avatars/u1-mwptecxm-e2689576.jpg" }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "description": "头像格式不支持 / 文件过大 / 不是有效图片" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },    "/api/users": {
       "get": {
         "tags": ["Users"],
         "summary": "用户分页列表",

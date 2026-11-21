@@ -3,6 +3,7 @@ import { App, Button, Form, Input, Switch } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import s from './index.module.scss';
 import { getSettings, saveSettings, resetSettings } from '../../api/settings';
+import { PERM, usePermission } from '../../utils/permissions';
 import { applyCssVars } from '../../utils/theme';
 import { useUserStore } from '../../store/useUserStore';
 
@@ -25,6 +26,9 @@ export default function Settings() {
   const [form] = Form.useForm();
   const { message, modal } = App.useApp();
   const setSettings = useUserStore((st) => st.setSettings);
+  // 无 settings:update 时只能查看，保存与恢复默认按钮禁用
+  const { can } = usePermission();
+  const canUpdate = can([PERM.SETTINGS_UPDATE, PERM.SETTINGS_VIEW]);
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
   // 已保存到服务端的值：用于改色二次确认
@@ -119,16 +123,34 @@ export default function Settings() {
           <p className={s.meta}>5 项可配置字段 · 保存后对全部成员立即生效</p>
         </div>
         <div className={s.actions}>
-          <Button icon={<ReloadOutlined />} loading={resetting} onClick={onReset}>
+          <Button
+            icon={<ReloadOutlined />}
+            loading={resetting}
+            disabled={!canUpdate}
+            title={canUpdate ? undefined : '当前账号无修改权限'}
+            onClick={onReset}
+          >
             恢复默认
           </Button>
-          <Button type="primary" loading={saving} onClick={onSubmit}>
+          <Button
+            type="primary"
+            loading={saving}
+            disabled={!canUpdate}
+            title={canUpdate ? undefined : '当前账号无修改权限'}
+            onClick={onSubmit}
+          >
             保存设置
           </Button>
         </div>
       </div>
 
-      <Form form={form} layout="vertical" requiredMark={false} className={s.grid}>
+      <Form
+        form={form}
+        layout="vertical"
+        requiredMark={false}
+        disabled={!canUpdate}
+        className={s.grid}
+      >
         {/* ---------- 基础信息 ---------- */}
         <div className={s.card}>
           <h2 className={s.cardTitle}>基础信息</h2>

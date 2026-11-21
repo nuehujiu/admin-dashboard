@@ -83,6 +83,8 @@ export default function Sales() {
 
   useEffect(() => {
     let alive = true;
+    // 请求前先把加载态置上，避免旧数据闪一下（必要的外部同步）
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     getSalesStats(range)
       .then((d) => {
@@ -107,6 +109,7 @@ export default function Sales() {
   useEffect(() => {
     if (!drawerOpen) return;
     let alive = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRowsLoading(true);
     const start = drRange > 0 ? localDate(-(drRange - 1)) : '';
     const end = drRange > 0 ? localDate(0) : '';
@@ -130,7 +133,7 @@ export default function Sales() {
     };
   }, [drawerOpen, page, pageSize, drRange, drCat]);
 
-  const trend = stats?.trend || [];
+  const trend = useMemo(() => stats?.trend || [], [stats]);
   const categories = stats?.categories || [];
   const kpi = stats?.kpi;
 
@@ -224,7 +227,7 @@ export default function Sales() {
       a.click();
       URL.revokeObjectURL(url);
       message.success(`已导出 ${all.length} 条明细`);
-    } catch (e) {
+    } catch {
       message.error('导出失败，请稍后重试');
     } finally {
       setExporting(false);

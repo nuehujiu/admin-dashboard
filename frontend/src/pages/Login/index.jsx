@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Form, Input, Checkbox, App } from 'antd';
-import { ShopOutlined, UserOutlined ,SafetyCertificateOutlined } from '@ant-design/icons';
+import { ShopOutlined, UserOutlined } from '@ant-design/icons';
 import s from './index.module.scss';
 import { useUserStore } from '../../store/useUserStore';
 import { login as loginApi, getProfile } from '../../api/auth';
@@ -25,6 +25,9 @@ export default function Login() {
   const navigate = useNavigate();
   // 获取用户令牌
   const token = useUserStore((s) => s.token);
+  // 品牌区跟随系统设置（登录前用 store 里的默认值兜底）
+  const systemName = useUserStore((s) => s.settings.systemName);
+  const slogan = useUserStore((s) => s.settings.slogan);
   // 设置认证状态
   const setAuth = useUserStore((s) => s.setAuth);
   // 设置用户资料
@@ -71,7 +74,7 @@ export default function Login() {
       message.error(
         e?.response?.data?.message ||
           e?.message ||
-          '登录失败，请确认 mock 服务已启动',
+          '登录失败，请确认后端服务已启动',
       );
     } finally {
       setLoading(false);
@@ -87,8 +90,8 @@ export default function Login() {
             <ShopOutlined />
           </div>
           <div>
-            <div className={s.logoName}>houtai</div>
-            <div className={s.logoSub}>商城后台管理系统</div>
+            <div className={s.logoName} title={systemName}>{systemName}</div>
+            <div className={s.logoSub}>{slogan || '商城后台管理系统'}</div>
           </div>
         </div>
 
@@ -123,7 +126,7 @@ export default function Login() {
         </div>
 
         <div className={s.brandFoot}>
-          © 2026 houtai | 内部系统，仅限授权账号访问
+          © 2026 内部系统，仅限授权账号访问
         </div>
       </aside>
       {/*右侧登录区*/}
@@ -131,13 +134,13 @@ export default function Login() {
         <div className={s.topLinks}>
           <button
             type="button"
-            onClick={() => message.info('演示环境，请联系系统管理员')}
+            onClick={() => message.info('请通过内部渠道联系系统管理员')}
           >
             帮助中心
           </button>
           <button
             type="button"
-            onClick={() => message.info('演示环境，请联系系统管理员')}
+            onClick={() => message.info('请通过内部渠道联系系统管理员')}
           >
             联系管理员
           </button>
@@ -165,7 +168,7 @@ export default function Login() {
             >
               <Input
                 prefix={<UserOutlined className={s.inputIcon} />}
-                placeholder="admin"
+                placeholder="请输入账号"
                 autoComplete="username"
               />
             </Form.Item>
@@ -178,7 +181,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() =>
-                      message.info('演示环境，请联系管理员重置密码')
+                      message.info('请联系系统管理员重置密码')
                     }
                   >
                     忘记密码？
@@ -210,18 +213,6 @@ export default function Login() {
               登录
             </Button>
           </Form>
-
-          <div className={s.divider}>
-            <span>演示环境</span>
-          </div>
-
-          <div className={s.demoTip}>
-            <SafetyCertificateOutlined className={s.tipIcon} />
-            <span>
-              账号 <b>admin</b> · 密码 <b>123456</b>
-            </span>
-            <span className={s.demoRight}>运营账号 operator</span>
-          </div>
 
           <p className={s.agree}>
             登录即表示同意《内部系统使用规范》与《数据安全承诺》

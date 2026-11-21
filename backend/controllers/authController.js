@@ -5,6 +5,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../config/db');
 const { success, fail } = require('../utils/response');
+const {
+  AVATAR_URL_PREFIX,
+  saveAvatarFromDataUrl,
+  removeAvatarByUrl,
+} = require('../config/upload');
 
 /** 头像 dataURL 上限（前端已压到 128px，正常十几 KB） */
 const AVATAR_MAX = 200 * 1024;
@@ -81,9 +86,12 @@ async function register(req, res, next) {
       return fail(res, '用户名已被占用');
     }
 
-    // 默认分配「运营」角色
+    // 默认分配「运营」角色；角色表没初始化好时给出明确错误，而不是让 role_id=null 撞 NOT NULL
     const role = await query("SELECT id FROM roles WHERE code = 'operator'");
-    const roleId = role.length ? role[0].id : null;
+    if (!role.length) {
+      return fail(res, '未找到默认角色（operator），请先执行 npm run init-db', 500, 500);
+    }
+    const roleId = role[0].id;
 
     const hash = await bcrypt.hash(password, 10);
     const result = await query(
@@ -168,6 +176,8 @@ async function updateProfile(req, res, next) {
   try {
     const body = req.body || {};
     const patch = {};
+    let oldAvatar = null;
+    let avatarChanged = false;
 
     if (body.nickname !== undefined) {
       const v = String(body.nickname ?? '').trim();
@@ -192,20 +202,42 @@ async function updateProfile(req, res, next) {
       patch.intro = v;
     }
     if (body.avatar !== undefined) {
-      const v = String(body.avatar || '');
-      if (v && !v.startsWith('data:image/')) return fail(res, '头像格式不支持');
-      if (v.length > AVATAR_MAX) return fail(res, '头像文件过大，请重新选择');
-      patch.avatar = v || null;
+      const v = String(body.avatar || '').trim();
+      if (!v) {
+        // 清空头像：保存后删掉旧文件
+        patch.avatar = null;
+        avatarChanged = true;
+      } else if (v.startsWith(AVATAR_URL_PREFIX) && v.length <= 200) {
+        // 已经由上传接口落盘，DB 只存相对 URL
+        patch.avatar = v;
+        avatarChanged = true;
+      } else if (v.startsWith('data:image/')) {
+        // 兼容老前端：收 dataURL，但落盘后仍然只存 URL，避免 base64 进 DB
+        if (v.length > AVATAR_MAX) return fail(res, '头像文件过大，请重新选择');
+        const saved = saveAvatarFromDataUrl(req.user.id, v);
+        patch.avatar = saved.url;
+        avatarChanged = true;
+      } else {
+        return fail(res, '头像格式不支持');
+      }
     }
 
     // 列名全部来自上面的白名单分支，不存在 SQL 注入面
     const keys = Object.keys(patch);
     if (!keys.length) return fail(res, '没有可保存的资料项');
 
+    // 头像要换时先记下旧文件，更新成功后再删，避免写库失败却把旧图删了
+    if (avatarChanged) {
+      const rows = await query('SELECT avatar FROM users WHERE id = ?', [req.user.id]);
+      oldAvatar = rows[0]?.avatar || null;
+    }
+
     await query(
       `UPDATE users SET ${keys.map((k) => `\`${k}\` = ?`).join(', ')}, updated_at = NOW() WHERE id = ?`,
       [...keys.map((k) => patch[k]), req.user.id]
     );
+
+    if (oldAvatar && oldAvatar !== patch.avatar) removeAvatarByUrl(oldAvatar);
 
     const payload = await mePayload(req.user.id);
     return success(res, payload, '资料已保存');
@@ -214,8 +246,35 @@ async function updateProfile(req, res, next) {
   }
 }
 
-/** 修改密码（校验当前密码；成功后前端需重新登录） */
-async function updatePassword(req, res, next) {
+/**
+ * 上传头像（文件存储）
+ *   POST /api/auth/avatar  { dataUrl }
+ * 服务端解码后写进 uploads/avatars，DB 只存 /uploads/avatars/xxx.jpg；
+ * 同时替换掉旧文件，避免上传目录越堆越多。
+ */
+async function uploadAvatar(req, res, next) {
+  try {
+    const { dataUrl } = req.body || {};
+    if (!dataUrl) return fail(res, '请先选择图片');
+
+    const rows = await query('SELECT avatar FROM users WHERE id = ?', [req.user.id]);
+    if (!rows.length) return fail(res, '用户不存在', 404, 404);
+
+    const saved = saveAvatarFromDataUrl(req.user.id, dataUrl);
+    await query('UPDATE users SET avatar = ?, updated_at = NOW() WHERE id = ?', [
+      saved.url,
+      req.user.id,
+    ]);
+    removeAvatarByUrl(rows[0].avatar);
+
+    return success(res, { avatar: saved.url }, '头像已更新');
+  } catch (err) {
+    if (err && err.status) return fail(res, err.message, err.status, err.status);
+    next(err);
+  }
+}
+
+/** 修改密码（校验当前密码；成功后前端需重新登录） */async function updatePassword(req, res, next) {
   try {
     const { oldPassword, newPassword } = req.body || {};
     if (!oldPassword || !newPassword) {
@@ -240,4 +299,4 @@ async function updatePassword(req, res, next) {
   }
 }
 
-module.exports = { register, login, me, updateProfile, updatePassword };
+module.exports = { register, login, me, updateProfile, uploadAvatar, updatePassword };
