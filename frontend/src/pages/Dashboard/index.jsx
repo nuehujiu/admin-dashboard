@@ -77,7 +77,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     let alive = true;
-    setLoading(true);
     Promise.all([
     // 并行请求所有数据
       getOverview(),
@@ -110,7 +109,10 @@ export default function Dashboard() {
     };
   }, [range, tick]);
 
-  const reload = useCallback(() => setTick((t) => t + 1), []);
+  const reload = useCallback(() => {
+    setLoading(true);
+    setTick((t) => t + 1);
+  }, []);
 
   // ---------- 派生 ----------
   const amountSpark = useMemo(
@@ -364,7 +366,14 @@ export default function Dashboard() {
           </div>
         </div>
         <div className={s.heroActions}>
-          <Segmented value={range} options={RANGES} onChange={setRange} />
+          <Segmented
+            value={range}
+            options={RANGES}
+            onChange={(v) => {
+              setLoading(true);
+              setRange(v);
+            }}
+          />
           <Button
             icon={<DownloadOutlined />}
             onClick={() => navigate('/sales')}
@@ -552,7 +561,7 @@ export default function Dashboard() {
 
       {isAllEmpty && (
         <div className={s.hint}>
-          当前 mock 返回空数据，可参考验证清单第 6 条排查
+          当前没有数据，可检查后端接口与数据库是否正常
         </div>
       )}
     </div>

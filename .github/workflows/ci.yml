@@ -19,10 +19,9 @@ jobs:
         with:
           node-version: 20
 
-      - name: 后端与 Mock 语法检查
+      - name: 后端语法检查
         run: |
           set -e
-          node --check mock/mock-server.js
           node --check backend/app.js
           for f in backend/controllers/*.js backend/routes/*.js backend/middleware/*.js backend/utils/*.js backend/config/*.js; do
             echo "check $f"; node --check "$f"

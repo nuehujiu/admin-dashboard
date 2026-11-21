@@ -71,7 +71,7 @@ export default function Login() {
       message.error(
         e?.response?.data?.message ||
           e?.message ||
-          '登录失败，请确认 mock 服务已启动',
+          '登录失败，请确认后端服务已启动',
       );
     } finally {
       setLoading(false);
