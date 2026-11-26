@@ -10,12 +10,27 @@ import NoticeBell from '../components/NoticeBell';
 
 import { Menu } from 'antd';
 import {
-  DashboardOutlined, BarChartOutlined, ShoppingOutlined, UserOutlined,
-  TeamOutlined, SettingOutlined,
-  LogoutOutlined, DownOutlined,
-  MenuFoldOutlined, MenuUnfoldOutlined, IdcardOutlined,
+  DashboardOutlined,
+  BarChartOutlined,
+  ShoppingOutlined,
+  UserOutlined,
+  TeamOutlined,
+  SettingOutlined,
+  LogoutOutlined,
+  DownOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  IdcardOutlined,
 } from '@ant-design/icons';
-import { Breadcrumb, Dropdown, Avatar, theme, Result, Button, Spin } from 'antd';
+import {
+  Breadcrumb,
+  Dropdown,
+  Avatar,
+  theme,
+  Result,
+  Button,
+  Spin,
+} from 'antd';
 
 /** 懒加载页面的占位：侧栏与顶栏已在，只等内容区 */
 function PageFallback() {
@@ -28,14 +43,21 @@ function PageFallback() {
 }
 
 const ICONS = {
-  dashboard: <DashboardOutlined />, 'bar-chart': <BarChartOutlined />,
-  shopping: <ShoppingOutlined />, user: <UserOutlined />,
-  team: <TeamOutlined />, setting: <SettingOutlined />,
+  dashboard: <DashboardOutlined />,
+  'bar-chart': <BarChartOutlined />,
+  shopping: <ShoppingOutlined />,
+  user: <UserOutlined />,
+  team: <TeamOutlined />,
+  setting: <SettingOutlined />,
   idcard: <IdcardOutlined />,
 };
 const GROUP_BY_PATH = {
-  '/dashboard': '概览', '/sales': '概览', '/goods': '运营',
-  '/system/users': '运营', '/system/roles': '系统', '/settings': '系统',
+  '/dashboard': '概览',
+  '/sales': '概览',
+  '/goods': '运营',
+  '/system/users': '运营',
+  '/system/roles': '系统',
+  '/settings': '系统',
   '/profile': '系统',
 };
 const GROUP_ORDER = ['概览', '运营', '系统'];
@@ -88,18 +110,23 @@ export default function Layout() {
       label: g,
       children: visiblePages
         .filter((r) => (GROUP_BY_PATH[r.path] ?? '概览') === g)
-        .map((r) => ({ key: r.path, icon: ICONS[r.meta?.icon] ?? null, label: r.name })),
+        .map((r) => ({
+          key: r.path,
+          icon: ICONS[r.meta?.icon] ?? null,
+          label: r.name,
+        })),
     })).filter((g) => g.children.length);
   }, [visiblePages]);
 
   /** 全局搜索的数据源：有权限访问的页面 */
   const searchItems = useMemo(
-    () => visiblePages.map((r) => ({
-      path: r.path,
-      name: r.name,
-      group: GROUP_BY_PATH[r.path] ?? '概览',
-      icon: ICONS[r.meta?.icon] ?? null,
-    })),
+    () =>
+      visiblePages.map((r) => ({
+        path: r.path,
+        name: r.name,
+        group: GROUP_BY_PATH[r.path] ?? '概览',
+        icon: ICONS[r.meta?.icon] ?? null,
+      })),
     [visiblePages],
   );
 
@@ -111,10 +138,14 @@ export default function Layout() {
 
   /** 当前页面是否可访问（手输 URL 也挡） */
   const route = allPages.find((r) => r.path === pathname);
-  const denied = !!(route?.meta?.permission && !permissions.includes(route.meta.permission));
+  const denied = !!(
+    route?.meta?.permission && !permissions.includes(route.meta.permission)
+  );
 
   const crumbs = route
-    ? group ? [{ title: group }, { title: route.name }] : [{ title: route.name }]
+    ? group
+      ? [{ title: group }, { title: route.name }]
+      : [{ title: route.name }]
     : [{ title: '概览' }];
 
   const onUserMenu = ({ key }) => {
@@ -129,19 +160,17 @@ export default function Layout() {
       <aside className={`${s.sider} ${collapsed ? s.siderCollapsed : ''}`}>
         <div className={s.brand}>
           <div className={s.brandLogo}>H</div>
-          {!collapsed && (
-            <div className={s.brandText}>
-              {/* 品牌名与副标题都跟随系统设置，不再写死 */}
-              <div className={s.brandName} title={settings.systemName}>
-                {settings.systemName}
-              </div>
-              {settings.slogan && (
-                <div className={s.brandSub} title={settings.slogan}>
-                  {settings.slogan}
-                </div>
-              )}
+          {/* 始终渲染，折叠时靠 brandTextCollapsed 淡出，动画才有效果 */}
+          <div className={`${s.brandText} ${collapsed ? s.brandTextCollapsed : ''}`}>
+            <div className={s.brandName} title={settings.systemName}>
+              {settings.systemName}
             </div>
-          )}
+            {settings.slogan && (
+              <div className={s.brandSub} title={settings.slogan}>
+                {settings.slogan}
+              </div>
+            )}
+          </div>
         </div>
         <div className={s.menuWarp}>
           <Menu
@@ -186,7 +215,12 @@ export default function Layout() {
             menu={{
               onClick: onUserMenu,
               items: [
-                { key: 'logout', label: '退出登录', icon: <LogoutOutlined />, danger: true },
+                {
+                  key: 'logout',
+                  label: '退出登录',
+                  icon: <LogoutOutlined />,
+                  danger: true,
+                },
               ],
             }}
           >
@@ -199,10 +233,14 @@ export default function Layout() {
                 {(user?.nickname || user?.username || '?').slice(0, 1)}
               </Avatar>
               <div>
-                <div className={s.userName}>{user?.nickname || user?.username || '未登录'}</div>
+                <div className={s.userName}>
+                  {user?.nickname || user?.username || '未登录'}
+                </div>
                 <div className={s.userRole}>{user?.role_name || '—'}</div>
               </div>
-              <DownOutlined style={{ fontSize: 10, color: token.colorTextTertiary }} />
+              <DownOutlined
+                style={{ fontSize: 10, color: token.colorTextTertiary }}
+              />
             </div>
           </Dropdown>
         </header>
@@ -214,7 +252,10 @@ export default function Layout() {
               title="403"
               subTitle={`当前角色（${user?.role_name || '未知'}）没有访问该页面的权限`}
               extra={
-                <Button type="primary" onClick={() => navigate(getDefaultMenuPath(menus))}>
+                <Button
+                  type="primary"
+                  onClick={() => navigate(getDefaultMenuPath(menus))}
+                >
                   回到可访问页面
                 </Button>
               }
