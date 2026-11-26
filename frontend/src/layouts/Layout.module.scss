@@ -39,10 +39,22 @@
   align-items: center;
   justify-content: center;
 }
-//brand名称样式
+// brand名称样式
 .brandText {
   min-width: 0;
+  white-space: nowrap;
   overflow: hidden;
+  opacity: 1;
+  max-width: 180px;
+  transition:
+    opacity 0.16s ease,
+    max-width 0.25s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.brandTextCollapsed {
+  opacity: 0;
+  max-width: 0;
+  pointer-events: none;
 }
 .brandName {
   font-size: 15px;
@@ -162,11 +174,11 @@
   line-height: 1.3;
   color: $text-3;
 }
-.content{
-    flex:1;
-    min-height:0;
-    overflow-y:auto;
-    padding: 20px 28px 22px;
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 28px 22px;
 }
 /* 懒加载页面的占位 */
 .pageLoad {
