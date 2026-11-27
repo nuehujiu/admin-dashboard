@@ -10,21 +10,25 @@
  *   PUT    /api/goods/:id/status     上下架
  *   DELETE /api/goods/:id            删除商品
  */
+// Express 路由工厂
 const express = require('express');
 const router = express.Router();
+// 控制器方法
 const {
-  list,
-  categories,
-  batchStatus,
-  batchDelete,
-  detail,
-  create,
-  update,
-  toggleStatus,
-  remove,
+  list, // 列表
+  categories, // 分类
+  batchStatus, // 批量上下架
+  batchDelete, // 批量删除
+  detail, // 详情
+  create, // 新增
+  update, // 编辑
+  toggleStatus, // 单个上下架
+  remove, // 删除
 } = require('../controllers/goodsController');
+// 鉴权 + 权限
 const { authRequired, requirePerm } = require('../middleware/auth');
 
+// 统一要求登录
 router.use(authRequired);
 
 // 注意：所有静态路径（categories / batch/status / batch-delete）
@@ -36,7 +40,9 @@ router.post('/batch-delete', requirePerm('goods:delete'), batchDelete);
 router.get('/:id', requirePerm('goods:view'), detail);
 router.post('/', requirePerm('goods:create'), create);
 router.put('/:id', requirePerm('goods:update'), update);
+// 上下架用独立的 goods:status 权限（和「编辑」分开授权）
 router.put('/:id/status', requirePerm('goods:status'), toggleStatus);
 router.delete('/:id', requirePerm('goods:delete'), remove);
 
+// 导出路由
 module.exports = router;

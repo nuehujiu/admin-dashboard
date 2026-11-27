@@ -1,36 +1,51 @@
+// 引入全局设计变量（尺寸、颜色、圆角）
 @use '../styles//variables' as *;
 
+// 应用最外层：左右两栏，锁定视口高度，滚动只发生在内容区
 .app {
   display: flex;
+  // 占满整屏
   height: 100vh;
+  // 禁止外层滚动，避免出现「整页滚动 + 内容区滚动」的双滚动条
   overflow: hidden;
 }
-//侧边栏样式
+
+// ===== 侧边栏 =====
+// 固定宽度、纵向布局：品牌区 → 菜单区 → 角色卡
 .sider {
+  // 展开宽度来自变量（与顶栏高度同一套骨架尺寸）
   width: $sider-w;
+  // flex: none 保证不被右侧内容挤压
   flex: none;
   display: flex;
   flex-direction: column;
+  // 白底 + 右侧描边，与内容区暖白底形成层次
   background: $card;
   border-right: 1px solid $line;
+  // 折叠/展开时宽度平滑过渡
   transition: width 0.2s ease;
 }
-//brand样式：高度与 header 对齐（$header-h 含 1px 下边框）
+
+// 品牌区：高度与 header 对齐（$header-h 含 1px 下边框）
 .brand {
   width: 100%;
   height: $header-h;
   flex: none;
   display: flex;
   align-items: center;
+  // logo 与文字的间距
   gap: 9px;
   padding: 0 18px;
+  // 与菜单区之间的极浅分隔线
   border-bottom: 1px solid $line-soft;
 }
-//Logo样式
+
+// Logo 方块：渐变底 + 白字，作为品牌识别符号
 .brandLogo {
   width: 30px;
   height: 30px;
   border-radius: 9px;
+  // 135° 暖橙渐变，与主色同一色系
   background: linear-gradient(135deg, #ff8442, #ee4e14);
   color: #fff;
   font-size: 13px;
@@ -39,42 +54,62 @@
   align-items: center;
   justify-content: center;
 }
-// brand名称样式
+
+// 品牌文字容器：折叠时通过宽度与透明度过渡实现淡出
 .brandText {
+  // min-width: 0 保证在 flex 容器里可以被压缩
   min-width: 0;
+  // 禁止换行，配合 max-width 过渡才有「收窄」效果
   white-space: nowrap;
   overflow: hidden;
+  // 展开态完全不透明
   opacity: 1;
+  // 展开态的最大宽度，也是折叠时的过渡起点
   max-width: 180px;
+  // 两个属性同时过渡：透明度快、宽度慢且用缓出曲线，观感更顺
   transition:
     opacity 0.16s ease,
     max-width 0.25s cubic-bezier(0.2, 0, 0, 1);
 }
 
+// 折叠态：透明 + 宽度归零 + 不接收鼠标事件
 .brandTextCollapsed {
+  // 完全透明
   opacity: 0;
+  // 宽度收为 0，配合父级 overflow: hidden 彻底让出空间
   max-width: 0;
+  // 避免透明元素仍能触发 title 悬浮提示
   pointer-events: none;
 }
+
+// 系统名称：字号略大、加字距，作为品牌主文字
 .brandName {
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.4px;
   line-height: 1.15;
 }
+
+// slogan：小号灰字，单行省略
 .brandSub {
   overflow: hidden;
   font-size: 11px;
   color: $text-3;
   white-space: nowrap;
+  // 超长时显示省略号
   text-overflow: ellipsis;
 }
-//菜单样式
+
+// ===== 菜单区 =====
+// 占据剩余高度并独立滚动，避免菜单过长把角色卡挤出视野
 .menuWarp {
+  // 吃掉中间所有可用空间
   flex: 1;
+  // min-height: 0 是 flex 子项内部滚动的必要条件
   min-height: 0;
   overflow-y: auto;
   padding: 8px 0;
+  // 菜单项圆角统一（:global 穿透 CSS Module 作用域去命中 antd 内部类）
   :global(.ant-menu-item) {
     border-radius: $r-ctl;
   }
@@ -82,58 +117,77 @@
 
 /* 折叠态：侧栏只留图标 */
 .siderCollapsed {
+  // 折叠后宽度收窄为图标列宽
   width: 64px;
 
+  // 品牌区在窄栏里改为纯居中，去掉左右内边距与间距
   .brand {
     padding: 0;
     justify-content: center;
     gap: 0;
   }
 
+  // 折叠态的 antd 菜单宽度占满窄栏，避免右侧留白
   .menuWarp :global(.ant-menu-inline-collapsed) {
     width: 100%;
   }
 }
-/* 底部角色卡固定 */
+
+/* 底部角色卡：固定在侧栏底部 */
 .roleCard {
+  // 不参与伸缩，始终贴底
   flex: none;
   margin: 10px 12px 12px;
   padding: 10px 12px;
   border: 1px solid $line-soft;
   border-radius: 10px;
+  // 比白底略暖的浅底，形成卡片区分
   background: #fcfaf8;
 
+  // 小标题「当前角色」
   p {
     margin: 0 0 3px;
     font-size: 11px;
     color: $text-3;
   }
+  // 角色名 + 菜单数量
   strong {
     font-size: 12.5px;
     font-weight: 600;
     color: $text;
   }
 }
-//内容区域样式
+
+// ===== 右侧主区域 =====
 .main {
+  // 占满剩余宽度
   flex: 1;
+  // min-width: 0 防止内部宽表格把整体撑破
   min-width: 0;
   display: flex;
   flex-direction: column;
+  // 内容区底色
   background: $bg;
 }
+
+// 顶栏：固定高度，横向排列各操作区
 .header {
   height: $header-h;
   flex: none;
   display: flex;
   align-items: center;
+  // 相邻控件间距
   gap: 12px;
   padding: 0 20px;
   border-bottom: 1px solid $line;
 }
+
+// 弹性占位：把右侧操作组推到行尾
 .grow {
   flex: 1;
 }
+
+// 顶栏图标按钮（折叠开关）：无边框方形按钮
 .iconBtn {
   width: 32px;
   height: 32px;
@@ -147,15 +201,19 @@
   color: $text-2;
   font-size: 15px;
   cursor: pointer;
+  // 悬停：浅底 + 文字加深，提供明确可点反馈
   &:hover {
     background: $hover-bg;
     color: $text;
   }
 }
+
+// 用户信息胶囊：头像 + 姓名/角色 + 箭头
 .userChip {
   display: flex;
   align-items: center;
   gap: 9px;
+  // 左侧留白小于右侧，让头像贴近边缘更紧凑
   padding: 4px 8px 4px 4px;
   border-radius: 10px;
   cursor: pointer;
@@ -163,23 +221,32 @@
     background: $hover-bg;
   }
 }
+
+// 用户名
 .userName {
   font-size: 12.5px;
   font-weight: 600;
   line-height: 1.3;
   color: $text;
 }
+
+// 角色名
 .userRole {
   font-size: 11px;
   line-height: 1.3;
   color: $text-3;
 }
+
+// 内容区：唯一滚动容器
 .content {
   flex: 1;
+  // 允许内部滚动
   min-height: 0;
   overflow-y: auto;
+  // 四周留白，页面卡片不贴边
   padding: 20px 28px 22px;
 }
+
 /* 懒加载页面的占位 */
 .pageLoad {
   display: flex;
@@ -187,8 +254,11 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+  // 占 60% 视口高度，视觉上居中且不顶满
   height: 60vh;
 }
+
+// 占位文案
 .pageLoadText {
   font-size: 12.5px;
   color: $text-3;

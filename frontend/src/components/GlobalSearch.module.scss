@@ -1,66 +1,99 @@
+// 引入全局设计变量（颜色、圆角等），用 as * 直接使用变量名
 @use '../styles/variables' as *;
 
+// 搜索输入框：去掉 antd 默认内边距，改为通栏大留白 + 底部细分隔线
 .input {
+  // !important 用于覆盖 antd Input 内部的内边距
   padding: 14px 16px !important;
+  // 与下方列表之间的分隔线
   border-bottom: 1px solid $line;
+  // 输入文字字号略大于正文
   font-size: 14px;
 }
 
+// 结果列表容器：限制高度并内部滚动，避免弹窗过高
 .list {
+  // 最多约 7 行
   max-height: 340px;
+  // 超出后纵向滚动
   overflow-y: auto;
+  // 四周留白，让条目不与弹窗边缘贴合
   padding: 6px;
 }
 
+// 「最近访问」分组标题
 .groupTitle {
+  // 上留白大于下留白，形成分组视觉起点
   padding: 8px 10px 4px;
+  // 小号字，弱化层级
   font-size: 11.5px;
   color: $text-3;
 }
 
+// 列表条目（可点击按钮）
 .item {
+  // 横向布局：图标 + 名称 + 路径
   display: flex;
   align-items: center;
+  // 元素间距
   gap: 10px;
+  // 撑满列表宽度
   width: 100%;
+  // 上下内边距，保证点击热区足够大
   padding: 9px 10px;
+  // 去掉按钮默认边框与背景
   border: none;
+  // 统一控件圆角
   border-radius: $r-ctl;
   background: transparent;
+  // 按钮内的文字左对齐
   text-align: left;
+  // 手型光标提示可点击
   cursor: pointer;
 }
 
+// 高亮态（键盘上下移动或鼠标移入时命中）
 .itemActive {
   background: $hover-bg;
 }
 
+// 条目左侧的图标底座
 .itemIcon {
   display: flex;
   align-items: center;
   justify-content: center;
+  // 固定方形尺寸
   width: 26px;
   height: 26px;
+  // flex: none 防止被文字挤压变形
   flex: none;
+  // 图标底座圆角
   border-radius: 7px;
+  // 浅主色底 + 深主色图标，弱化但可辨
   background: $primary-soft;
   color: $primary-ink;
   font-size: 13px;
 }
 
+// 页面名称
 .itemName {
   font-size: 13.5px;
   color: $text;
 }
 
+// 右侧路径说明（仅搜索匹配结果显示）
 .itemPath {
+  // 推到行尾
   margin-left: auto;
   font-size: 11.5px;
   color: $text-3;
+  // 等宽字体，路径更易读
   font-family: ui-monospace, Menlo, Consolas, monospace;
 }
 
+// 空态文案
 .empty {
+  // 上下大留白，让空态居中不显突兀
   padding: 34px 12px;
   text-align: center;
   font-size: 12.5px;

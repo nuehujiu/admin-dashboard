@@ -1,8 +1,11 @@
+// 引入全局设计变量
 @use '../../styles/variables' as *;
 
+// 页面容器
 .page { display: flex; flex-direction: column; gap: 16px; }
 
 /* ---------- 页头 ---------- */
+// 标题组与操作组两端分布，底部对齐，窄屏换行
 .hero {
   display: flex;
   align-items: flex-end;
@@ -11,6 +14,7 @@
   flex-wrap: wrap;
 }
 
+// 页面标题
 .title {
   margin: 0;
   font-size: 20px;
@@ -19,17 +23,21 @@
   letter-spacing: .2px;
 }
 
+// 副信息（天数、品类数、更新时间）
 .meta { margin: 6px 0 0; font-size: 12px; color: $text-3; }
 
+// 右上操作组
 .actions { display: flex; align-items: center; gap: 10px; }
 
 /* ---------- KPI ---------- */
+// 四列栅格
 .kpiGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
 
+// 单个 KPI 卡：相对定位（给右上角图标定位），纵向居中内容
 .kpi {
   position: relative;
   min-height: 104px;
@@ -45,6 +53,7 @@
 
 /* 右上角淡橙图标块（设计稿里有） */
 .kpiIcon {
+  // 绝对定位到卡片右上角
   position: absolute;
   top: 14px;
   right: 14px;
@@ -54,17 +63,20 @@
   align-items: center;
   justify-content: center;
   border-radius: $r-ctl;
+  // 浅主色底 + 主色图标
   background: $primary-soft;
   color: $primary;
   font-size: 15px;
 }
 
+// 指标名：右侧留白避免与图标块重叠
 .kpiLabel {
   padding-right: 38px;
   font-size: 12.5px;
   color: $text-2;
 }
 
+// 指标数值：大号加粗 + 等宽数字
 .kpiValue {
   margin-top: 10px;
   font-size: 26px;
@@ -76,6 +88,7 @@
   font-variant-numeric: tabular-nums;
 }
 
+// 单位
 .kpiUnit {
   margin-left: 3px;
   font-size: 12px;
@@ -86,8 +99,11 @@
 /* 环比行 */
 .kpiFoot { margin-top: 9px; }
 
+// 环比基础文字色（灰）
 .footMuted { font-size: 12px; color: $text-3; }
+// 向好变化：绿色加粗
 .up { color: $success; font-weight: 600; }
+// 不利变化：红色加粗
 .down { color: $danger; font-weight: 600; }
 
 /* ---------- 卡片 ---------- */
@@ -102,6 +118,7 @@
   flex-direction: column;
 }
 
+// 卡片头
 .cardHead {
   display: flex;
   align-items: flex-start;
@@ -110,7 +127,9 @@
   margin-bottom: 6px;
 }
 
+// 卡片标题
 .cardTitle { font-size: 15.5px; font-weight: 700; color: $text; }
+// 卡片副标题
 .cardSub { margin-top: 4px; font-size: 12px; color: $text-3; }
 
 /* 设计稿两侧宽度比约 1.45 : 1 */
@@ -118,9 +137,11 @@
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
   gap: 16px;
+  // 两栏等高拉伸，右侧品类条能均匀铺满高度
   align-items: stretch;
 }
 
+// 空态容器
 .emptyBox {
   flex: 1;
   min-height: 240px;
@@ -138,14 +159,18 @@
   font-size: 11.5px;
   color: $text-2;
 
+  // 图例色块：主色小方块
   i { width: 8px; height: 8px; border-radius: 2px; background: $primary; }
 }
 
+// 「查看明细」链接按钮：去掉默认内边距，与标题行对齐更紧凑
 .linkMore { padding: 0; font-size: 12px; }
 
 /* ---------- 品类明细：名称 ｜ 进度条 ｜ 金额+单量 ｜ 百分比 ---------- */
+// 列表：纵向均分卡片剩余高度
 .catList { flex: 1; display: flex; flex-direction: column; padding-top: 4px; }
 
+// 单行：四列网格（名称 / 条形 / 金额 / 占比）
 .catRow {
   flex: 1;
   display: grid;
@@ -154,9 +179,11 @@
   gap: 12px;
   border-bottom: 1px solid $line-soft;
 
+  // 末行不画分隔线
   &:last-child { border-bottom: 0; }
 }
 
+// 品类名：单行省略
 .catName {
   font-size: 13px;
   font-weight: 600;
@@ -166,6 +193,7 @@
   text-overflow: ellipsis;
 }
 
+// 占比条轨道
 .catBar {
   display: block;
   height: 6px;
@@ -173,9 +201,11 @@
   background: $line-soft;
   overflow: hidden;
 
+  // 内部条：宽度动画，筛选切换时平滑过渡
   span { display: block; height: 100%; border-radius: 3px; transition: width .3s; }
 }
 
+// 金额 + 单量：右对齐纵向排列
 .catAmtBox {
   display: flex;
   flex-direction: column;
@@ -183,6 +213,7 @@
   gap: 3px;
 }
 
+// 金额：加粗等宽
 .catAmt {
   font-size: 13px;
   font-weight: 600;
@@ -191,6 +222,7 @@
   font-variant-numeric: tabular-nums;
 }
 
+// 单量：小号灰字
 .catQty {
   font-size: 11.5px;
   color: $text-3;
@@ -198,6 +230,7 @@
   font-variant-numeric: tabular-nums;
 }
 
+// 占比：右对齐灰字
 .catPct {
   text-align: right;
   font-size: 12px;
@@ -206,6 +239,7 @@
 }
 
 /* ---------- 明细抽屉 ---------- */
+// 抽屉顶部筛选工具条
 .drawerToolbar {
   display: flex;
   align-items: center;
@@ -214,6 +248,7 @@
   margin-bottom: 14px;
 }
 
+// 抽屉底部分页：右对齐
 .drawerPager {
   display: flex;
   justify-content: flex-end;
@@ -221,6 +256,7 @@
 }
 
 /* ---------- 其它 ---------- */
+// 错误/空态区
 .state {
   min-height: 420px;
   display: flex;
@@ -229,12 +265,14 @@
 }
 
 /* ---------- 窄屏 ---------- */
+// ≤1280px：KPI 两列、图表行改单列，并给品类行走内边距避免挤在一起
 @media (max-width: 1280px) {
   .kpiGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .row2 { grid-template-columns: minmax(0, 1fr); }
   .catRow { padding: 15px 0; }
 }
 
+// ≤760px：KPI 单列，品类行收窄列宽与间距
 @media (max-width: 760px) {
   .kpiGrid { grid-template-columns: minmax(0, 1fr); }
   .catRow { grid-template-columns: 62px minmax(0, 1fr) 80px 34px; gap: 8px; }

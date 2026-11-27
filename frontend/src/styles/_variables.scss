@@ -1,43 +1,45 @@
+// 全局 SCSS 变量：集中定义品牌色、功能色、中性色、圆角、骨架尺寸与阴影
+// 说明：只放变量，不产出任何 CSS，因此可被任意 module.scss 用 @use 引入
 
-// 品牌色
-$primary:       #F5611D;
-$primary-hover: #DC4F12;
-$primary-ink:   #B9400A;
-$primary-soft:  #FFF2EA;
-$primary-line:  #FFD8C4;
+// ===== 品牌色（暖橙，与 antd 主题色、CSS 变量保持一致）=====
+$primary:       #F5611D; // 主色：按钮、强调、选中态
+$primary-hover: #DC4F12; // 悬停态：主色压暗一档
+$primary-ink:   #B9400A; // 深主色：选中文字、图标
+$primary-soft:  #FFF2EA; // 浅主色底：选中背景、标签底
+$primary-line:  #FFD8C4; // 浅主色描边：浅边框、分割线
 
-// 功能色
-$success:      #1F9D55;
-$success-soft: #E9F7EF;
-$warn:         #C77A28;
-$warn-soft:    #FBF1E4;
-$danger:       #D33A32;
-$danger-soft:  #FBEAE9;
-$teal:         #2F8F86;
+// ===== 功能色（语义状态，配同名浅底用于标签/卡片）=====
+$success:      #1F9D55; // 成功 / 启用
+$success-soft: #E9F7EF; // 成功浅底
+$warn:         #C77A28; // 警告 / 待处理
+$warn-soft:    #FBF1E4; // 警告浅底
+$danger:       #D33A32; // 错误 / 危险操作
+$danger-soft:  #FBEAE9; // 错误浅底
+$teal:         #2F8F86; // 辅助强调色（点缀用）
 
-// 中性色
-$text:      #1C1917;
-$text-2:    #5D5751;
-$text-3:    #A8A29C;
-$line:      #EDE8E2;
-$line-soft: #F4F1ED;
-$bg:        #F7F5F2;
-$card:      #FFFFFF;
-$hover-bg:  #FFFBF8;
+// ===== 中性色（文本三级 + 描边两级 + 底色三级）=====
+$text:      #1C1917; // 主文本（暖黑）
+$text-2:    #5D5751; // 次级文本
+$text-3:    #A8A29C; // 三级文本 / 占位 / 说明
+$line:      #EDE8E2; // 常规描边
+$line-soft: #F4F1ED; // 次级描边（表格内分隔）
+$bg:        #F7F5F2; // 页面底色（暖白）
+$card:      #FFFFFF; // 卡片底色
+$hover-bg:  #FFFBF8; // 悬停底色（极浅暖白）
 
-// 圆角
-$r-card:  14px;
-$r-ctl:   8px;
-$r-tag:   6px;
-$r-thumb: 9px;
+// ===== 圆角 =====
+$r-card:  14px; // 卡片、抽屉等大容器
+$r-ctl:   8px;  // 按钮、输入框等控件
+$r-tag:   6px;  // 标签、小徽章
+$r-thumb: 9px;  // 缩略图、头像
 
-// 骨架尺寸
-$sider-w:  216px;
-$header-h: 64px;
+// ===== 骨架尺寸（侧栏与顶栏，供布局与子组件对齐用）=====
+$sider-w:  216px; // 侧栏展开宽度
+$header-h: 64px;  // 顶栏高度
 
-// 阴影
-$shadow-card: 0 1px 2px rgba(28, 25, 23, .04);
-$shadow-pop:  0 2px 4px rgba(28, 25, 23, .04), 0 12px 28px rgba(28, 25, 23, .05);
+// ===== 阴影 =====
+$shadow-card: 0 1px 2px rgba(28, 25, 23, .04); // 卡片轻浮起
+$shadow-pop:  0 2px 4px rgba(28, 25, 23, .04), 0 12px 28px rgba(28, 25, 23, .05); // 弹层双层阴影
 
-// 字体
+// ===== 字体栈 =====
 $font: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;

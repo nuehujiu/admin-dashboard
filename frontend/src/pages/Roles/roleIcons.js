@@ -6,19 +6,20 @@
  *   - 页面上「编辑角色」弹窗会从下面的清单里让你选，选完保存到后端
  * 想增加可选项，只往 ICON_OPTIONS / COLOR_OPTIONS 里加一条即可。
  */
+// 可选的 12 个图标组件（与下方 ICON_OPTIONS 一一对应）
 import {
-  SafetyOutlined,
-  CrownOutlined,
-  BarChartOutlined,
-  ShopOutlined,
-  TeamOutlined,
-  UserOutlined,
-  KeyOutlined,
-  LockOutlined,
-  SettingOutlined,
-  AppstoreOutlined,
-  StarOutlined,
-  EyeOutlined,
+  SafetyOutlined, // 安全盾
+  CrownOutlined, // 皇冠
+  BarChartOutlined, // 数据
+  ShopOutlined, // 商品
+  TeamOutlined, // 团队
+  UserOutlined, // 用户
+  KeyOutlined, // 钥匙
+  LockOutlined, // 权限
+  SettingOutlined, // 设置
+  AppstoreOutlined, // 应用
+  StarOutlined, // 星标
+  EyeOutlined, // 访客
 } from '@ant-design/icons';
 
 /** 可选图标：name 存进 roles.icon，component 用于渲染 */
@@ -49,16 +50,18 @@ export const COLOR_OPTIONS = [
   { value: '#A8A29C', label: '中性灰' },
 ];
 
+// 图标名 → 图标组件 的查找表；渲染时按名字 O(1) 取组件
 const ICON_MAP = new Map(ICON_OPTIONS.map((item) => [item.name, item.component]));
 
 /** 老数据里没有 icon / color 时，按 code 兜底，视觉和原来一致 */
 const CODE_FALLBACK = {
-  admin: 'Safety',
-  operator: 'BarChart',
-  'goods-editor': 'Shop',
-  guest: 'Eye',
+  admin: 'Safety', // 管理员 → 安全盾
+  operator: 'BarChart', // 运营 → 数据
+  'goods-editor': 'Shop', // 商品编辑 → 商品
+  guest: 'Eye', // 访客 → 眼睛
 };
 
+// 兜底颜色：中性灰（未配置配色时使用）
 const FALLBACK_COLOR = '#A8A29C';
 
 /**

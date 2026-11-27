@@ -1,18 +1,26 @@
+// 引入全局设计变量
 @use '../styles/variables' as *;
 
+// 通知面板整体宽度（气泡弹层内容宽度）
 .panel {
   width: 320px;
 }
 
+// 面板头部：标题与「全部已读」左右分布
 .head {
   display: flex;
   align-items: center;
+  // 两端对齐，左侧标题、右侧操作按钮
   justify-content: space-between;
+  // 左侧留白大于右侧，贴合「全部已读」按钮自带内边距
   padding: 10px 6px 8px 14px;
+  // 与列表分隔
   border-bottom: 1px solid $line;
 }
 
+// 标题：文字 + 未读数徽标
 .title {
+  // 行内弹性布局，让徽标与文字垂直居中
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -21,71 +29,88 @@
   color: $text;
 }
 
+// 未读数胶囊徽标
 .count {
+  // 左右内边距形成胶囊形
   padding: 0 6px;
+  // 足够大的圆角即胶囊效果
   border-radius: 999px;
   background: $primary;
   color: #fff;
   font-size: 10.5px;
+  // em 元素默认斜体，这里复位
   font-style: normal;
   line-height: 17px;
 }
 
+// 通知列表容器
 .list {
+  // 限高 + 内部滚动
   max-height: 340px;
   overflow-y: auto;
   padding: 6px;
 }
 
+// 单条通知（整行可点击）
 .row {
   display: flex;
   gap: 10px;
   width: 100%;
   padding: 10px;
+  // 清除按钮默认样式
   border: none;
   border-radius: $r-ctl;
   background: transparent;
   text-align: left;
   cursor: pointer;
 
+  // 悬停反馈
   &:hover {
     background: $hover-bg;
   }
 }
 
+// 左侧类型图标底座（公共部分）
 .icon {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
+  // 防止被文字挤压
   flex: none;
   border-radius: 7px;
   font-size: 13px;
 }
 
+// 库存类通知：浅橙底 + 警告橙图标
 .stock {
   background: #fdf1e6;
   color: $warn;
 }
 
+// 账号类通知：浅红底 + 错误红图标
 .user {
   background: #fdeceb;
   color: $danger;
 }
 
+// 公告类通知：浅主色底 + 深主色图标
 .notice {
   background: $primary-soft;
   color: $primary-ink;
 }
 
+// 右侧内容区：纵向排列标题 / 描述 / 时间
 .body {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  // 关键：允许 flex 子项收缩，长文本才会省略而不撑破面板
   min-width: 0;
 }
 
+// 通知标题行：未读红点 + 标题
 .rowTitle {
   display: flex;
   align-items: center;
@@ -94,25 +119,31 @@
   color: $text;
 }
 
+// 未读红点
 .dot {
   width: 5px;
   height: 5px;
   flex: none;
+  // 圆形
   border-radius: 50%;
   background: $primary;
 }
 
+// 通知描述正文
 .desc {
   font-size: 12px;
+  // 1.5 倍行距，多行时更易读
   line-height: 1.5;
   color: $text-2;
 }
 
+// 时间戳
 .time {
   font-size: 11px;
   color: $text-3;
 }
 
+// 空态
 .empty {
   padding: 40px 12px;
   text-align: center;

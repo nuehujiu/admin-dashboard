@@ -1,16 +1,21 @@
+// 引入全局设计变量
 @use '../../styles/variables' as *;
 
+// 页面容器：纵向排列区块，间距统一
 .page { display: flex; flex-direction: column; gap: 16px; }
 
 /* ---------- 页头 ---------- */
+// 页头：标题组与操作组两端分布，底部对齐
 .hero {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
+  // 窄屏换行
   flex-wrap: wrap;
 }
 
+// 页面标题
 .title {
   margin: 0;
   font-size: 20px;
@@ -19,11 +24,14 @@
   letter-spacing: .2px;
 }
 
+// 标题下的统计说明
 .meta { margin: 6px 0 0; font-size: 12px; color: $text-3; }
 
+// 右上按钮组
 .actions { display: flex; align-items: center; gap: 10px; }
 
 /* ---------- 筛选栏 ---------- */
+// 工具条：一张白色卡片里横向排布筛选控件
 .toolbar {
   display: flex;
   align-items: center;
@@ -36,10 +44,14 @@
   box-shadow: $shadow-card;
 }
 
+// 搜索框宽度
 .search { width: 300px; }
+// 分类下拉宽度
 .selectCat { width: 140px; }
+// 状态下拉宽度
 .selectStatus { width: 120px; }
 
+// 右侧结果提示：margin-left:auto 推到行尾
 .toolbarRight {
   margin-left: auto;
   font-size: 12px;
@@ -47,6 +59,7 @@
 }
 
 /* ---------- 表格卡片 ---------- */
+// 表格容器：卡片样式 + 裁剪圆角（批量条贴边时不溢出）
 .tableCard {
   background: $card;
   border: 1px solid $line;
@@ -55,8 +68,11 @@
   overflow: hidden;
 }
 
+// 表格内部样式覆盖（:global 穿透 module 作用域命中 antd 内部类）
 .table {
+  // 表格本体透明，跟随卡片底色
   :global(.ant-table) { background: transparent; }
+  // 表头：白底、稍深文字、加粗、自定义内边距与底边
   :global(.ant-table-thead > tr > th) {
     background: $card;
     color: $text-2;
@@ -65,14 +81,17 @@
     padding: 12px 16px;
     border-bottom: 1px solid $line;
   }
+  // 单元格：统一内边距与极浅分隔线
   :global(.ant-table-tbody > tr > td) {
     padding: 12px 16px;
     border-bottom: 1px solid $line-soft;
   }
+  // 行悬停高亮
   :global(.ant-table-tbody > tr:hover > td) { background: $hover-bg; }
 }
 
 /* ---------- 商品信息单元格 ---------- */
+// 缩略图 + 文字横向布局
 .goodsCell {
   display: flex;
   align-items: center;
@@ -80,6 +99,7 @@
   min-width: 0;
 }
 
+// 缩略图：无图时用主色浅底 + 首字母占位
 .thumb {
   flex: none;
   width: 52px;
@@ -92,13 +112,17 @@
   color: $primary;
   font-size: 16px;
   font-weight: 700;
+  // 图片超出圆角时裁掉
   overflow: hidden;
 
+  // 有图时铺满并等比裁切，避免变形
   img { width: 100%; height: 100%; object-fit: cover; }
 }
 
+// 文字区：可收缩
 .goodsText { min-width: 0; }
 
+// 商品名：单行省略
 .goodsName {
   font-size: 13.5px;
   font-weight: 600;
@@ -108,6 +132,7 @@
   text-overflow: ellipsis;
 }
 
+// SKU 副信息：更小更浅，同样单行省略
 .goodsMeta {
   margin-top: 4px;
   font-size: 11.5px;
@@ -118,15 +143,19 @@
 }
 
 /* ---------- 库存 ---------- */
+// 库存单元格：数字 + 进度条
 .stockCell { display: flex; align-items: center; gap: 8px; }
 
+// 库存数字：等宽数字，避免位数变化导致左右晃动
 .stockNum {
   font-variant-numeric: tabular-nums;
   font-size: 13px;
   color: $text;
+  // 固定最小宽度，让进度条起点对齐
   min-width: 24px;
 }
 
+// 库存条轨道：细长圆角
 .stockBar {
   width: 58px;
   height: 4px;
@@ -134,10 +163,12 @@
   background: $line-soft;
   overflow: hidden;
 
+  // 内部进度条：宽度与颜色由内联 style 决定
   span { display: block; height: 100%; border-radius: 2px; }
 }
 
 /* ---------- 状态 ---------- */
+// 状态胶囊：圆点 + 文案
 .statusPill {
   display: inline-flex;
   align-items: center;
@@ -149,16 +180,21 @@
   font-weight: 500;
   white-space: nowrap;
 
+  // 状态圆点
   i { width: 5px; height: 5px; border-radius: 50%; }
 }
 
+// 已上架：浅绿底 + 绿字 + 绿点
 .statusUp { background: rgba(31, 157, 85, .09); color: $success; i { background: $success; } }
+// 已下架：灰底 + 灰字 + 灰点
 .statusDown { background: $line-soft; color: $text-3; i { background: $text-3; } }
 
-/* ---------- 操作 ---------- */
+/* ---------- 操作列 ---------- */
+// 操作分隔符
 .dot { color: $line; }
 
 /* ---------- 底部 ---------- */
+// 统计 + 分页
 .footer {
   display: flex;
   align-items: center;
@@ -169,25 +205,30 @@
   flex-wrap: wrap;
 }
 
+// 左侧统计文字
 .footerLeft { font-size: 12px; color: $text-2; }
 
 /* ---------- 批量操作条 ---------- */
+// 有勾选时出现的浅主色横条
 .bulkBar {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
   padding: 8px 16px;
+  // 浅主色底 + 主色描边，提示「当前处于批量操作模式」
   background: $primary-soft;
   border-bottom: 1px solid $primary-line;
 }
 
+// 已选数量文案：主色深字加粗
 .bulkText {
   font-size: 12.5px;
   font-weight: 600;
   color: $primary-ink;
 }
 
+// 批量操作按钮组：推到右侧
 .bulkActions {
   margin-left: auto;
   display: flex;
@@ -196,10 +237,15 @@
 }
 
 /* ---------- 表单 ---------- */
+// 弹窗内多列行布局
 .formRow { display: flex; gap: 12px; }
+// 每个子项等宽分配
 .formRow > * { flex: 1; }
 
+// 窄屏适配
 @media (max-width: 900px) {
+  // 搜索框占满一行
   .search { width: 100%; }
+  // 底部统计与分页改为纵向排列
   .footer { flex-direction: column; align-items: flex-start; }
 }

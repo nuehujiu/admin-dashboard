@@ -1,8 +1,11 @@
+// 引入全局设计变量
 @use '../../styles/variables' as *;
 
+// 页面容器：纵向堆叠
 .page { display: flex; flex-direction: column; gap: 16px; }
 
 /* ---------- 页头 ---------- */
+// 页头：底部对齐，窄屏折行
 .hero {
   display: flex;
   align-items: flex-end;
@@ -11,6 +14,7 @@
   flex-wrap: wrap;
 }
 
+// 页面标题
 .title {
   margin: 0;
   font-size: 20px;
@@ -19,11 +23,14 @@
   letter-spacing: .2px;
 }
 
+// 标题下统计副信息
 .meta { margin: 6px 0 0; font-size: 12px; color: $text-3; }
 
+// 右上操作按钮组
 .actions { display: flex; align-items: center; gap: 10px; }
 
 /* ---------- 筛选栏 ---------- */
+// 筛选栏卡片：一行排列，窄屏自动折行
 .toolbar {
   display: flex;
   align-items: center;
@@ -36,12 +43,18 @@
   box-shadow: $shadow-card;
 }
 
+// 搜索框宽度
+// 注意：JSX 里用的是 s.serach（拼写与下面的 .search 不一致），此规则实际未命中，
+// 这是既有代码的拼写问题，本次只加注释不改逻辑。
 .search { width: 280px; }
+// 角色 / 状态下拉固定宽度
 .selectRole,
 .selectStatus { width: 130px; }
+// 排序下拉：margin-left auto 推到行尾
 .sortSelect { width: 140px; margin-left: auto; }
 
 /* ---------- 表格卡片 ---------- */
+// 表格卡片：overflow hidden 让内部表头背景不越出圆角
 .tableCard {
   background: $card;
   border: 1px solid $line;
@@ -59,10 +72,14 @@
   border-bottom: 1px solid $line-soft;
 }
 
+// 「已选 N 项」文案
 .bulkText { font-size: 13px; color: $text-2; }
+// 批量按钮组
 .bulkActions { display: flex; align-items: center; gap: 8px; }
+// 排序说明：推到最右
 .bulkHint { margin-left: auto; font-size: 12px; color: $text-3; }
 
+// 表格外观：透明背景、浅色表头，与卡片融为一体
 .table {
   :global(.ant-table) { background: transparent; }
   :global(.ant-table-thead > tr > th) {
@@ -73,9 +90,12 @@
 }
 
 /* ---------- 用户单元格 ---------- */
+// 头像 + 文字两行
 .userCell { display: flex; align-items: center; gap: 10px; }
 
+// 文字头像：圆形，底色由行内 style 注入
 .avatar {
+  // 防止被长名字挤压
   flex: none;
   width: 36px;
   height: 36px;
@@ -88,11 +108,15 @@
   justify-content: center;
 }
 
+// 文字区：min-width 0 保证内部内容可收缩
 .userText { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+// 昵称
 .userName { font-size: 13px; font-weight: 600; color: $text; }
+// 登录名 / ID 副信息
 .userMeta { font-size: 11px; color: $text-3; }
 
 /* ---------- 角色 pill ---------- */
+// 角色标签基样式
 .rolePill {
   display: inline-block;
   padding: 2px 10px;
@@ -100,16 +124,23 @@
   font-size: 12px;
   line-height: 20px;
 }
+// 管理员：品牌橙浅底
 .roleAdmin { background: $primary-soft; color: $primary-ink; }
+// 运营：青绿浅底
 .roleOp { background: #E7F4F2; color: $teal; }
+// 其它角色：中性灰
 .roleOther { background: $line-soft; color: $text-3; }
 
+// 最近登录时间文字
 .loginText { font-size: 12px; color: $text-2; }
 
+// 操作列按钮：压缩左右内边距、缩小字号
 .opBtn { padding: 0 4px; font-size: 12px; }
+// 操作按钮之间的分隔点
 .dot { padding: 0 2px; color: $text-3; font-size: 12px; }
 
 /* ---------- 分页条 ---------- */
+// 底部分页条：左侧统计、右侧分页器
 .footer {
   display: flex;
   align-items: center;
@@ -119,4 +150,5 @@
   border-top: 1px solid $line-soft;
 }
 
+// 左侧统计文字
 .footerLeft { font-size: 12px; color: $text-3; }

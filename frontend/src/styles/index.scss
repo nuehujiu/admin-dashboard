@@ -1,13 +1,18 @@
+// 引入设计变量（颜色、圆角、阴影、字体），用 as * 简化引用
 @use './variables' as *;
 
-// CSS 变量：给内联 style、ECharts 配色、自定义块用
+// ===== CSS 变量层：把 SCSS 变量同步成运行时变量 =====
+// 用途：内联 style、ECharts 配色、第三方组件（拿不到 SCSS 变量）也能统一取色
+// #{$var} 是 SCSS 插值语法，把 SCSS 变量值输出为 CSS 变量值
 :root {
+  // 品牌色五档
   --primary: #{$primary};
   --primary-hover: #{$primary-hover};
   --primary-ink: #{$primary-ink};
   --primary-soft: #{$primary-soft};
   --primary-line: #{$primary-line};
 
+  // 功能色（含浅底版本）
   --success: #{$success};
   --success-soft: #{$success-soft};
   --warn: #{$warn};
@@ -16,6 +21,7 @@
   --danger-soft: #{$danger-soft};
   --teal: #{$teal};
 
+  // 中性色
   --text: #{$text};
   --text-2: #{$text-2};
   --text-3: #{$text-3};
@@ -25,46 +31,60 @@
   --card: #{$card};
   --hover-bg: #{$hover-bg};
 
+  // 圆角与阴影
   --r-card: #{$r-card};
   --r-ctl: #{$r-ctl};
   --shadow-card: #{$shadow-card};
   --shadow-pop: #{$shadow-pop};
 }
 
+// ===== 基础重置 =====
+// 统一盒模型：宽度包含内边距与边框，避免各处手算尺寸
 * { box-sizing: border-box; }
 
+// 让根节点撑满视口高度，便于内部布局用 100% 高度
 html,
 body,
 #root { height: 100%; }
 
+// 页面基础样式
 body {
+  // 去掉浏览器默认外边距
   margin: 0;
+  // 暖白底色
   background: $bg;
+  // 主文本色
   color: $text;
+  // 全局字体栈
   font-family: $font;
+  // 基础字号（与 antd token 的 13.5 对齐）
   font-size: 13.5px;
+  // macOS 下抗锯齿，中文更清晰
   -webkit-font-smoothing: antialiased;
 }
 
-// 卡片：白底 + 1px 描边 + 极浅阴影
+// ===== antd 全局外观微调（不覆盖组件逻辑，只调视觉）=====
+
+// 卡片：暖色描边 + 大圆角 + 极浅阴影，形成轻浮起感
 .ant-card {
   border-color: $line;
   border-radius: $r-card;
   box-shadow: $shadow-card;
 }
 
-// 表格：表头 12px 灰字、仅横向分割线
+// 表头：小号灰字、常规字重，弱化表头强调内容
 .ant-table-thead > tr > th {
   font-size: 12px !important;
   font-weight: 500 !important;
   color: $text-3 !important;
 }
 
+// 表体：只保留横向分隔线，且用更浅的次级描边色
 .ant-table-tbody > tr > td {
   border-bottom-color: $line-soft !important;
 }
 
-// 输入框聚焦：橙描边 + 10% 光晕
+// 输入类控件聚焦：主色浅描边 + 10% 主色光晕（替换掉 antd 默认蓝色）
 .ant-input:focus,
 .ant-input-affix-wrapper-focused,
 .ant-select-focused .ant-select-selector {
@@ -72,8 +92,9 @@ body {
   box-shadow: 0 0 0 3px rgba(245, 97, 29, .10) !important;
 }
 
-// 滚动条收细
+// 滚动条收细：宽高 8px，避免默认滚动条过粗破坏精致感
 ::-webkit-scrollbar { width: 8px; height: 8px; }
+// 滚动条滑块：描边色 + 小圆角
 ::-webkit-scrollbar-thumb {
   background: $line;
   border-radius: 4px;
@@ -84,10 +105,12 @@ body {
   background: $primary;
   border-color: $primary;
 
+  // 选中页码文字转白
   > a {
     color: #fff !important;
   }
 
+  // 悬停时背景切换为深一档的主色
   &:hover {
     background: $primary-hover;
     border-color: $primary-hover;
@@ -96,7 +119,7 @@ body {
   }
 }
 
-// 未选中页码：默认字色偏浅，压到正文次要色
+// 未选中页码：默认字色偏浅，压到正文次要色以提升可读性
 .ant-pagination .ant-pagination-item > a {
   color: $text-2;
 }
