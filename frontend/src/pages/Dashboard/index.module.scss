@@ -1,36 +1,46 @@
+// 引入全局设计变量（颜色、圆角、阴影）
 @use '../../styles/variables' as *;
 
+// 页面容器：纵向排列各区块，区块间距统一 16px
 .page { display: flex; flex-direction: column; gap: 16px; }
 
-/* ---------- 顶部 ---------- */
+/* ---------- 顶部问候区 ---------- */
+// 问候区：左右两端分布，底部对齐（让右侧操作与标题基线齐平）
 .hero {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
+  // 窄屏下允许换行，操作组掉到下一行
   flex-wrap: wrap;
   margin-bottom: 2px;
 }
 
+// 问候标题
 .hello {
   margin: 0;
   font-size: 22px;
   font-weight: 700;
+  // 轻微字距，标题更舒展
   letter-spacing: .2px;
   color: $text;
 }
 
+// 日期 / 更新时间副信息
 .meta { margin-top: 6px; font-size: 12px; color: $text-3; }
 
+// 右上操作组：范围切换 + 导出按钮
 .heroActions { display: flex; align-items: center; gap: 10px; }
 
-/* ---------- KPI ---------- */
+/* ---------- KPI 卡片 ---------- */
+// KPI 栅格：固定四列，minmax(0, 1fr) 防止内容撑破列宽
 .kpiGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
 
+// 单个 KPI 卡：左右两栏（左侧文字、右侧图标与迷你图）
 .kpi {
   display: flex;
   justify-content: space-between;
@@ -40,23 +50,30 @@
   border: 1px solid $line;
   border-radius: $r-card;
   box-shadow: $shadow-card;
+  // 同上，避免长数字把卡片挤变形
   min-width: 0;
 }
 
+// 左侧文字区：可收缩
 .kpiMain { min-width: 0; flex: 1; }
+// 指标名
 .kpiLabel { font-size: 12px; color: $text-3; }
 
+// 指标数值
 .kpiValue {
   margin-top: 8px;
   font-size: 24px;
   font-weight: 700;
   line-height: 1.15;
   color: $text;
+  // 金额不换行，超长时由父级自行处理
   white-space: nowrap;
   letter-spacing: -.2px;
+  // 等宽数字：数值变化时宽度不跳动
   font-variant-numeric: tabular-nums;
 }
 
+// 单位（单/人）
 .kpiUnit {
   margin-left: 3px;
   font-size: 12px;
@@ -64,27 +81,34 @@
   color: $text-3;
 }
 
+// 副说明（较昨日涨跌等）
 .kpiSub {
   margin-top: 8px;
   font-size: 11.5px;
   color: $text-3;
   white-space: nowrap;
+  // 超长时省略，不撑破卡片
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+// 正向变化（涨）
 .up { color: $success; }
+// 负向变化（跌）
 .down { color: $danger; }
 
+// 右侧区：纵向排列图标与迷你图，靠右对齐
 .kpiRight {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: space-between;
+  // 不参与伸缩，保持图标列宽度稳定
   flex: none;
   gap: 6px;
 }
 
+// 图标块：浅底圆角方块
 .kpiIcon {
   width: 32px;
   height: 32px;
@@ -96,7 +120,7 @@
   font-size: 15px;
 }
 
-/* ---------- 卡片 ---------- */
+/* ---------- 通用卡片 ---------- */
 .card {
   background: $card;
   border: 1px solid $line;
@@ -108,6 +132,7 @@
   flex-direction: column;
 }
 
+// 卡片头：标题组与右上操作两端分布
 .cardHead {
   display: flex;
   align-items: flex-start;
@@ -116,10 +141,14 @@
   margin-bottom: 10px;
 }
 
+// 卡片标题
 .cardTitle { font-size: 15px; font-weight: 700; color: $text; }
+// 卡片副标题
 .cardSub { margin-top: 4px; font-size: 12px; color: $text-3; }
+// 卡片右上提示文字
 .cardHint { font-size: 11.5px; color: $text-3; }
 
+// 第二、三行：2:1 栅格（大图 2 份、侧栏 1 份）
 .row2,
 .row3 {
   display: grid;
@@ -127,6 +156,7 @@
   gap: 16px;
 }
 
+// 图表空态容器：撑满剩余高度并居中
 .emptyBox {
   flex: 1;
   min-height: 220px;
@@ -135,9 +165,11 @@
   justify-content: center;
 }
 
-/* ---------- 趋势图例 ---------- */
+/* ---------- 趋势图图例 ---------- */
+// 图例组：横向排列
 .legendTop { display: flex; gap: 14px; padding-top: 2px; }
 
+// 单个图例项：色块 + 文字
 .legendKey {
   display: inline-flex;
   align-items: center;
@@ -145,10 +177,12 @@
   font-size: 11.5px;
   color: $text-2;
 
+  // 色块：小方块，颜色由内联 style 决定
   i { width: 8px; height: 8px; border-radius: 2px; }
 }
 
-/* ---------- 环形 + 图例 ---------- */
+/* ---------- 环形图 + 图例 ---------- */
+// 环形图行：图表在左、图例在右
 .pieRow {
   display: flex;
   align-items: center;
@@ -156,6 +190,7 @@
   flex: 1;
 }
 
+// 环形图容器：固定方形尺寸，作为中心文字的定位基准
 .pieBox {
   position: relative;
   width: 190px;
@@ -163,6 +198,7 @@
   flex: none;
 }
 
+// 环形图中心文字（绝对定位覆盖在图表中央）
 .pieCenter {
   position: absolute;
   inset: 0;
@@ -170,19 +206,28 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  // 不拦截事件，避免影响扇区 hover 提示
   pointer-events: none;
 
+  // 「销售合计」小字
   span { font-size: 11px; color: $text-3; }
+  // 合计金额
   strong { margin-top: 2px; font-size: 15px; font-weight: 700; color: $text; }
 }
 
+// 图例列：竖向排列各品类
 .pieLegend { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
 
+// 单行图例：色点 + 名称 + 占比 + 金额
 .pieLegendRow { display: flex; align-items: center; gap: 8px; font-size: 12px; }
 
+// 色点
 .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+// 品类名：占满中间空间，超长省略
 .pieName { flex: 1; color: $text-2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+// 占比：右对齐数字用等宽
 .piePct { color: $text-3; font-variant-numeric: tabular-nums; }
+// 金额：固定宽度右对齐，保证多行纵向对齐
 .pieAmt {
   width: 74px;
   text-align: right;
@@ -192,15 +237,19 @@
 }
 
 /* ---------- 排行 ---------- */
+// 排行列表：竖向排列，行距较大
 .rankList { display: flex; flex-direction: column; gap: 14px; padding-top: 4px; }
 
+// 单行：序号 + 名称 + 进度条 + 金额
 .rankRow { display: flex; align-items: center; gap: 10px; }
 
+// 序号徽标
 .rankIdx {
   width: 19px;
   height: 19px;
   flex: none;
   border-radius: 5px;
+  // 默认灰底灰字
   background: $line-soft;
   color: $text-2;
   font-size: 11px;
@@ -209,10 +258,13 @@
   justify-content: center;
 }
 
+// 第一名徽标：主色底白字，形成视觉焦点
 .rankIdxTop { background: $primary; color: #fff; }
 
+// 品类名：固定宽度，保证进度条起点一致
 .rankName { width: 74px; flex: none; font-size: 12.5px; color: $text; }
 
+// 进度槽：占满中间，圆角，裁剪内部超出的进度条
 .rankBarWrap {
   flex: 1;
   height: 8px;
@@ -221,13 +273,16 @@
   overflow: hidden;
 }
 
+// 进度条：宽度由内联 style 控制
 .rankBar {
   display: block;
   height: 100%;
   border-radius: 4px;
+  // 主色到浅橙的横向渐变，强化动势
   background: linear-gradient(90deg, $primary, #FF9A5A);
 }
 
+// 金额：固定宽度右对齐
 .rankAmt {
   width: 92px;
   text-align: right;
@@ -238,24 +293,33 @@
 }
 
 /* ---------- 快捷入口 ---------- */
+// 磁贴栅格：两列
 .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 
+// 单个磁贴
 .tile {
   padding: 14px;
   border: 1px solid $line-soft;
   border-radius: 10px;
+  // 比白底略暖，形成可点区域感
   background: #FCFAF8;
   cursor: pointer;
+  // 背景与描边同时过渡，hover 更顺滑
   transition: background .15s ease, border-color .15s ease;
 
+  // 悬停：底色更亮、描边加深
   &:hover { background: $hover-bg; border-color: $line; }
 }
 
+// 磁贴图标
 .tileIcon { font-size: 16px; color: $text-2; }
+// 磁贴标题
 .tileTitle { margin-top: 8px; font-size: 13px; font-weight: 600; color: $text; }
+// 磁贴副说明
 .tileSub { margin-top: 3px; font-size: 11.5px; color: $text-3; }
 
 /* ---------- 其它 ---------- */
+// 错误 / 空态容器：占位较高并居中，避免页面塌缩
 .state {
   min-height: 420px;
   display: flex;
@@ -263,16 +327,20 @@
   justify-content: center;
 }
 
+// 底部排查提示
 .hint { font-size: 11.5px; color: $text-3; text-align: center; }
 
-/* ---------- 窄屏 ---------- */
+/* ---------- 窄屏适配 ---------- */
+// ≤1280px：KPI 由四列改两列，图表行改为单列堆叠
 @media (max-width: 1280px) {
   .kpiGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .row2, .row3 { grid-template-columns: minmax(0, 1fr); }
 }
 
+// ≤760px：KPI 单列；环形图与图例改为上下排列
 @media (max-width: 760px) {
   .kpiGrid { grid-template-columns: minmax(0, 1fr); }
   .pieRow { flex-direction: column; align-items: stretch; }
+  // 环形图在小屏下居中
   .pieBox { align-self: center; }
 }

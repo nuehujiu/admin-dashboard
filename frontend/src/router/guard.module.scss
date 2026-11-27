@@ -1,9 +1,14 @@
+// 引入全局设计变量（使用页面底色 $bg）
 @use '../styles/variables' as *;
 
+// 守卫加载态：占满整屏并在中央展示加载指示器
 .loading {
+  // 至少一屏高，避免资料未就绪时出现白条抖动
   min-height: 100vh;
+  // 弹性布局用于居中
   display: flex;
   align-items: center;
   justify-content: center;
+  // 与页面一致的暖白底色，避免加载时闪白
   background: $bg;
 }

@@ -1,5 +1,7 @@
+// 引入全局设计变量
 @use '../../styles/variables' as *;
 
+// 页面容器
 .page {
   display: flex;
   flex-direction: column;
@@ -7,6 +9,7 @@
 }
 
 /* ---------- 页头 ---------- */
+// 标题与状态胶囊两端分布（顶部对齐）
 .hero {
   display: flex;
   align-items: flex-start;
@@ -15,6 +18,7 @@
   flex-wrap: wrap;
 }
 
+// 页面标题
 .title {
   margin: 0;
   font-size: 20px;
@@ -23,18 +27,21 @@
   letter-spacing: 0.2px;
 }
 
+// 副信息
 .meta {
   margin: 6px 0 0;
   font-size: 12px;
   color: $text-3;
 }
 
+// 账号状态胶囊：正常态为主色浅底
 .statusPill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   height: 26px;
   padding: 0 12px;
+  // 999px 圆角即胶囊
   border-radius: 999px;
   background: $primary-soft;
   border: 1px solid $primary-line;
@@ -42,6 +49,7 @@
   font-size: 12px;
 }
 
+// 状态圆点
 .dot {
   width: 6px;
   height: 6px;
@@ -49,6 +57,7 @@
   background: $primary;
 }
 
+// 禁用态：浅红底 + 红字红点
 .statusOff {
   background: #fdeceb;
   border-color: #f6cac6;
@@ -60,10 +69,12 @@
 }
 
 /* ---------- 两列 ---------- */
+// 主栅格：左宽右窄；窄屏单列
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
   gap: 16px;
+  // 两列各自按内容高度排列
   align-items: start;
 
   @media (max-width: 1180px) {
@@ -71,6 +82,7 @@
   }
 }
 
+// 列容器：纵向堆叠多张卡片
 .col {
   display: flex;
   flex-direction: column;
@@ -78,6 +90,7 @@
   min-width: 0;
 }
 
+// 卡片
 .card {
   display: flex;
   flex-direction: column;
@@ -89,6 +102,7 @@
   box-shadow: $shadow-card;
 }
 
+// 卡片头
 .cardHead {
   display: flex;
   align-items: center;
@@ -96,6 +110,7 @@
   gap: 12px;
 }
 
+// 卡片标题
 .cardTitle {
   margin: 0;
   font-size: 14px;
@@ -103,12 +118,14 @@
   color: $text;
 }
 
+// 卡片右上提示
 .cardHint {
   font-size: 12px;
   color: $text-3;
 }
 
 /* ---------- 头像区 ---------- */
+// 头像行：头像 + 信息，底部留分隔线
 .avatarRow {
   display: flex;
   align-items: center;
@@ -117,12 +134,14 @@
   border-bottom: 1px solid $line-soft;
 }
 
+// 头像本体：主色底（无图时的文字头像）
 .avatar {
   flex: none;
   background: $primary;
   font-size: 22px;
 }
 
+// 姓名 + 角色标签
 .avatarName {
   display: flex;
   align-items: center;
@@ -132,6 +151,7 @@
   color: $text;
 }
 
+// 角色标签：主色浅底小标签，字重回落常规
 .roleTag {
   padding: 1px 7px;
   border-radius: $r-tag;
@@ -143,12 +163,14 @@
   line-height: 18px;
 }
 
+// 登录名 / ID 副信息
 .avatarSub {
   margin-top: 4px;
   font-size: 12px;
   color: $text-3;
 }
 
+// 头像操作组
 .avatarActions {
   display: flex;
   align-items: center;
@@ -156,6 +178,7 @@
   margin-top: 10px;
 }
 
+// 自定义上传按钮（用 label 承载隐藏的 file input）
 .uploadBtn {
   display: inline-flex;
   align-items: center;
@@ -167,6 +190,7 @@
   font-size: 12.5px;
   color: $text;
   cursor: pointer;
+  // 悬停时描边与文字转主色系
   transition:
     border-color 0.15s,
     color 0.15s;
@@ -177,6 +201,7 @@
   }
 }
 
+// 文字按钮（移除头像）：悬停转红，提示是移除动作
 .textBtn {
   padding: 0;
   border: none;
@@ -190,12 +215,14 @@
   }
 }
 
+// 格式与大小提示
 .avatarTip {
   font-size: 12px;
   color: $text-3;
 }
 
 /* ---------- 表单 ---------- */
+// 两列表单网格：列间距 18、行间距 14
 .formGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -204,46 +231,55 @@
   /* 账号信息区是纯 div 网格，用 field 排版 */
   row-gap: 14px;
 
+  // 收紧 antd 表单项默认下边距，避免网格行距叠加
   :global(.ant-form-item) {
     margin-bottom: 4px;
   }
 
+  // 窄屏单列
   @media (max-width: 620px) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
+// 跨满整行（个人简介用）
 .span2 {
   grid-column: 1 / -1;
 }
 
+// 只读字段块
 .field {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
+// 字段标签
 .label {
   font-size: 12.5px;
   color: $text-2;
 }
 
+// 底部操作行
 .footer {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
+// 弹性占位，把右侧信息推到行尾
 .grow {
   flex: 1;
 }
 
+// 上次保存时间
 .savedAt {
   font-size: 12px;
   color: $text-3;
 }
 
 /* ---------- 密码强度 ---------- */
+// 强度行：负的上外边距抵消表单项下边距
 .strength {
   display: flex;
   align-items: center;
@@ -251,6 +287,7 @@
   margin: -8px 0 16px;
 }
 
+// 单段条：默认灰色
 .strengthBar {
   width: 34px;
   height: 3px;
@@ -258,16 +295,19 @@
   background: $line;
 }
 
+// 已达等级：点亮为主色
 .strengthBar.on {
   background: $primary;
 }
 
+// 强度文字
 .strengthTxt {
   margin-left: 6px;
   font-size: 11.5px;
   color: $text-3;
 }
 
+// 密码规则说明块
 .note {
   margin: 4px 0 0;
   padding: 10px 12px;
@@ -279,6 +319,7 @@
 }
 
 /* ---------- 登录设备 ---------- */
+// 当前设备行
 .deviceRow {
   display: flex;
   align-items: center;
@@ -288,6 +329,7 @@
   border-radius: $r-ctl;
 }
 
+// 设备图标块
 .deviceIcon {
   display: flex;
   align-items: center;
@@ -301,6 +343,7 @@
   font-weight: 600;
 }
 
+// 设备名 + 当前标签
 .deviceName {
   display: flex;
   align-items: center;
@@ -309,6 +352,7 @@
   color: $text;
 }
 
+// 「当前」标签：绿底白字
 .deviceTag {
   padding: 0 6px;
   border-radius: $r-tag;
@@ -318,12 +362,14 @@
   line-height: 17px;
 }
 
+// 设备副信息
 .deviceSub {
   margin-top: 3px;
   font-size: 12px;
   color: $text-3;
 }
 
+// 安全提示条：浅主色底 + 主色深字
 .safetyBar {
   display: flex;
   align-items: center;

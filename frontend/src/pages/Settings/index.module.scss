@@ -1,5 +1,7 @@
+// 引入全局设计变量
 @use '../../styles/variables' as *;
 
+// 页面容器：纵向排列，区块间距统一
 .page {
   display: flex;
   flex-direction: column;
@@ -7,6 +9,7 @@
 }
 
 /* ---------- 页头 ---------- */
+// 标题与操作两端分布，窄屏换行
 .hero {
   display: flex;
   align-items: flex-end;
@@ -15,6 +18,7 @@
   flex-wrap: wrap;
 }
 
+// 页面标题
 .title {
   margin: 0;
   font-size: 20px;
@@ -23,12 +27,14 @@
   letter-spacing: 0.2px;
 }
 
+// 副信息
 .meta {
   margin: 6px 0 0;
   font-size: 12px;
   color: $text-3;
 }
 
+// 右上按钮组
 .actions {
   display: flex;
   align-items: center;
@@ -36,17 +42,21 @@
 }
 
 /* ---------- 两列布局 ---------- */
+// 表单网格：左侧基础信息（宽）、右侧外观（窄）
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
   gap: 16px;
+  // 卡片按内容高度排列，不强行等高
   align-items: start;
 
+  // 窄屏改为单列堆叠
   @media (max-width: 1180px) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
+// 设置卡片：字段纵向排列
 .card {
   display: flex;
   flex-direction: column;
@@ -58,6 +68,7 @@
   box-shadow: $shadow-card;
 }
 
+// 卡片标题
 .cardTitle {
   margin: 0;
   font-size: 14px;
@@ -66,24 +77,27 @@
 }
 
 /* ---------- 字段 ---------- */
+// 单个字段块：标签与控件纵向排列
 .field {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
+// 标签行：以基线对齐，方便与等宽字段名并排
 .labelRow {
   display: flex;
   align-items: baseline;
   gap: 8px;
 }
 
+// 标签文字
 .label {
   font-size: 12.5px;
   color: $text-2;
 }
 
-/* 等宽小灰字：settings 的字段名 */
+/* 等宽小灰字：settings 的字段名（当前在 JSX 中注释掉，样式保留备用） */
 .key {
   font-size: 11px;
   color: $text-3;
@@ -91,7 +105,7 @@
   letter-spacing: 0.2px;
 }
 
-/* 开关那一行：左标签 + 右开关 */
+// 开关行：左标签、右控件两端分布
 .row {
   display: flex;
   align-items: center;
@@ -100,12 +114,14 @@
 }
 
 /* ---------- 主题色块 ---------- */
+// 色块组：横向排列
 .swatches {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
+// 单个色块：圆形按钮，颜色由内联 style 提供
 .swatch {
   width: 26px;
   height: 26px;
@@ -113,17 +129,20 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  // 轻微投影让色块从白底上「浮起」
   box-shadow: 0 1px 2px rgba(28, 25, 23, 0.08);
+  // 悬停上浮与阴影变化都做过渡
   transition:
     box-shadow 0.15s,
     transform 0.15s;
 
+  // 悬停时向上位移 1px，提供可点反馈
   &:hover {
     transform: translateY(-1px);
   }
 }
 
-/* 选中：外面套一圈浅色描边 */
+/* 选中：外面套一圈浅色描边（白环 + 浅主色边） */
 .swatchActive {
   box-shadow:
     0 0 0 3px #fff,

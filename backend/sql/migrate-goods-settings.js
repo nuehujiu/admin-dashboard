@@ -9,9 +9,12 @@
  *
  * 运行：node sql/migrate-goods-settings.js
  */
+// 指定 .env 路径，避免依赖 cwd
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+// Promise 版 mysql
 const mysql = require('mysql2/promise');
 
+// goods 表 DDL：IF NOT EXISTS 保证可重复执行
 const DDL_GOODS = `
 CREATE TABLE IF NOT EXISTS \`goods\` (
   \`id\`          INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '商品ID',
@@ -27,12 +30,15 @@ CREATE TABLE IF NOT EXISTS \`goods\` (
   \`created_at\`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   \`updated_at\`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (\`id\`),
+  -- SKU 唯一约束：DB 层也拦住重复 SKU（控制器里还有一次友好提示）
   UNIQUE KEY \`uk_sku\` (\`sku\`),
+  -- 分类 / 状态常用于筛选
   KEY \`idx_category\` (\`category\`),
   KEY \`idx_status\` (\`status\`)
 ) ENGINE=InnoDB COMMENT='商品表';
 `;
 
+// settings 表 DDL：键值结构，value 统一按字符串存
 const DDL_SETTINGS = `
 CREATE TABLE IF NOT EXISTS \`settings\` (
   \`key\`        VARCHAR(50) NOT NULL COMMENT '设置项名，如 systemName / themeColor',
@@ -42,6 +48,7 @@ CREATE TABLE IF NOT EXISTS \`settings\` (
 ) ENGINE=InnoDB COMMENT='系统设置表';
 `;
 
+// 演示商品：[名称, SKU, 分类, 价格, 库存, 销量]
 const DEMO_GOODS = [
   ['无线蓝牙耳机 Pro', 'SKU-EAR-001', '电子产品', 899.0, 120, 320],
   ['144Hz 电竞显示器', 'SKU-MON-002', '电子产品', 1599.0, 45, 210],
@@ -57,6 +64,7 @@ const DEMO_GOODS = [
   ['智能手环 5 代', 'SKU-EAR-012', '电子产品', 299.0, 0, 520],
 ];
 
+// 设置项默认值（值为字符串）
 const SETTINGS = {
   systemName: '电商后台管理系统',
   slogan: '用数据驱动每一次增长',
@@ -65,12 +73,15 @@ const SETTINGS = {
   siderCollapsed: '0',
 };
 
+// 需要补的菜单：parent_id 直接给 0 的是顶级；parent_key 表示「找同名顶级菜单作为父级」
 const NEW_MENUS = [
   { parent_id: 0, name: '商品管理', path: '/goods', icon: 'shopping', type: 1, permission: 'goods:view', sort: 4 },
   { parent_key: '系统管理', name: '系统设置', path: '/settings', icon: 'setting', type: 1, permission: 'settings:view', sort: 3 },
 ];
 
+/** 主流程 */
 async function run() {
+  // 这里必须指定 database（DDL 里不带库名前缀）
   const conn = await mysql.createConnection({
     host: process.env.DB_HOST || '127.0.0.1',
     port: Number(process.env.DB_PORT) || 3306,
@@ -79,15 +90,18 @@ async function run() {
     database: process.env.DB_NAME || 'admin_dashboard',
   });
 
+  // 建表（幂等）
   await conn.query(DDL_GOODS);
   await conn.query(DDL_SETTINGS);
   console.log('[migrate] goods / settings 表已就绪');
 
+  // 只在空表时灌演示数据，避免覆盖用户已有商品
   const [[{ goodsCount }]] = await conn.query('SELECT COUNT(*) AS goodsCount FROM goods');
   if (goodsCount === 0) {
     for (const [name, sku, category, price, stock, sales] of DEMO_GOODS) {
       await conn.query(
         'INSERT INTO goods (name, sku, category, price, stock, sales, status, description) VALUES (?,?,?,?,?,?,?,?)',
+        // 库存为 0 的直接设为下架
         [name, sku, category, price, stock, sales, stock === 0 ? 0 : 1, `${name} —— 演示数据`]
       );
     }
@@ -96,6 +110,7 @@ async function run() {
     console.log(`[migrate] goods 已有 ${goodsCount} 条，跳过演示数据`);
   }
 
+  // 设置项 upsert：已存在的 key 保持原值（"value = value" 是空更新，起占位作用）
   for (const [key, value] of Object.entries(SETTINGS)) {
     await conn.query(
       'INSERT INTO settings (`key`, `value`) VALUES (?,?) ON DUPLICATE KEY UPDATE `value` = `value`',
@@ -111,6 +126,7 @@ async function run() {
       console.log(`[migrate] 菜单已存在，跳过: ${m.path}`);
       continue;
     }
+    // 父级解析：parent_id 优先，其次用 parent_key 找同名顶级菜单
     let parentId = m.parent_id || 0;
     if (m.parent_key) {
       const p = await conn.query('SELECT id FROM menus WHERE name = ? AND parent_id = 0', [m.parent_key]);
@@ -129,6 +145,7 @@ async function run() {
     const adminRoleId = adminRole[0][0].id;
     const allMenus = await conn.query('SELECT id FROM menus');
     for (const row of allMenus[0]) {
+      // INSERT IGNORE：已授权过的记录不会报唯一键冲突
       await conn.query(
         'INSERT IGNORE INTO role_menu (role_id, menu_id) VALUES (?,?)',
         [adminRoleId, row.id]
@@ -137,6 +154,7 @@ async function run() {
     console.log('[migrate] 已为超级管理员补齐全部菜单授权');
   }
 
+  // 打印迁移后的基线数据量，便于确认结果
   const [[stat]] = (await conn.query(
     'SELECT (SELECT COUNT(*) FROM goods) AS goods, (SELECT COUNT(*) FROM settings) AS settings, (SELECT COUNT(*) FROM menus) AS menus'
   ));
@@ -144,6 +162,7 @@ async function run() {
   await conn.end();
 }
 
+// 统一退出码
 run()
   .then(() => process.exit(0))
   .catch((err) => {

@@ -7,15 +7,23 @@
  * 写操作不再复用 settings:view（查看权限删库不合理），
  * 改为 settings:update；旧库还没建这个权限点时，回落到 settings:view 保持兼容。
  */
+// Express 路由工厂
 const express = require('express');
 const router = express.Router();
+// 控制器：读、写、重置
 const { getAll, save, reset } = require('../controllers/settingsController');
+// 鉴权 + 权限
 const { authRequired, requirePerm } = require('../middleware/auth');
 
+// 统一要求登录
 router.use(authRequired);
 
+// 读取：不做接口级权限校验（设置项本身已由前端按权限渲染）
 router.get('/', getAll);
+// 保存：settings:update 或 settings:view（任一满足，兼容旧权限数据）
 router.put('/', requirePerm('settings:update', 'settings:view'), save);
+// 重置同上
 router.post('/reset', requirePerm('settings:update', 'settings:view'), reset);
 
+// 导出路由
 module.exports = router;

@@ -1,32 +1,45 @@
+// 引入全局设计变量
 @use '../../styles/variables' as *;
 
+// 整页容器：最小占满视口，左右两栏横向排列
 .page {
   min-height: 100vh;
   display: flex;
+  // 白底，避免品牌区圆角/渐变边缘露底色
   background: $card;
 }
 
 /* ================= 左侧品牌区 ================= */
 .brand {
+  // 相对定位：为内部的装饰圆与文字层提供定位参照
   position: relative;
+  // 固定占 43%，不随内容伸缩
   flex: 0 0 43%;
+  // 桌面窄屏下限，保证标题不被挤压换行过碎
   min-width: 480px;
+  // 上留白大于下留白，视觉重心略偏上
   padding: 36px 40px 28px;
   display: flex;
   flex-direction: column;
+  // 裁掉超出边界的装饰圆
   overflow: hidden;
+  // 165° 暖色渐变：从米白过渡到浅橙再回到米白，形成柔和光感
   background: linear-gradient(165deg, #FFF9F4 0%, #FFEFE3 38%, #FFE7D8 68%, #FFF6EF 100%);
 
-  // 两个同心装饰圆
+  // 两个同心装饰圆（用伪元素实现，不额外增加 DOM 节点）
   &::before,
   &::after {
+    // 伪元素必须设置 content 才会渲染
     content: '';
     position: absolute;
+    // 极淡的主色描边
     border: 1px solid rgba(245, 97, 29, .10);
     border-radius: 50%;
+    // 不拦截鼠标事件，避免影响上层文字交互
     pointer-events: none;
   }
 
+  // 内圈：较小、偏右下
   &::before {
     width: 760px;
     height: 760px;
@@ -34,6 +47,7 @@
     top: -120px;
   }
 
+  // 外圈：更大、更靠左，形成层次
   &::after {
     width: 1180px;
     height: 1180px;
@@ -42,7 +56,9 @@
   }
 }
 
+// 品牌顶部：logo + 名称
 .brandTop {
+  // 抬到装饰圆之上
   position: relative;
   z-index: 1;
   display: flex;
@@ -50,6 +66,7 @@
   gap: 10px;
 }
 
+// logo 方块：主色底 + 白字 + 主色投影
 .logoMark {
   width: 34px;
   height: 34px;
@@ -63,6 +80,7 @@
   box-shadow: 0 4px 12px rgba(245, 97, 29, .28);
 }
 
+// 系统名称：加粗 + 字距，作为品牌主文字
 .logoName {
   font-size: 15px;
   font-weight: 700;
@@ -71,73 +89,88 @@
   line-height: 1.2;
 }
 
+// slogan：小号灰字，压在名称下方
 .logoSub {
   font-size: 11px;
   color: $text-3;
   margin-top: 2px;
 }
 
+// 品牌正文区：上下 auto 外边距实现垂直居中
 .brandMain {
   position: relative;
   z-index: 1;
   margin-top: auto;
   margin-bottom: auto;
+  // 与顶部 logo 区拉开距离
   padding-top: 40px;
 }
 
+// 英文小标题（eyebrow）
 .eyebrow {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 11px;
+  // 大写字距拉开，增强设计感
   letter-spacing: 1.6px;
   color: $text-3;
 }
 
+// eyebrow 前的装饰短线
 .eyebrowLine {
   width: 26px;
   height: 1px;
   background: rgba(245, 97, 29, .55);
 }
 
+// 主标语
 .title {
   margin: 18px 0 0;
   font-size: 38px;
+  // 1.3 倍行距，两行标题不拥挤
   line-height: 1.3;
   font-weight: 700;
   letter-spacing: .5px;
   color: $text;
 
+  // 强调句：复位斜体并改为主色
   em {
     font-style: normal;
     color: $primary;
   }
 }
 
+// 说明段：限制最大宽度，避免长行阅读疲劳
 .desc {
   margin: 18px 0 0;
   max-width: 380px;
   font-size: 13px;
+  // 1.9 倍行距，正文更疏朗
   line-height: 1.9;
   color: $text-2;
 }
 
+// 三个数据点横排
 .stats {
   display: flex;
   align-items: center;
   gap: 26px;
   margin-top: 34px;
 
+  // 每个数据点内部纵向排列（数字 + 标签）
   > div {
     display: flex;
     flex-direction: column;
     gap: 4px;
 
+    // 除最后一项外，右侧加竖线分隔
     &:not(:last-child) {
       padding-right: 26px;
       border-right: 1px solid rgba(28, 25, 23, .10);
     }
 
+    // 数字：大号加粗，行高 1 便于与标签贴合
     strong {
       font-size: 19px;
       font-weight: 700;
@@ -145,6 +178,7 @@
       line-height: 1;
     }
 
+    // 标签：小号灰字
     span {
       font-size: 11.5px;
       color: $text-3;
@@ -152,6 +186,7 @@
   }
 }
 
+// 品牌区底部版权
 .brandFoot {
   position: relative;
   z-index: 1;
@@ -160,6 +195,7 @@
 }
 
 /* ================= 右侧表单区 ================= */
+// 表单区：占满剩余宽度并居中卡片，同时作为右上角链接的定位容器
 .formArea {
   flex: 1;
   position: relative;
@@ -169,6 +205,7 @@
   padding: 24px;
 }
 
+// 右上角辅助入口
 .topLinks {
   position: absolute;
   top: 26px;
@@ -176,6 +213,7 @@
   display: flex;
   gap: 18px;
 
+  // 纯文字按钮：去掉默认边框与背景
   button {
     border: 0;
     background: none;
@@ -184,18 +222,23 @@
     color: $text-2;
     cursor: pointer;
 
+    // 悬停转主色，提示可点击
     &:hover { color: $primary; }
   }
 }
 
+// 登录卡片
 .card {
   width: 100%;
+  // 限制最大宽度，大屏下不显得空旷
   max-width: 376px;
 
   // 让"密码"这一行的 label 撑满，好把"忘记密码?"顶到右边
+  // :global 穿透 module 作用域命中 antd 内部类名
   :global(.ant-form-item-label > label) { width: 100%; }
 }
 
+// 欢迎标题
 .welcome {
   margin: 0;
   font-size: 26px;
@@ -203,18 +246,21 @@
   color: $text;
 }
 
+// 欢迎副标题
 .welcomeSub {
   margin: 8px 0 0 0;
   font-size: 12.5px;
   color: $text-3;
 }
 
+// 密码标签行：左侧「密码」、右侧「忘记密码」两端对齐
 .pwdLabel {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
 
+  // 内嵌文字按钮样式
   button {
     border: 0;
     background: none;
@@ -223,32 +269,40 @@
     color: $primary;
     cursor: pointer;
 
+    // 悬停加深，反馈更明确
     &:hover { color: $primary-hover; }
   }
 }
 
+// 账号输入框前缀图标：灰字弱化
 .inputIcon { color: $text-3; }
 
+// 记住账号 + 环境标识一行
 .rememberRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  // 与下方提交按钮拉开间距
   margin-bottom: 18px;
 }
 
+// 环境标识文字
 .envTag {
   font-size: 11.5px;
   color: $text-3;
 }
 
+// 提交按钮：高度略高、字号加大，形成主操作视觉
 .submit {
   height: 42px;
   font-size: 14px;
   font-weight: 600;
   border-radius: $r-ctl;
+  // 主色投影体现可点击感
   box-shadow: 0 6px 16px rgba(245, 97, 29, .22);
 }
 
+// 底部合规提示
 .agree {
   margin: 18px 0 0;
   text-align: center;
@@ -256,9 +310,12 @@
   color: $text-3;
 }
 
-/* ================= 窄屏 ================= */
+/* ================= 窄屏适配 ================= */
 @media (max-width: 1000px) {
+  // 隐藏品牌区，只保留表单，避免两栏拥挤
   .brand { display: none; }
+  // 表单区增加上留白，为右上角链接让位
   .formArea { padding: 72px 24px 32px; }
+  // 右上角链接随之收窄
   .topLinks { right: 24px; top: 20px; }
 }

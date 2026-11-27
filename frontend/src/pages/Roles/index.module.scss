@@ -1,5 +1,7 @@
+// 引入全局设计变量（颜色、圆角、阴影等）
 @use '../../styles/variables' as *;
 
+// 页面容器：纵向堆叠
 .page {
   display: flex;
   flex-direction: column;
@@ -7,6 +9,7 @@
 }
 
 /* ---------- 页头 ---------- */
+// 页头：底部对齐（标题块与右侧按钮组基线更自然），窄屏折行
 .hero {
   display: flex;
   align-items: flex-end;
@@ -15,6 +18,7 @@
   flex-wrap: wrap;
 }
 
+// 页面标题
 .title {
   margin: 0;
   font-size: 20px;
@@ -22,11 +26,13 @@
   color: $text;
   letter-spacing: 0.2px;
 }
+// 标题下的统计副信息
 .meta {
   margin: 6px 0 0;
   font-size: 12px;
   color: $text-3;
 }
+// 右上操作按钮组
 .actions {
   display: flex;
   align-items: center;
@@ -34,12 +40,14 @@
 }
 
 /* ---------- 角色卡 ---------- */
+// 角色卡栅格：固定 4 列，minmax(0,...) 允许内容收缩不出横向滚动
 .cards {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
 
+// 单张角色卡：整卡可点击（切换权限矩阵当前列）
 .roleCard {
   display: flex;
   flex-direction: column;
@@ -50,11 +58,13 @@
   border-radius: $r-card;
   box-shadow: $shadow-card;
   cursor: pointer;
+  // 只过渡描边，避免 hover 时布局抖动
   transition: border-color 0.18s;
 
   &:hover {
     border-color: $primary-line;
   }
+  // 键盘聚焦时用描边代替默认 outline，保持视觉统一
   &:focus-visible {
     outline: none;
     border-color: $primary-line;
@@ -67,21 +77,26 @@
   background: $hover-bg;
 }
 
+// 卡片头部：图标 + 标题 + 右侧操作
 .roleHead {
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  // 为操作区提供定位上下文
   position: relative;
 }
 /* 卡片操作区：默认隐形，hover 卡片时整组淡入 */
 .cardActions {
+  // 推到最右
   margin-left: auto;
   align-self: flex-start;
   display: flex;
   gap: 4px;
+  // 防止被标题区挤压缩窄
   flex-shrink: 0;
 }
 
+// 圆形图标按钮（编辑 / 删除）
 .cardAction {
   width: 24px;
   height: 24px;
@@ -94,6 +109,7 @@
   color: $text-3;
   font-size: 12px;
   cursor: pointer;
+  // 默认隐藏：透明 + 略微缩小，hover 时"弹"出来
   opacity: 0;
   transform: scale(0.88);
   transition:
@@ -119,18 +135,21 @@
   }
 }
 
+// 出现条件：hover 卡片、或该卡是当前选中列（键盘用户也能看到操作）
 .roleCard:hover .cardAction,
 .roleCardActive .cardAction {
   opacity: 1;
   transform: scale(1);
 }
 
+// 尊重系统「减少动效」设置
 @media (prefers-reduced-motion: reduce) {
   .cardAction {
     transition: none;
   }
 }
 
+// 角色图标方块：底色与图标色由行内 style 注入
 .roleIcon {
   flex: none;
   width: 34px;
@@ -142,17 +161,21 @@
   font-size: 16px;
 }
 
+// 标题区：纵向排列名称与描述
 .roleTitle {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  // 关键：允许子元素在 flex 中收缩，配合 desc 的省略号生效
   min-width: 0;
 }
+// 角色名
 .roleName {
   font-size: 14px;
   font-weight: 700;
   color: $text;
 }
+// 角色描述：单行 + 超长省略
 .roleDesc {
   font-size: 12px;
   color: $text-3;
@@ -161,6 +184,7 @@
   text-overflow: ellipsis;
 }
 
+// 卡片底部：成员数 / 权限数 / 状态胶囊
 .roleFoot {
   display: flex;
   align-items: center;
@@ -168,16 +192,19 @@
   font-size: 12px;
   color: $text-3;
 }
+// 统计数字：加深加粗，与单位区分
 .roleStat b {
   color: $text;
   font-weight: 600;
   margin-right: 3px;
 }
 
+// 状态胶囊：本身是 button，需重置按钮默认样式
 .statusPill {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  // 推到行尾
   margin-left: auto;
   padding: 2px 9px;
   border: none;
@@ -186,8 +213,10 @@
   font-size: 12px;
   line-height: 18px;
   cursor: pointer;
+  // 用 brightness 做 hover 反馈，不用改背景色（两种状态都能复用）
   transition: filter 0.18s ease;
 
+  // 胶囊前的状态圆点
   i {
     width: 5px;
     height: 5px;
@@ -202,6 +231,7 @@
     outline-offset: 1px;
   }
 }
+// 启用态：浅绿底 + 绿字绿点
 .statusOn {
   background: #eaf6ef;
   color: $success;
@@ -209,6 +239,7 @@
     background: $success;
   }
 }
+// 停用态：浅灰底 + 灰字灰点
 .statusOff {
   background: $line-soft;
   color: $text-3;
@@ -218,6 +249,7 @@
 }
 
 /* ---------- 权限矩阵 ---------- */
+// 矩阵卡片：overflow hidden 让表头背景与圆角贴合不溢出
 .matrixCard {
   background: $card;
   border: 1px solid $line;
@@ -226,6 +258,7 @@
   overflow: hidden;
 }
 
+// 矩阵头：标题区 + 右侧全选按钮
 .matrixHead {
   display: flex;
   align-items: flex-start;
@@ -234,18 +267,21 @@
   padding: 16px 20px 12px;
 }
 
+// 矩阵标题
 .matrixTitle {
   margin: 0;
   font-size: 15px;
   font-weight: 700;
   color: $text;
 }
+// 矩阵说明
 .matrixHint {
   margin: 4px 0 0;
   font-size: 12px;
   color: $text-3;
 }
 
+// 表格外观：去背景、浅色表头，与卡片融为一体
 .table {
   :global(.ant-table) {
     background: transparent;
@@ -260,6 +296,7 @@
   }
 }
 
+// 主行标签：正常字重加深
 .rowLabel {
   color: $text;
   font-weight: 500;
@@ -271,11 +308,13 @@
   color: $text-2;
 }
 
+// 无对应权限项时的破折号
 .cellEmpty {
   color: $text-3;
 }
 
 /* ---------- 编辑角色弹窗：图标 / 配色选择器 ---------- */
+// 弹窗内的字段块
 .field {
   display: flex;
   flex-direction: column;
@@ -283,6 +322,7 @@
   margin-bottom: 18px;
 }
 
+// 横向字段（标签在左、开关在右）
 .fieldRow {
   flex-direction: row;
   align-items: center;
@@ -290,24 +330,28 @@
   gap: 16px;
 }
 
+// 字段标签
 .fieldLabel {
   font-size: 13px;
   color: $text;
   font-weight: 500;
 }
 
+// 字段补充说明
 .fieldHint {
   margin: 2px 0 0;
   font-size: 12px;
   color: $text-3;
 }
 
+// 图标选择器容器：自动换行
 .iconPicker {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
+// 单个图标选项
 .iconOption {
   width: 36px;
   height: 36px;
@@ -341,12 +385,14 @@
   border-style: solid;
 }
 
+// 配色选择器容器
 .colorPicker {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
+// 单个色点：透明边先占位，选中时整圈变白
 .colorDot {
   width: 22px;
   height: 22px;
@@ -354,6 +400,7 @@
   border: 2px solid transparent;
   border-radius: 50%;
   cursor: pointer;
+  // 内阴影给浅色点描边，避免白点在白底上隐形
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
   transition:
     transform 0.15s ease,
